@@ -1,0 +1,63 @@
+import { type ReactNode, useEffect, useState } from "react";
+import useUser from "@/hooks/useUser";
+import { useNavigate } from "react-router-dom";
+import Lottie from "lottie-react";
+import animation from "../../lottie/accessDenied.json";
+
+interface VerifiedRouteProps {
+  children: ReactNode;
+}
+
+function VerifiedRoute({ children }: VerifiedRouteProps) {
+  const user = useUser();
+  const navigate = useNavigate();
+  const redirectTime = 5;
+  const [countdown, setCountdown] = useState(redirectTime);
+
+  useEffect(() => {
+    if (user === null || !user.isVerified) {
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(interval);
+            navigate("/auth?mode=login");
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [navigate, user]);
+
+  if (user !== null && user.isVerified) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
+      <div className="w-[80%] h-[60%]">
+        <Lottie
+          animationData={animation}
+          loop={true}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
+      <div className="w-full h-1/3 flex justify-center items-center flex-col">
+        <h1 className="text-3xl p-4 font-extrabold">Access Denied</h1>
+        <h2 className="text-2xl p-2 font-semibold text-muted-foreground">
+          You are not authorized to access this page
+        </h2>
+        <h3 className="text-l p-2 font-semibold text-muted-foreground">
+          Please verify your email to access this page
+        </h3>
+        <span className="text-muted-foreground">
+          Redirecting to login page in{" "}
+          <span className="font-bold text-foreground">{countdown}</span> seconds
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export default VerifiedRoute;
