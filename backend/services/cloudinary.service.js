@@ -4,9 +4,7 @@ import path from "path";
 import fs from "fs/promises";
 import { statSync, rmSync, existsSync, unlinkSync, readFileSync, rm } from "fs";
 import { nanoid } from "nanoid";
-import dotenv from "dotenv";
 
-dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -216,7 +214,7 @@ const uploadMediaVideoToCDN = async (userID, currentVersion, previousVersion, cd
     public_id: public_id,
     timestamp: timestamp.toString(),
     unique_filename: 'false',
-    notification_url: " https://8809-2409-40e5-1052-301c-bc5c-7790-fcad-c9e5.ngrok-free.app/api/v1/cdn/video/upload/callback",
+    notification_url: "https://b602-2409-40e5-100e-da14-e87e-cc83-c411-5a94.ngrok-free.app/api/v1/cdn/video/upload/callback",
   };
 
   const signature = cloudinary.utils.api_sign_request(

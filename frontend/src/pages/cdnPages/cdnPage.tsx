@@ -39,7 +39,7 @@ import {
   Search,
   Edit2,
 } from "lucide-react";
-import useUser from "@/hooks/useUser";
+
 import { useUserStore, type ICDn } from "@/store/store";
 import { useApiGet, useApiPost } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
@@ -97,7 +97,7 @@ function formatVersion(num: number): string {
 type SortOption = "newest" | "oldest" | "name" | "size";
 
 function CdnPage() {
-  const [hasContent, setHasContent] = useState(true);
+  const [hasContent] = useState(true);
   const [cdns, setCdns] = useState<ICDn[]>([]);
   const [searchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -105,7 +105,7 @@ function CdnPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [updatingCdnId, setUpdatingCdnId] = useState<string | null>(null);
 
-  const user = useUser();
+
   const { toast } = useToast();
   const userStore = useUserStore();
 
@@ -128,17 +128,8 @@ function CdnPage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      if (user.cdns && user.cdns.length > 0) {
-        setCdns(user.cdns);
-        setHasContent(true);
-      } else if (user.cdns && user.cdns.length === 0) {
-        setHasContent(false);
-      } else {
-        getCDN.refetch();
-      }
-    }
-  }, [user]);
+    getCDN.refetch();
+  }, []);
 
   useEffect(() => {
     if (getCDN.isSuccess) {
@@ -563,14 +554,14 @@ const FileCard = ({
               <Label className="text-sm font-medium">CDN URL</Label>
               <div className="flex gap-2">
                 <Input
-                  value={cdn.relativePath}
+                  value={cdn.secureUrl}
                   readOnly
                   className="font-mono text-xs"
                 />
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyTOClipboard(cdn.relativePath)}
+                  onClick={() => copyTOClipboard(cdn.secureUrl)}
                   className="gap-1 whitespace-nowrap"
                 >
                   <Copy className="w-3 h-3" />
@@ -608,9 +599,12 @@ const FileCard = ({
             </div>
             <Dialog>
               <DialogTrigger>
-            <Button variant="outline" size="sm" className="gap-2" >
+                {(cdn.fileType === "image" || cdn.fileType === "video") &&(
+            <Button variant="outline" size="sm" className="gap-2" disabled={cdn.isTransformActive} >
               On Fly Transformation
               </Button>
+  )
+}
               </DialogTrigger>
 
               <DialogContent className="w-svw">

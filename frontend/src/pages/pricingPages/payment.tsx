@@ -8,10 +8,9 @@ import { useApiPost } from "@/hooks/apiHooks";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMsg } from "@/lib/getErrorMsg";
+import config from "@/config/config";
 
-const stripePromise = loadStripe(
-  "pk_test_51RT02YQNakd5vzwzc5ucip489H1fKro3v44yBP7PVvcI301spBUUF6BgJIxYitImN46KoOrTkOC442tm2rZOZ4oI007Lb8wsCH",
-);
+const stripePromise = loadStripe(config.StripeKey);
 
 const Pay = () => {
   const [searchParams] = useSearchParams({ planType: "monthly" });

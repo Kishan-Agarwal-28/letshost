@@ -5,9 +5,7 @@ import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
-const stripe = new Stripe(
-  "sk_test_51RT02YQNakd5vzwzQ2rMASK2NJTgaH0WfuaxTCKfKYqE2cfpAB5JebKdrkm4PkNOzBVVMY1oGqNPSG6PvEHy7ziJ006GwVSwLC"
-);
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 const MakePayment = asyncHandler(async (req, res) => {
   const { planType } = req.body;

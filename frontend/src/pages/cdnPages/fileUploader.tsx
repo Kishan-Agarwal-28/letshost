@@ -367,7 +367,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         formData.append("signature", res.data.data.signature);
         formData.append(
           "notification_url",
-          " https://8809-2409-40e5-1052-301c-bc5c-7790-fcad-c9e5.ngrok-free.app/api/v1/cdn/video/upload/callback",
+          "https://b602-2409-40e5-100e-da14-e87e-cc83-c411-5a94.ngrok-free.app/api/v1/cdn/video/upload/callback",
         );
 
         const uploadResult = await axios.post(

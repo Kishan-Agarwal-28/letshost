@@ -13,6 +13,9 @@ export interface ICDn {
   size: number;
   bucketAssigned: "cdn" | "cloudinary";
   relativePath: string;
+  isTransformActive: boolean;
+  transformLimit: number;
+  secureUrl: string;  
   createdAt: Date;
   updatedAt: Date;
 }

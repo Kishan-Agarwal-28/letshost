@@ -11,15 +11,7 @@ import { router } from "./routes/routes";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={new QueryClient(
-    {
-      defaultOptions:{
-        queries:{
-          refetchOnWindowFocus:false,
-        }
-      }
-    }
-  )}>
+  <QueryClientProvider client={new QueryClient()}>
     <ReactQueryDevtools initialIsOpen={false} />
     <RouterProvider router={router} />
   </QueryClientProvider>,

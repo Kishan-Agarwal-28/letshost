@@ -43,7 +43,7 @@ const cdnSchema = new Schema({
     type: String,
     required: true
   },
-  isTransfomActive:{
+  isTransformActive:{
     type:Boolean,
     default:false
   },
@@ -52,9 +52,10 @@ const cdnSchema = new Schema({
     default:0,
     max:5
   },
-  transformUrl:{
+  secureUrl:{
     type:String,
-    default:""
+    default:"",
+    required:true
   }
 }
 ,{

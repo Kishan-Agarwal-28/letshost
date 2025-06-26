@@ -47,7 +47,7 @@ const registerCDN = asyncHandler(async (req, res) => {
         switch(contentType){
             case "js":
                
-               if(req.files[0].size>pricing.cdnCSSJSlimit){
+               if((user.totalJsCssSize+req.files[0].size)>pricing.cdnCSSJSlimit){
                    throw new apiError(400,"File size exceeds the limit upgrade to pro tier");
                }
 
@@ -65,7 +65,8 @@ const registerCDN = asyncHandler(async (req, res) => {
                 previousVersion:prevVersion,
                 size:req.files[0].size,
                 bucketAssigned:"cdn",
-                relativePath:url
+                relativePath:url,
+                secureUrl:`https://cdn.letshost.dpdns.org/${url}`
                })
                
                user.totalJsCssSize+=req.files[0].size;
@@ -78,7 +79,7 @@ const registerCDN = asyncHandler(async (req, res) => {
 
             case "css":
                  
-               if(req.files[0].size>pricing.cdnCSSJSlimit){
+               if((user.totalJsCssSize+req.files[0].size)>pricing.cdnCSSJSlimit){
                    throw new apiError(400,"File size exceeds the limit upgrade to pro tier");
                }
                  url= await uploadToCDN(userID,currentVersion,prevVersion,cdnProjectID);
@@ -94,7 +95,8 @@ const registerCDN = asyncHandler(async (req, res) => {
                 previousVersion:prevVersion,
                 size:req.files[0].size,
                 bucketAssigned:"cdn",
-                relativePath:url
+                relativePath:url,
+                secureUrl:`https://cdn.letshost.dpdns.org/${url}`
                })
                 
                user.totalJsCssSize+=req.files[0].size;
@@ -107,7 +109,7 @@ const registerCDN = asyncHandler(async (req, res) => {
 
             case "image":
                 
-               if(req.files[0].size>pricing.cdnCSSJSlimit){
+               if((user.totalMediaSize+req.files[0].size)>pricing.cdnCSSJSlimit){
                    throw new apiError(400,"File size exceeds the limit upgrade to pro tier");
                }
                const uploadResult= await uploadMediaToCDN(userID,currentVersion,prevVersion,cdnProjectID);
@@ -115,6 +117,8 @@ const registerCDN = asyncHandler(async (req, res) => {
                if(!uploadResult){
                    throw new apiError(400,"Failed to upload to CDN");
                }
+               const pathname=new URL(uploadResult.url).pathname;
+               const ImageUrl=pathname.replace("/testifywebdev/","");
                cdn=await CDN.create({
                 owner:req.user._id,
                 cdnProjectID:cdnProjectID,
@@ -124,7 +128,8 @@ const registerCDN = asyncHandler(async (req, res) => {
                 previousVersion:prevVersion,
                 size:req.files[0].size,
                 bucketAssigned:"cloudinary",
-                relativePath:uploadResult.url
+                relativePath:uploadResult.url,
+                secureUrl:`https://cdn.letshost.dpdns.org/${ImageUrl}`
                })
                
                user.totalMediaSize+=req.files[0].size;
@@ -139,14 +144,14 @@ const registerCDN = asyncHandler(async (req, res) => {
                     throw new apiError(400,"No files metadata uploaded");
                 }
 
-               if(req.body.fileMetaData.size>pricing.cdnMedialimit){
+               if((user.totalMediaSize+req.body.fileMetaData.size)>pricing.cdnMedialimit){
                    throw new apiError(400,"File size exceeds the limit upgrade to pro tier");
                }
                 const uploadResultVideo= await uploadMediaVideoToCDN(userID, currentVersion, prevVersion, cdnProjectID);
                 if(!uploadResultVideo){
                     throw new apiError(400,"Failed to upload to CDN");
                 }
-                
+
                 cdn=await CDN.create({
                 owner:req.user._id,
                 cdnProjectID:cdnProjectID,
@@ -154,9 +159,10 @@ const registerCDN = asyncHandler(async (req, res) => {
                 fileType:contentType,
                 currentVersion:currentVersion,
                 previousVersion:prevVersion,
-                size:req.body.fileMetaData.size,
+                size:0,
                 bucketAssigned:"cloudinary",
                 relativePath:uploadResultVideo.public_id,
+                secureUrl:"waiting for video upload"
                })
                
                user.totalMediaSize+=req.body.fileMetaData.size;
@@ -231,7 +237,7 @@ const updateCDN = asyncHandler(async (req, res) => {
     
     switch (contentType) {
         case "js":
-            if (req.files[0].size > pricing.cdnCSSJSlimit) {
+            if ((user.cdnCSSJSlimit+req.files[0].size-prevCdn.size) > pricing.cdnCSSJSlimit) {
                 throw new apiError(400, "File size exceeds the limit upgrade to pro tier");
             }
 
@@ -248,13 +254,14 @@ const updateCDN = asyncHandler(async (req, res) => {
             prevCdn.currentVersion = currentVersion;
             prevCdn.previousVersion = previousVersion;
             prevCdn.size = req.files[0].size;
+            prevCdn.secureUrl=`https://cdn.letshost.dpdns.org/${url}`
             await prevCdn.save();
             
             return res.status(200)
                 .json(new apiResponse(200, prevCdn, "File uploaded successfully"));
 
         case "css":
-            if (req.files[0].size > pricing.cdnCSSJSlimit) {
+            if ((user.cdnCSSJSlimit+req.files[0].size-prevCdn.size) > pricing.cdnCSSJSlimit) {
                 throw new apiError(400, "File size exceeds the limit upgrade to pro tier");
             }
             
@@ -271,13 +278,14 @@ const updateCDN = asyncHandler(async (req, res) => {
             prevCdn.currentVersion = currentVersion;
             prevCdn.previousVersion = previousVersion;
             prevCdn.size = req.files[0].size;
+            prevCdn.secureUrl=`https://cdn.letshost.dpdns.org/${url}`
             await prevCdn.save();
 
             return res.status(200)
                 .json(new apiResponse(200, prevCdn, "File uploaded successfully"));
 
         case "image":
-            if (req.files[0].size > pricing.cdnMedialimit) {
+            if ((user.totalMediaSize + req.files[0].size-prevCdn.size) > pricing.cdnMedialimit) {
                 throw new apiError(400, "File size exceeds the limit upgrade to pro tier");
             }
             
@@ -288,12 +296,14 @@ const updateCDN = asyncHandler(async (req, res) => {
             
             user.totalMediaSize = user.totalMediaSize - prevCdn.size + req.files[0].size;
             await user.save();
-            
+            const pathname=new URL(uploadResult.url).pathname;
+            const ImageUrl=pathname.replace("/testifywebdev/","");
             prevCdn.filename = req.files[0].filename;
             prevCdn.relativePath = uploadResult.url;
             prevCdn.currentVersion = currentVersion;
             prevCdn.previousVersion = previousVersion;
             prevCdn.size = req.files[0].size;
+            prevCdn.secureUrl=`https://cdn.letshost.dpdns.org/${ImageUrl}`
             await prevCdn.save();
 
             return res.status(200)
@@ -304,7 +314,7 @@ const updateCDN = asyncHandler(async (req, res) => {
                 throw new apiError(400, "No files metadata uploaded");
             }
             
-            if (req.body.fileMetaData.size > pricing.cdnMedialimit) {
+            if ((user.cdnMedialimit+req.body.fileMetaData.size-prevCdn.size )> pricing.cdnMedialimit) {
                 throw new apiError(400, "File size exceeds the limit upgrade to pro tier");
             }
             
@@ -315,12 +325,11 @@ const updateCDN = asyncHandler(async (req, res) => {
             
             user.totalMediaSize = user.totalMediaSize - prevCdn.size + req.body.fileMetaData.size;
             await user.save();
-            
             prevCdn.filename = req.body.fileMetaData.filename;
             prevCdn.relativePath = uploadResultVideo.public_id;
             prevCdn.currentVersion = currentVersion;
             prevCdn.previousVersion = previousVersion;
-            prevCdn.size = req.body.fileMetaData.size;
+            prevCdn.size = 0;
             await prevCdn.save();
 
             return res.status(200)
@@ -333,6 +342,8 @@ const updateCDN = asyncHandler(async (req, res) => {
 
 const deleteCDN=asyncHandler(async (req,res)=>{
     const {cdnId}=req.body;
+    const user=await User.findById(req.user._id);
+
     if(!cdnId){
         throw new apiError(400,"cdnId is required");
     }
@@ -350,6 +361,9 @@ const deleteCDN=asyncHandler(async (req,res)=>{
         
 
         await deleteFromCDN(req.user._id,prevCdn.cdnProjectID,prevCdn.currentVersion,prevCdn.fileType);
+
+            user.totalJsCssSize=Math.max(user.totalJsCssSize-prevCdn.size,0);
+            await user.save();
     }
    
     else{
@@ -359,7 +373,9 @@ const deleteCDN=asyncHandler(async (req,res)=>{
         const folder=prevCdn.fileType==="image"?"img":prevCdn.fileType==="video"?"video":"";
 
         await deleteMediaFromCDN(req.user._id,prevCdn.currentVersion,folder,prevCdn.cdnProjectID);
-        await deleteEmptyFolders(req.user._id,folder,prevCdn.cdnProjectID);
+        // await deleteEmptyFolders(req.user._id,folder,prevCdn.cdnProjectID);
+       user.totalJsCssSize=Math.max(user.totalJsCssSize-prevCdn.size,0);
+        await user.save();
     }
     await CDN.deleteOne({cdnProjectID:cdnId});  
     return res.status(200)
@@ -375,10 +391,17 @@ const confirmVideoUpload=asyncHandler(async (req,res)=>{
     if(!cdn){
         throw new apiError(404,"CDN not found");
     }
+
     if(cdn.bucketAssigned !="cdn"){
         cdn.relativePath=playbackUrl;
+        cdn.size=req.body.bytes;
+        const pathname=new URL(req.body.secure_url).pathname;
+        const VideoUrl=pathname.replace("/testifywebdev/","");
+        cdn.secureUrl=`https://cdn.letshost.dpdns.org/${VideoUrl}`
     }
-
+    if(cdn.previousVersion!==0){
+ await deleteMediaFromCDN(cdn.owner.toString(), cdn.previousVersion,"video",cdn.cdnProjectID)
+    }
     await cdn.save();
 
     return res.status(200)

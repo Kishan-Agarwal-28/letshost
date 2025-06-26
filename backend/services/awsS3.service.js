@@ -10,7 +10,7 @@ import {
 import mime from "mime-types";
 import pLimit from "p-limit";
 import { createClient } from "@supabase/supabase-js";
-
+import  {Readable} from 'node:stream';
 const s3Client = new S3Client({
   forcePathStyle: true,
   region: process.env.AWS_REGION,
@@ -219,4 +219,68 @@ async function listFromCDN(userID, cdnID, folder, version) {
   return files;
 }
 
-export { uploadToS3, deleteObjects, listObjects, upload ,uploadToCDN, deleteFromCDN, listFromCDN };
+async function uploadToTransformBucket(mediaUrl) {
+  try {
+    console.log("Starting media upload from URL...");
+    console.log("Source URL:", mediaUrl);
+
+    const urlObject = new URL(mediaUrl);
+    const cloudinaryPath = urlObject.pathname; 
+    
+
+    const s3Key = cloudinaryPath.startsWith('/') ? cloudinaryPath.slice(1) : cloudinaryPath;
+    
+    console.log("S3 Key:", s3Key);
+    
+    
+    const response = await fetch(mediaUrl);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch media: ${response.status} ${response.statusText}`);
+    }
+
+    let contentType = response.headers.get('content-type');
+    if (!contentType) {
+      const fileExtension = path.extname(s3Key);
+      contentType = mime.lookup(fileExtension) || 'application/octet-stream';
+    }
+    
+    const contentLength = response.headers.get('content-length');
+    
+    console.log("Content Type:", contentType);
+    console.log("Content Length:", contentLength);
+    
+
+    const nodeStream = Readable.fromWeb(response.body);
+    
+    // Create upload command
+    const command = new PutObjectCommand({
+      Bucket: "imgix",
+      Key: s3Key,
+      Body: nodeStream, 
+      ContentType: contentType,
+      ContentLength: contentLength ? parseInt(contentLength) : undefined,
+    });
+    
+    await s3Client.send(command);
+    
+    console.log("Uploaded:", s3Key);
+    console.log("Done. Media upload completed.");
+
+    return {
+      success: true,
+      s3Key: s3Key,
+      fileName: s3Key,
+      originalUrl: mediaUrl,
+      contentType: contentType,
+      size: contentLength ? parseInt(contentLength) : null,
+    };
+    
+  } catch (error) {
+    console.error("Error uploading media to S3:", error);
+    throw error;
+  }
+}
+
+
+export { uploadToS3, deleteObjects, listObjects, upload ,uploadToCDN, deleteFromCDN, listFromCDN ,uploadToTransformBucket};
