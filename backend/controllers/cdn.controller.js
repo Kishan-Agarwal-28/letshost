@@ -373,7 +373,7 @@ const deleteCDN=asyncHandler(async (req,res)=>{
         const folder=prevCdn.fileType==="image"?"img":prevCdn.fileType==="video"?"video":"";
 
         await deleteMediaFromCDN(req.user._id,prevCdn.currentVersion,folder,prevCdn.cdnProjectID);
-        // await deleteEmptyFolders(req.user._id,folder,prevCdn.cdnProjectID);
+        await deleteEmptyFolders(req.user._id,folder,prevCdn.cdnProjectID);
        user.totalJsCssSize=Math.max(user.totalJsCssSize-prevCdn.size,0);
         await user.save();
     }

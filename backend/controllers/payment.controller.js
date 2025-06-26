@@ -29,7 +29,7 @@ const MakePayment = asyncHandler(async (req, res) => {
     ],
     ui_mode: "embedded",
     return_url:
-      "http://localhost:5173/payment/checkout/return?session_id={CHECKOUT_SESSION_ID}",
+      `http://${APP_URL}/payment/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
   });
   return res
     .status(200)
