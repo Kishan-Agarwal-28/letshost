@@ -20,9 +20,12 @@ import FS from "fs";
 import { Pricing } from "../models/pricing.model.js";
 const formatSubdomainKey = (subdomain) => `user_${subdomain}`;
 
-const cacheSubDomain = async (subdomain, projectID, owner) => {
+const cacheSubDomain = async (subdomain, projectID, owner,Ispublic) => {
   const key = formatSubdomainKey(subdomain);
-  const subdomainData = { owner, projectID };
+  const subdomainData = { owner, projectID ,Ispublic};
+  if(redis.get(key)){
+    await redis.del(key);
+  }
   await redis.set(key, JSON.stringify(subdomainData), "PX", REDIS_EXP);
 };
 
@@ -38,7 +41,8 @@ const getSubDomain = async (subdomain) => {
       await cacheSubDomain(
         subD.subDomain.replace(/^user_/, ""),
         subD.projectID,
-        subD.owner._id
+        subD.owner._id,
+        subD.public
       );
       return subD;
     }
@@ -136,7 +140,7 @@ const registerSubDomain = asyncHandler(async (req, res) => {
     fileSize: folderSize
   });
 
-  await cacheSubDomain(subDomain, projectID.toLowerCase(), owner);
+  await cacheSubDomain(subDomain, projectID.toLowerCase(), owner,subdomain.public);
   user.SDLimit = user.SDLimit - 1;
   await user.save();
     return res
@@ -180,7 +184,7 @@ const updateSubDomain = asyncHandler(async (req, res) => {
     if (getOldKeyDataRedis) {
       await redis.del(oldKey);
     }
-    await cacheSubDomain(newSubDomain, subdomainRecord.projectID, owner);
+    await cacheSubDomain(newSubDomain, subdomainRecord.projectID, owner,subdomainRecord.public);
 
     return res
       .status(200)
@@ -375,6 +379,7 @@ const updateSubDomainVisibility = asyncHandler(async (req, res) => {
   } else {
     existing.public = false;
   }
+  await cacheSubDomain(existing.subDomain, existing.projectID, owner,existing.public);
   await existing.save();
   return res
     .status(200)
@@ -413,6 +418,7 @@ const getViewSignedUrl = asyncHandler(async (req, res) => {
     );
     ViewUrl = `${existing.subDomain}.lethost.dpdns.org/?token=${token}`;
   }
+  await cacheSubDomain(existing.subDomain, existing.projectID, owner,existing.public);
   return res
     .status(200)
     .json(
