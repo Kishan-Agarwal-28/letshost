@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import { type } from "os";
 const userSchema = new Schema(
   {
     username: {
@@ -13,6 +14,36 @@ const userSchema = new Schema(
       index: true,
       minlength: 3,
     },
+    fullName:{
+      type:String,
+      required:true,
+      index:true,
+      minlength:3
+   },
+   description:{
+    type:String,
+    minlength:10,
+    maxlength:500
+   },
+   coverImage:{
+    type:String
+   },
+   location:{
+    type:String
+   },
+   links:[
+    {
+      socialPlatform:{
+        type:String
+      },
+      url:{
+        type:String
+      }
+    }
+   ],
+   isCreator:{
+    type:Boolean
+   },
     email: {
       type: String,
       required: true,
@@ -43,10 +74,39 @@ const userSchema = new Schema(
       default: 10,
       validate(value) {
         if (value < 0) throw new Error("SDLimit must be a positive number");
-        if (value > 10) throw new Error("SDLimit must be less than 10");
       },
       required: true,
     },
+    tier:{
+      type: String,
+      enum: ["free", "pro"],
+      default: "free",
+      required: true,
+    },
+    fileLimit: {
+      type: Number,
+      default:0,
+    },
+    cdnCSSJSlimit:{
+         type: Number,
+         default: 0 ,
+    },
+      cdnMedialimit:{ 
+         type: Number,
+    default: 0,
+},
+totalMediaSize:{
+  type: Number,
+  default: 0,
+},
+totalJsCssSize:{
+  type: Number,
+  default: 0,
+},
+genCredits:{
+  type: Number,
+  default: 10,
+},
     password: {
       type: String,
       required: true,
@@ -78,6 +138,55 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+userSchema.pre("save", async function (next) {
+  // If none of the limits are being modified, skip
+  if (
+    !this.isModified("fileLimit") &&
+    !this.isModified("SDLimit") &&
+    !this.isModified("cdnCSSJSlimit") &&
+    !this.isModified("cdnMedialimit")
+  ) {
+    return next();
+  }
+
+  try {
+    const pricing = await this.model("Pricing").findOne({ tier: this.tier });
+
+    if (!pricing) {
+      return next(new Error(`No pricing found for tier: ${this.tier}`));
+    }
+
+    if (this.isModified("fileLimit") && this.fileLimit > pricing.fileLimit) {
+      return next(new Error("File limit exceeded"));
+    }
+
+    if (this.isModified("SDLimit") && this.SDLimit > pricing.SDLimit) {
+      return next(new Error("Subdomain limit exceeded"));
+    }
+
+    if (
+      this.isModified("cdnCSSJSlimit") &&
+      this.cdnCSSJSlimit > pricing.cdnCSSJSlimit
+    ) {
+      return next(new Error("CSS/JS CDN limit exceeded"));
+    }
+
+    if (
+      this.isModified("cdnMedialimit") &&
+      this.cdnMedialimit > pricing.cdnMedialimit
+    ) {
+      return next(new Error("Media CDN limit exceeded"));
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+
+
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };

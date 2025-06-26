@@ -20,6 +20,7 @@ const FormFieldComp = ({
   labelValue,
   descriptionValue,
   placeholderValue,
+  value
 }: {
   form: UseFormReturn<any>;
   needLabel?: boolean;
@@ -32,6 +33,7 @@ const FormFieldComp = ({
   labelValue: string;
   descriptionValue: string;
   placeholderValue: string;
+  value?: string;
 }) => {
   if (!form || !form.control) {
     return null; // Avoid rendering if form.control is not available
@@ -50,6 +52,7 @@ const FormFieldComp = ({
               {...field}
               type={type}
               disabled={!enabled}
+              value={value}
             />
           </FormControl>
           {needDescription && (

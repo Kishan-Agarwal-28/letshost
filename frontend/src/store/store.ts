@@ -4,6 +4,19 @@ import { devtools, persist, createJSONStorage } from "zustand/middleware";
 import { encryptJSON, decryptJSON } from "@/lib/encrypt";
 import { immer } from "zustand/middleware/immer";
 
+export interface ICDn {
+  cdnProjectID: string;
+  filename: string;
+  fileType: "image" | "video" | "js" | "css";
+  currentVersion: number;
+  previousVersion: number;
+  size: number;
+  bucketAssigned: "cdn" | "cloudinary";
+  relativePath: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUser {
   _id: string;
   username: string;
@@ -23,6 +36,24 @@ export interface IUser {
     updatedAt: Date;
   }>;
   SDLimit: number;
+  tier: "free" | "pro";
+  fileLimit: number;
+  cdns: Array<ICDn> | [];
+  cdnCSSJSlimit: number;
+  cdnMedialimit: number;
+  totalMediaSize: number;
+  totalJsCssSize: number;
+  genCredits: number;
+  apiKey: string;
+  fullName: string;
+  description: string;
+  location: string;
+  coverImage: string;
+  links: Array<{
+    socialPlatform: string;
+    url: string;
+  }>;
+  isCreator: boolean;
   verificationToken: string;
   verificationTokenExpiryDate: Date;
   createdAt: Date;
@@ -88,7 +119,6 @@ export const useUserStore = create<IStore>()(
             ...updatedFields,
           };
           const encrypted = await encryptUserData(updatedUser);
-
           set({ user: encrypted });
         },
 
@@ -98,7 +128,7 @@ export const useUserStore = create<IStore>()(
       })),
       {
         name: "User",
-        storage: createJSONStorage(() => sessionStorage),
+        storage: createJSONStorage(() => localStorage),
         onRehydrateStorage: () => {
           return (state, error) => {
             if (!error && state) {

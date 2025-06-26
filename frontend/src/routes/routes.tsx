@@ -18,7 +18,12 @@ import Contact from "@/pages/contactPages/contact.tsx";
 import Pay from "@/pages/pricingPages/payment.tsx";
 import Pricing from "@/pages/landingPage/pricing.tsx";
 import Tools from "@/pages/toolsPage/tools.tsx";
-import Dashboard from "@/pages/dashboardPages/dashboard.tsx";
+import TermsAndConditions from "@/pages/termsPage/tnc.tsx";
+
+import DashboardLayout from "@/pages/dashboardPages/main.tsx";
+import  Gallery  from "@/pages/galleryPage/gallery.tsx";
+import CreatorDashboard from "@/pages/creatorpages/creatordashboard.tsx";
+
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -68,12 +73,26 @@ export const router = createBrowserRouter(
           element={
             <ProtectedRoute>
               <VerifiedRoute>
-                <Dashboard />
+                <DashboardLayout />
               </VerifiedRoute>
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/gallery"
+          element={
+            <Gallery />
+          }
+          />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route
+                path="/creator/:creatorId"
+                element={
+                  <CreatorDashboard/>
+                }
+                />
       </Route>
+
       <Route path="*" element={<Error />} />
     </>,
   ),

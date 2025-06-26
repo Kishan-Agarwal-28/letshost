@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useApiPost } from "@/hooks/apiHooks";
+import { useApiPost, useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import { UploadCloudIcon } from "lucide-react";
 import { File as Files, Folder, Tree } from "@/components/magicui/file-tree";
+import { useConfettiCannon } from "@/components/ui/confetti-cannon";
 
 const formSchema = z.object({
   subDomain: z.string().min(1, "Subdomain is required"),
@@ -42,7 +43,7 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const { toast } = useToast();
-
+  const confettiCannon = useConfettiCannon;
   const form = useForm<RegisterDomainFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { subDomain: "", files: undefined },
@@ -54,7 +55,11 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
     sendingFile: true,
     type: "post",
   });
-
+  const getUser = useApiGet({
+    key: ["getUser"],
+    path: ApiRoutes.getUserDetails,
+    enabled: false,
+  });
   const onSubmit = async (values: RegisterDomainFormData) => {
     setUploadProgress(0);
     registerDomain.mutate({
@@ -74,6 +79,8 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
         variant: "success",
         duration: 5000,
       });
+      confettiCannon();
+      getUser.refetch();
     }
     if (registerDomain.isError) {
       toast({

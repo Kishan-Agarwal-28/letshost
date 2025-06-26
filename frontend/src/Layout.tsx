@@ -24,7 +24,7 @@ function Layout() {
   useEffect(() => {
     (async () => {
       if (user.isSuccess) {
-        await userStore.setUser(user.data?.data?.data);
+        await userStore.updateUser(user.data?.data?.data);
       }
     })();
 

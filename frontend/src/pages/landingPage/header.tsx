@@ -32,6 +32,8 @@ function Header() {
     },
     staleTime: 1000 * 60,
     enabled: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
   useEffect(() => {
     (async () => {
@@ -44,7 +46,7 @@ function Header() {
       }
     })();
     return () => {};
-  }, [getGithubStars.isSuccess, getGithubStars.isError, getGithubStars.data]);
+  }, []);
 
   const user = useUser();
   const userStore = useUserStore();
@@ -104,8 +106,8 @@ function Header() {
             menuOpen ? "block" : "hidden"
           } w-full md:flex md:w-auto md:items-center text-center text-white md:space-x-6 mt-4 md:mt-0 `}
         >
-          {["", "/tools", "/pricing", "/contact-us"].map((path, idx) => {
-            const labels = ["home", "tools", "pricing", "contact us"];
+          {["", "/tools", "/pricing", "/contact-us","/gallery"].map((path, idx) => {
+            const labels = ["home", "tools", "pricing", "contact us", "gallery"];
             return (
               <li key={path} className="py-2 md:py-0">
                 <NavLink

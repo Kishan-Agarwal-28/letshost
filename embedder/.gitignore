@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+*.eggs/
+*.pyo
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+lib/
+lib64/
+.venv/

@@ -1,4 +1,4 @@
-# Create using 'npx create-gi' command
+
 
 # Node.js
 node_modules/
@@ -21,7 +21,7 @@ build/
 develop-eggs/
 dist/
 downloads/
-lib/
+
 lib64/
 
 # Virtual environments

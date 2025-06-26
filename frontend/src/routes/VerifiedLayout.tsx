@@ -9,13 +9,21 @@ interface VerifiedRouteProps {
 }
 
 function VerifiedRoute({ children }: VerifiedRouteProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const user = useUser();
   const navigate = useNavigate();
   const redirectTime = 5;
   const [countdown, setCountdown] = useState(redirectTime);
-
   useEffect(() => {
-    if (user === null || !user.isVerified) {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    // Only start countdown if we're not loading and user is null or not verified
+    if (!isLoading && (user === null || !user.isVerified)) {
       const interval = setInterval(() => {
         setCountdown((prev) => {
           if (prev === 1) {
@@ -28,12 +36,23 @@ function VerifiedRoute({ children }: VerifiedRouteProps) {
 
       return () => clearInterval(interval);
     }
-  }, [navigate, user]);
+  }, [navigate, user, isLoading]);
 
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="w-full h-dvh flex justify-center items-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show children if user is authenticated and verified
   if (user !== null && user.isVerified) {
     return <>{children}</>;
   }
 
+  // Show access denied screen if user is not authenticated or not verified
   return (
     <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
       <div className="w-[80%] h-[60%]">

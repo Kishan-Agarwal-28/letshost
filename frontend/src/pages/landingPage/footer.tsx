@@ -15,12 +15,16 @@ function Footer() {
             Letshost
           </h1>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground flex flex-col">
               Brought to you by Kishan Agarwal
-            </span>
+           
+            <Link to={"/terms"} className="text-sm text-primary">
+              Terms of Service
+            </Link>
+             </span>
             <div className="flex items-center gap-4 text-sm">
               <a
-                href="https://github.com/letshost-io/letshost"
+                href="https://github.com/kishan-agarwal-28"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 hover:underline"

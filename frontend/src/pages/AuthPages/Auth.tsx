@@ -41,11 +41,12 @@ function Auth() {
       email: z.string().email("Please enter a valid email address"),
       password: z
         .string()
-        .min(8, "Password must be at least 8 characters long")
-        .regex(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-        ),
+        // .min(8, "Password must be at least 8 characters long")
+        // .regex(
+        //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+        //   "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        // )
+        ,
       confirmPassword: z.string(),
     })
     .superRefine((data, ctx) => {
@@ -93,17 +94,16 @@ function Auth() {
         .refine((val) => val === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
           message: "Please enter a valid email address",
         }),
-      password: z
-        .string()
-        .min(8, "Password must be at least 8 characters long")
-        .regex(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-        ),
+      password: z.string(),
+      // .min(8, "Password must be at least 8 characters long")
+      // .regex(
+      //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+      //   "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      // ),
     })
     .refine((data) => data.username !== "" || data.email !== "", {
       message: "Either username or email is required",
-      path: ["username"], // You can point to 'email' if preferred
+      path: ["username"],
     });
 
   const [showPassword, setShowPassword] = useState(false);
