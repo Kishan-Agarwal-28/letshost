@@ -208,7 +208,7 @@ function Auth() {
     enabled: false,
   });
   useEffect(() => {
-    (() => {
+
       if (
         getStatus === "User logged in successfully" ||
         getStatus === "User registered successfully"
@@ -228,8 +228,7 @@ function Auth() {
           }
         }
       }
-    })();
-  }, [getStatus, toast]);
+  }, [getStatus,getOauthUser.isError,getOauthUser.isSuccess, toast]);
   useEffect(() => {
     (async () => {
       const user = await userStore.getUser();
