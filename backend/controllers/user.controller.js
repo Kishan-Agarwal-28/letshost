@@ -535,7 +535,7 @@ const handleGoogleOauthCallback = async (req, res) => {
       const tokenParams = {
         code: code,
         redirect_uri:
-          "http://localhost:3000/api/v1/users/auth/oauth/google/callback",
+          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/google/callback`,
       };
 
       // Ensure the 'client' is properly initialized
@@ -634,7 +634,7 @@ const handleGithubOauthCallback = async (req, res) => {
       const tokenParams = {
         code: code,
         redirect_uri:
-          "http://localhost:3000/api/v1/users/auth/oauth/github/callback",
+          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/github/callback`,
       };
       const client = new AuthorizationCode(GithubClient);
 
@@ -748,7 +748,7 @@ const handleSpotifyOauthCallback = async (req, res) => {
         grant_type: "authorization_code",
         code: code,
         redirect_uri:
-          "http://localhost:3000/api/v1/users/auth/oauth/spotify/callback",
+          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/spotify/callback`,
       };
       const client = new AuthorizationCode(SpotifyClient);
 
@@ -865,7 +865,7 @@ const handleFacebookOauthCallback = async (req, res) => {
       const tokenParams = {
         code: code,
         redirect_uri:
-          "http://localhost:3000/api/v1/users/auth/oauth/facebook/callback",
+          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/facebook/callback`,
       };
 
       const client = new AuthorizationCode(FacebookClient);
@@ -969,7 +969,7 @@ const handleMicrosoftOauthCallback = async (req, res) => {
       const tokenParams = {
         code: code,
         redirect_uri:
-          "http://localhost:3000/api/v1/users/auth/oauth/microsoft/callback",
+          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/microsoft/callback`,
       };
 
       const client = new AuthorizationCode(MicrosoftClient);

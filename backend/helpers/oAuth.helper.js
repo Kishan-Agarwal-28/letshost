@@ -5,7 +5,7 @@ const generateAuthUri = (provider, scopes, providerName) => {
   const state = "";
   const client = new AuthorizationCode(provider);
   const authorizationUri = client.authorizeURL({
-    redirect_uri: `http://localhost:3000/api/v1/users/auth/oauth/${providerName}/callback`,
+    redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/${providerName}/callback`,
     scope: scopes,
     state: state,
   });
