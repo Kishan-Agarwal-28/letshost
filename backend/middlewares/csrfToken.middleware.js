@@ -63,14 +63,15 @@ export const csrfTokenHandler = asyncHandler((req, res) => {
     res.cookie("csrf_token", csrfTokenHash, {
       httpOnly: true,
       secure: true,
-      sameSite:"none"
+      sameSite:"none",
     });
 
     // Store raw token in accessible cookie or return in JSON
     res.cookie("csrf_token_client", csrfToken, {
       secure: true,
       sameSite:"none",
-      httpOnly: false
+      httpOnly: false,
+      domain:"lethost.dpdns.org"
     });
   }
 
