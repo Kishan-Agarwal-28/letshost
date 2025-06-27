@@ -569,6 +569,7 @@ const handleContributeImage = async () => {
     const isCreator=await registerCreator.mutateAsync({
     });
     if (isCreator.status === 200) {
+      userStore.updateUser({isCreator:true})
     const res = await contributeImage.mutateAsync({
       public_id: currentImagePublicId,
     });
