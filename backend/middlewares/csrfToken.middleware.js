@@ -33,7 +33,8 @@ export const csrfMiddleware = asyncHandler((req, res, next) => {
   if (["POST", "PUT", "PATCH", "DELETE","GET"].includes(method)) {
     const csrfTokenClient = req.headers["x-csrf-token"];
     const csrfTokenServer = req.cookies["csrf_token"];
- 
+    console.log("csrfTokenClient",csrfTokenClient);
+    console.log("csrfTokenServer",csrfTokenServer);
     
     if (!csrfTokenClient || !csrfTokenServer) {
       throw new apiError(403, "CSRF token is missing");
