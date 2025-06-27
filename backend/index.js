@@ -9,7 +9,7 @@ import { csrfMiddleware, csrfTokenHandler } from "./middlewares/csrfToken.middle
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173",/^https:\/\/.*\.cloudinary\.com$/],
+    origin: ["https://letshost.dpdns.org","http://letshost.dpdns.org",/^https:\/\/.*\.cloudinary\.com$/],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: [
@@ -25,7 +25,7 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
-// app.use(csrfMiddleware)
+app.use(csrfMiddleware)
 connectDB();
 connectRedis();
 connectvectorDB();
