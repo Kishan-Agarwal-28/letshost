@@ -23,7 +23,7 @@ const hashToken = (token) => {
 // Middleware to validate CSRF token for state-changing requests
 export const csrfMiddleware = asyncHandler((req, res, next) => {
   const method = req.method;
-
+console.log(req)
      // Skip CSRF for these specific endpoints
   const skipCSRFPaths = ["/api/v1/csrf-token", "/api/v1/cdn/video/upload/callback","/api/v1/users/auth/oauth/google/callback","/api/v1/users/auth/oauth/github/callback","/api/v1/users/auth/oauth/spotify/callback","/api/v1/users/auth/oauth/facebook/callback","/api/v1/users/auth/oauth/microsoft/callback","/api/v1/users/oauth"];
     if (skipCSRFPaths.includes(req._parsedUrl.pathname)) {
