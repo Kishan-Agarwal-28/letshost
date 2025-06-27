@@ -4,7 +4,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
-
+import { APP_URL } from "../constants.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 const MakePayment = asyncHandler(async (req, res) => {
