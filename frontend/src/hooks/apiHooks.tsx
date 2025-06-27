@@ -23,6 +23,16 @@ const getCsrfTokenFromCookie = (): string | null => {
   }
   return null;
 };
+// Add this debugging function
+export const debugCsrfIssue = () => {
+  console.log("Environment:", {
+    isProduction: process.env.NODE_ENV === 'production',
+    backendUrl: config.BackendUrl,
+    currentDomain: window.location.hostname,
+    cookies: document.cookie,
+    userAgent: navigator.userAgent
+  });
+};
 
 // Helper function to fetch CSRF token from server
 const fetchCsrfToken = async (): Promise<string> => {

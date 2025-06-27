@@ -8,8 +8,9 @@ import { useEffect } from "react";
 import { useUserStore } from "./store/store";
 import { useApiGet } from "./hooks/apiHooks";
 import ApiRoutes from "./connectors/api-routes";
-
+import { debugCsrfIssue } from "./hooks/apiHooks";
 function Layout() {
+  debugCsrfIssue();
   const userStore = useUserStore();
   const user = useApiGet({
     key: ["getUser"],
