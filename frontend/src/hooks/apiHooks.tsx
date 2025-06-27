@@ -12,6 +12,7 @@ import { useEffect, useCallback, useRef } from "react";
 
 // Helper function to get CSRF token from cookies
 const getCsrfTokenFromCookie = (): string | null => {
+  debugCsrfIssue();
   if (typeof document === "undefined") return null;
 
   const cookies = document.cookie.split(";");
@@ -36,6 +37,7 @@ export const debugCsrfIssue = () => {
 
 // Helper function to fetch CSRF token from server
 const fetchCsrfToken = async (): Promise<string> => {
+  debugCsrfIssue();
   try {
     const response = await axios.get(`${config.BackendUrl}/csrf-token`, {
       withCredentials: true,
@@ -49,6 +51,7 @@ const fetchCsrfToken = async (): Promise<string> => {
 
 // Helper function to ensure CSRF token is available
 const ensureCsrfToken = async (): Promise<string> => {
+  debugCsrfIssue();
   let token = getCsrfTokenFromCookie();
 
   if (!token) {
