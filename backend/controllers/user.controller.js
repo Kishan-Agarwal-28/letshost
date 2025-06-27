@@ -22,6 +22,7 @@ import { redis } from "../db/connectRedis.js";
 const cookieOptions = {
   httpOnly: true,
   secure: true,
+  sameSite: "none",
 };
 const generateAccessTokenAndRefreshToken = async (user) => {
   const accessToken = await user.generateAccessToken();
