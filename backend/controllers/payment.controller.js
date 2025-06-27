@@ -4,7 +4,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import { APP_URL } from "../constants.js";
+import { APPURL } from "../constants.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 const MakePayment = asyncHandler(async (req, res) => {
@@ -29,7 +29,7 @@ const MakePayment = asyncHandler(async (req, res) => {
     ],
     ui_mode: "embedded",
     return_url:
-      `http://${APP_URL}/payment/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+      `http://${APPURL}/payment/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
   });
   return res
     .status(200)
