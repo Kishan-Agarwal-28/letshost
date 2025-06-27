@@ -229,7 +229,7 @@ function Auth() {
         }
       }
     })();
-  }, [getStatus, getOauthUser.isSuccess, getOauthUser.isError, toast]);
+  }, [getStatus, toast]);
   useEffect(() => {
     (async () => {
       const user = await userStore.getUser();
