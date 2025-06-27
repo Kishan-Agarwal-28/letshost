@@ -69,7 +69,8 @@ export const csrfTokenHandler = asyncHandler((req, res) => {
     // Store raw token in accessible cookie or return in JSON
     res.cookie("csrf_token_client", csrfToken, {
       secure: true,
-      sameSite:"none"
+      sameSite:"none",
+      httpOnly: false
     });
   }
 
