@@ -48,7 +48,11 @@
 <url>        
   <loc>https://letshost.dpdns.org/terms
   </loc>    
-</url>    
+</url> 
+<url>        
+  <loc>https://letshost.dpdns.org/docs
+  </loc>    
+</url>       
 <url>        
   <loc>https://letshost.dpdns.org/creator
   </loc>        
