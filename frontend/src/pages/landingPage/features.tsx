@@ -36,21 +36,25 @@ function Features() {
   ];
 
   return (
-    <motion.div 
+    <motion.div
       className="max-w-5xl mx-auto px-8 flex flex-col items-center justify-center py-4"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.25, 0.25, 0, 1] as const }}
       viewport={{ once: true, margin: "-50px" }}
     >
-      <motion.div 
+      <motion.div
         className="text-center mb-16"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.25, 0, 1] as const }}
+        transition={{
+          duration: 0.8,
+          delay: 0.2,
+          ease: [0.25, 0.25, 0, 1] as const,
+        }}
         viewport={{ once: true }}
       >
-        <motion.h2 
+        <motion.h2
           className="text-4xl font-bold mb-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -59,21 +63,26 @@ function Features() {
         >
           Why choose letshost?
         </motion.h2>
-        <motion.p 
+        <motion.p
           className="text-muted-foreground max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
           viewport={{ once: true }}
         >
-          Our platform is built with developers in mind. We make it simple to deploy your sites with all the features you need.
+          Our platform is built with developers in mind. We make it simple to
+          deploy your sites with all the features you need.
         </motion.p>
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.25, 0, 1] as const }}
+        transition={{
+          duration: 0.8,
+          delay: 0.4,
+          ease: [0.25, 0.25, 0, 1] as const,
+        }}
         viewport={{ once: true }}
       >
         <HoverEffect items={projects} />

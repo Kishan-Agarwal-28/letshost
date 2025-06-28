@@ -8,70 +8,71 @@ import { useApiPost } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { getErrorMsg } from "@/lib/getErrorMsg";
 export default function Contact() {
-  
-const formRefs = useRef<{
-  firstName: HTMLInputElement | null;
-  lastName: HTMLInputElement | null;
-  email: HTMLInputElement | null;
-  phoneNumber: HTMLInputElement | null;
-  message: HTMLTextAreaElement | null;
-}>({
-  firstName: null,
-  lastName: null,
-  email: null,
-  phoneNumber: null,
-  message: null,
-});
-const {toast}=useToast();
-const handleContact=useApiPost({
-  type: "post",
-  key: ["contact"],
-  path: ApiRoutes.contact,
-  sendingFile: false,
-})
-const handleSubmit = async() => {
-  const firstName = formRefs.current.firstName?.value;
-  const lastName = formRefs.current.lastName?.value;
-  const email = formRefs.current.email?.value;
-  const phoneNumber = formRefs.current.phoneNumber?.value;
-  const message = formRefs.current.message?.value;
-if([firstName,lastName,email,phoneNumber,message].some(field => field?.trim() === "")){
-  toast({
-    title: "Error",
-    description: "All fields are required",
-    duration: 5000, 
-    variant: "error"
-  })
-}
-else{
-  const result=await handleContact.mutateAsync({
-    firstName,
-    lastName,
-    email,
-    phoneNumber,
-    message
+  const formRefs = useRef<{
+    firstName: HTMLInputElement | null;
+    lastName: HTMLInputElement | null;
+    email: HTMLInputElement | null;
+    phoneNumber: HTMLInputElement | null;
+    message: HTMLTextAreaElement | null;
+  }>({
+    firstName: null,
+    lastName: null,
+    email: null,
+    phoneNumber: null,
+    message: null,
   });
-  if(result.status===200){
-    Object.values(formRefs.current).forEach((field) => {
-  if (field) field.value = "";
-});
-  toast({
-    title: "Success",
-    description: "Message sent successfully",
-    duration: 5000, 
-    variant: "success"
-  })
-}
-else{
-  toast({
-    title: "Error",
-    description: getErrorMsg(handleContact),
-    duration: 5000, 
-    variant: "error"
-  })
-}
-}
-};
+  const { toast } = useToast();
+  const handleContact = useApiPost({
+    type: "post",
+    key: ["contact"],
+    path: ApiRoutes.contact,
+    sendingFile: false,
+  });
+  const handleSubmit = async () => {
+    const firstName = formRefs.current.firstName?.value;
+    const lastName = formRefs.current.lastName?.value;
+    const email = formRefs.current.email?.value;
+    const phoneNumber = formRefs.current.phoneNumber?.value;
+    const message = formRefs.current.message?.value;
+    if (
+      [firstName, lastName, email, phoneNumber, message].some(
+        (field) => field?.trim() === "",
+      )
+    ) {
+      toast({
+        title: "Error",
+        description: "All fields are required",
+        duration: 5000,
+        variant: "error",
+      });
+    } else {
+      const result = await handleContact.mutateAsync({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        message,
+      });
+      if (result.status === 200) {
+        Object.values(formRefs.current).forEach((field) => {
+          if (field) field.value = "";
+        });
+        toast({
+          title: "Success",
+          description: "Message sent successfully",
+          duration: 5000,
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: getErrorMsg(handleContact),
+          duration: 5000,
+          variant: "error",
+        });
+      }
+    }
+  };
   return (
     <div className="w-full flex flex-col items-center justify-start p-6 pt-16 pb-28">
       {/* Heading */}
@@ -101,37 +102,50 @@ else{
               <Input
                 placeholder="First Name"
                 className="bg-[#0f0f1c] border-gray-600 text-white"
-                ref={(el) => {formRefs.current.firstName = el}}
+                ref={(el) => {
+                  formRefs.current.firstName = el;
+                }}
               />
               <Input
                 placeholder="Last Name"
                 className="bg-[#0f0f1c] border-gray-600 text-white"
-                ref={(el) => {formRefs.current.lastName = el}}
+                ref={(el) => {
+                  formRefs.current.lastName = el;
+                }}
               />
             </div>
             <Input
               placeholder="Email"
               className="mt-4 bg-[#0f0f1c] border-gray-600 text-white"
-              ref={(el) => {formRefs.current.email = el}}
+              ref={(el) => {
+                formRefs.current.email = el;
+              }}
               type="email"
             />
             <Input
-  placeholder="Phone Number"
-  className="mt-4 bg-[#0f0f1c] border-gray-600 text-white"
-  ref={(el) => { formRefs.current.phoneNumber = el }}
-  type="tel"
-  pattern="[0-9]{10}" 
-  maxLength={10}
-  inputMode="numeric" 
-  title="Enter a 10-digit phone number"
-/>
+              placeholder="Phone Number"
+              className="mt-4 bg-[#0f0f1c] border-gray-600 text-white"
+              ref={(el) => {
+                formRefs.current.phoneNumber = el;
+              }}
+              type="tel"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              inputMode="numeric"
+              title="Enter a 10-digit phone number"
+            />
             <Textarea
               placeholder="Message"
               className="mt-4 bg-[#0f0f1c] border-gray-600 text-white"
-              ref={(el) => {formRefs.current.message = el}}
-              
+              ref={(el) => {
+                formRefs.current.message = el;
+              }}
             />
-            <Button className="mt-6 bg-gradient-to-r from-purple-500 to-blue-500 text-white w-full" onClick={handleSubmit} disabled={handleContact.isPending}>
+            <Button
+              className="mt-6 bg-gradient-to-r from-purple-500 to-blue-500 text-white w-full"
+              onClick={handleSubmit}
+              disabled={handleContact.isPending}
+            >
               Send it to the moon 🚀
             </Button>
           </CardContent>
@@ -141,7 +155,7 @@ else{
         <Card className="bg-[#1a1a2e] text-white w-full ">
           <CardContent className="p-0 flex flex-col justify-between h-full">
             <img
-              src="./astronaut.png"
+              src="https://letshost.imgix.net/assets/astronaut.png?fm=webp"
               alt="Astronaut"
               className="w-full object-cover rounded-t-xl max-h-80 sm:max-h-full"
             />

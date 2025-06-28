@@ -14,10 +14,13 @@ import {
   deleteOnCloudinary,
   uploadOnCloudinary,
 } from "../services/cloudinary.service.js";
-import {CDN} from "../models/cdn.model.js";
-import {SubDomain} from "../models/subdomain.model.js";
-import {deleteObjects,deleteFromCDN} from "../services/awsS3.service.js";
-import {deleteEmptyFolders,deleteMediaFromCDN} from "../services/cloudinary.service.js";
+import { CDN } from "../models/cdn.model.js";
+import { SubDomain } from "../models/subdomain.model.js";
+import { deleteObjects, deleteFromCDN } from "../services/awsS3.service.js";
+import {
+  deleteEmptyFolders,
+  deleteMediaFromCDN,
+} from "../services/cloudinary.service.js";
 import { redis } from "../db/connectRedis.js";
 const cookieOptions = {
   httpOnly: true,
@@ -83,7 +86,7 @@ const registerUser = asyncHandler(async (req, res) => {
       );
       const user = await User.create({
         username,
-        fullName:username,
+        fullName: username,
         email,
         password,
         verificationToken,
@@ -277,16 +280,22 @@ const sendUpdatePasswordEmail = asyncHandler(async (req, res) => {
   user.verificationTokenExpiryDate =
     Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
   await user.save({ validateBeforeSave: false });
-  await sendEmail(user.email, "updatePassword", {
-    username: user.username,
-    token: user.verificationToken,
-  },null,user._id);
+  await sendEmail(
+    user.email,
+    "updatePassword",
+    {
+      username: user.username,
+      token: user.verificationToken,
+    },
+    null,
+    user._id
+  );
   return res
     .status(200)
     .json(new apiResponse(200, {}, "Verification token sent to your email"));
 });
 const updatePassword = asyncHandler(async (req, res) => {
-  const { verificationToken, newPassword , oldPassword} = req.body;
+  const { verificationToken, newPassword, oldPassword } = req.body;
   if (!verificationToken) {
     throw new apiError(400, "Verification token is required");
   }
@@ -297,7 +306,7 @@ const updatePassword = asyncHandler(async (req, res) => {
   if (user.verificationTokenExpiryDate < Date.now()) {
     throw new apiError(400, "Verification token expired");
   }
-  if(!bcrypt.compareSync(oldPassword,user.password)){
+  if (!bcrypt.compareSync(oldPassword, user.password)) {
     throw new apiError(400, "Old password is incorrect");
   }
   user.password = newPassword;
@@ -429,7 +438,6 @@ const changeUserName = asyncHandler(async (req, res) => {
   }
 });
 const updateAvatar = asyncHandler(async (req, res) => {
- 
   const user = await User.findById(req.user._id).select(
     "-password -refreshToken "
   );
@@ -437,7 +445,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     throw new apiError(404, "User not found");
   }
   const oldAvatarUrl = user.avatar;
-  
+
   const avatarLocalFilePath = req.files[0]?.path;
   if (!avatarLocalFilePath) {
     throw new apiError(400, "Avatar is required");
@@ -490,18 +498,18 @@ const getUserDetails = asyncHandler(async (req, res) => {
           },
         },
         tier: 1,
-  fileLimit: 1,
-  cdnCSSJSlimit: 1,
-  cdnMedialimit: 1,
-  totalMediaSize: 1,
-  totalJsCssSize: 1,
-  genCredits: 1,
-  fullName:1,
-  description:1,
-  location:1,
-  coverImage:1,
-  links:1,
-  isCreator:1,
+        fileLimit: 1,
+        cdnCSSJSlimit: 1,
+        cdnMedialimit: 1,
+        totalMediaSize: 1,
+        totalJsCssSize: 1,
+        genCredits: 1,
+        fullName: 1,
+        description: 1,
+        location: 1,
+        coverImage: 1,
+        links: 1,
+        isCreator: 1,
         isVerified: 1,
         verificationToken: 1,
         verificationTokenExpiryDate: 1,
@@ -534,8 +542,7 @@ const handleGoogleOauthCallback = async (req, res) => {
     try {
       const tokenParams = {
         code: code,
-        redirect_uri:
-          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/google/callback`,
+        redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/google/callback`,
       };
 
       // Ensure the 'client' is properly initialized
@@ -633,8 +640,7 @@ const handleGithubOauthCallback = async (req, res) => {
     try {
       const tokenParams = {
         code: code,
-        redirect_uri:
-          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/github/callback`,
+        redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/github/callback`,
       };
       const client = new AuthorizationCode(GithubClient);
 
@@ -747,8 +753,7 @@ const handleSpotifyOauthCallback = async (req, res) => {
       const tokenParams = {
         grant_type: "authorization_code",
         code: code,
-        redirect_uri:
-          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/spotify/callback`,
+        redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/spotify/callback`,
       };
       const client = new AuthorizationCode(SpotifyClient);
 
@@ -864,8 +869,7 @@ const handleFacebookOauthCallback = async (req, res) => {
     try {
       const tokenParams = {
         code: code,
-        redirect_uri:
-          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/facebook/callback`,
+        redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/facebook/callback`,
       };
 
       const client = new AuthorizationCode(FacebookClient);
@@ -968,8 +972,7 @@ const handleMicrosoftOauthCallback = async (req, res) => {
     try {
       const tokenParams = {
         code: code,
-        redirect_uri:
-          `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/microsoft/callback`,
+        redirect_uri: `${process.env.BACKEND_URI}/api/v1/users/auth/oauth/microsoft/callback`,
       };
 
       const client = new AuthorizationCode(MicrosoftClient);
@@ -1077,46 +1080,66 @@ const deleteUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new apiError(404, "User not found");
   }
-  
+
   const subdomains = await SubDomain.find({ owner: req.user._id });
   const cdns = await CDN.find({ owner: req.user._id });
-  
+
   const ProjectIds = subdomains.map((subdomain) => subdomain.projectID);
   const CDNIds = cdns.map((cdn) => cdn.projectID);
-  
-  console.log(`Deleting user ${req.user._id}: ${subdomains.length} subdomains, ${cdns.length} CDNs`);
+
+  console.log(
+    `Deleting user ${req.user._id}: ${subdomains.length} subdomains, ${cdns.length} CDNs`
+  );
 
   const formatSubdomainKey = (subdomain) => `user_${subdomain}`;
-  
+
   // Helper function to handle individual CDN deletion with error handling
   const deleteCDNSafely = async (cdn) => {
     try {
       if (cdn.bucketAssigned === "cdn") {
         // Delete from S3 CDN bucket
         console.log(`Deleting S3 CDN: ${cdn.cdnProjectID}`);
-        return deleteFromCDN(req.user._id, cdn.cdnProjectID, cdn.currentVersion, cdn.fileType);
+        return deleteFromCDN(
+          req.user._id,
+          cdn.cdnProjectID,
+          cdn.currentVersion,
+          cdn.fileType
+        );
       } else {
         // Delete from Cloudinary
-        const folder = cdn.fileType === "image" ? "img" : cdn.fileType === "video" ? "video" : "";
-        
+        const folder =
+          cdn.fileType === "image"
+            ? "img"
+            : cdn.fileType === "video"
+              ? "video"
+              : "";
+
         if (folder) {
-          console.log(`Deleting Cloudinary CDN: ${cdn.cdnProjectID}, folder: ${folder}, version: ${cdn.currentVersion}`);
-          
+          console.log(
+            `Deleting Cloudinary CDN: ${cdn.cdnProjectID}, folder: ${folder}, version: ${cdn.currentVersion}`
+          );
+
           // Delete media files from Cloudinary
           const deleteResult = await deleteMediaFromCDN(
-            req.user._id, 
-            cdn.currentVersion, 
-            folder, 
-            cdn.cdnProjectID, 
+            req.user._id,
+            cdn.currentVersion,
+            folder,
+            cdn.cdnProjectID,
             null
           );
           console.log(`Delete media result:`, deleteResult);
-          
+
           // Delete empty folders from Cloudinary
-          const folderResult = await deleteEmptyFolders(req.user._id, folder, cdn.cdnProjectID);
+          const folderResult = await deleteEmptyFolders(
+            req.user._id,
+            folder,
+            cdn.cdnProjectID
+          );
           console.log(`Delete folder result:`, folderResult);
         } else {
-          console.warn(`Unknown file type for CDN ${cdn.cdnProjectID}: ${cdn.fileType}`);
+          console.warn(
+            `Unknown file type for CDN ${cdn.cdnProjectID}: ${cdn.fileType}`
+          );
         }
       }
       return { success: true, cdn: cdn.cdnProjectID };
@@ -1125,7 +1148,7 @@ const deleteUser = asyncHandler(async (req, res) => {
       return { success: false, cdn: cdn.cdnProjectID, error: error.message };
     }
   };
-  
+
   // Helper function to handle individual subdomain deletion with error handling
   const deleteSubdomainSafely = async (projectID) => {
     try {
@@ -1137,7 +1160,7 @@ const deleteUser = asyncHandler(async (req, res) => {
       return { success: false, projectID, error: error.message };
     }
   };
-  
+
   // Helper function to handle Redis deletion with error handling
   const deleteRedisSafely = async (subdomain) => {
     try {
@@ -1149,72 +1172,88 @@ const deleteUser = asyncHandler(async (req, res) => {
       }
       return { success: true, subdomain: formattedSubdomain };
     } catch (error) {
-      console.error(`Error deleting Redis key for ${subdomain.subDomain}:`, error);
-      return { success: false, subdomain: subdomain.subDomain, error: error.message };
+      console.error(
+        `Error deleting Redis key for ${subdomain.subDomain}:`,
+        error
+      );
+      return {
+        success: false,
+        subdomain: subdomain.subDomain,
+        error: error.message,
+      };
     }
   };
-  
+
   try {
     // Delete subdomain files from S3 with individual error handling
     const subdomainResults = await Promise.allSettled(
       ProjectIds.map(deleteSubdomainSafely)
     );
-    
+
     // Delete CDN files with individual error handling
-    const cdnResults = await Promise.allSettled(
-      cdns.map(deleteCDNSafely)
-    );
-    
+    const cdnResults = await Promise.allSettled(cdns.map(deleteCDNSafely));
+
     // Delete Redis cache entries for subdomains with individual error handling
     const redisResults = await Promise.allSettled(
       subdomains.map(deleteRedisSafely)
     );
-    
+
     // Log results
-    const subdomainFailures = subdomainResults.filter(r => r.status === 'rejected' || !r.value?.success);
-    const cdnFailures = cdnResults.filter(r => r.status === 'rejected' || !r.value?.success);
-    const redisFailures = redisResults.filter(r => r.status === 'rejected' || !r.value?.success);
-    
+    const subdomainFailures = subdomainResults.filter(
+      (r) => r.status === "rejected" || !r.value?.success
+    );
+    const cdnFailures = cdnResults.filter(
+      (r) => r.status === "rejected" || !r.value?.success
+    );
+    const redisFailures = redisResults.filter(
+      (r) => r.status === "rejected" || !r.value?.success
+    );
+
     if (subdomainFailures.length > 0) {
       console.warn(`Failed to delete ${subdomainFailures.length} subdomain(s)`);
     }
-    
+
     if (cdnFailures.length > 0) {
       console.warn(`Failed to delete ${cdnFailures.length} CDN(s)`);
     }
-    
+
     if (redisFailures.length > 0) {
       console.warn(`Failed to delete ${redisFailures.length} Redis key(s)`);
     }
-    
+
     // Delete database records (this should succeed even if file deletions failed)
     await SubDomain.deleteMany({ owner: req.user._id });
     console.log(`Deleted ${subdomains.length} subdomain records from database`);
-    
+
     await CDN.deleteMany({ owner: req.user._id });
     console.log(`Deleted ${cdns.length} CDN records from database`);
-    
+
     await User.findByIdAndDelete(req.user._id);
     console.log(`Deleted user ${req.user._id} from database`);
-    
+
     // Prepare response message
-    const totalFailures = subdomainFailures.length + cdnFailures.length + redisFailures.length;
+    const totalFailures =
+      subdomainFailures.length + cdnFailures.length + redisFailures.length;
     let message = "User deleted successfully";
-    
+
     if (totalFailures > 0) {
       message += ` (with ${totalFailures} file/cache deletion warnings - check logs)`;
     }
-    
-    return res.status(200).json(new apiResponse(200, {
-      subdomainsDeleted: subdomains.length,
-      cdnsDeleted: cdns.length,
-      warnings: totalFailures
-    }, message));
-    
+
+    return res.status(200).json(
+      new apiResponse(
+        200,
+        {
+          subdomainsDeleted: subdomains.length,
+          cdnsDeleted: cdns.length,
+          warnings: totalFailures,
+        },
+        message
+      )
+    );
   } catch (error) {
-    console.error('Critical error during user deletion:', error);
-    
-    
+    console.error("Critical error during user deletion:", error);
+
     throw new apiError(500, `Failed to delete user: ${error.message}`);
   }
 });
@@ -1242,5 +1281,5 @@ export {
   getUserDetails,
   sendUpdatePasswordEmail,
   updatePassword,
-  deleteUser
+  deleteUser,
 };

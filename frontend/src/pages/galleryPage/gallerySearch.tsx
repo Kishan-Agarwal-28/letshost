@@ -1,21 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, Clock, X, Command, Calendar, Tag, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect, useRef } from "react";
+import {
+  Search,
+  Clock,
+  X,
+  Command,
+  Calendar,
+  Tag,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { type DateRange } from 'react-day-picker';
-import { useSearchParams } from 'react-router-dom';
-
+} from "@/components/ui/popover";
+import { type DateRange } from "react-day-picker";
+import { useSearchParams } from "react-router-dom";
 
 const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [filteredSearches, setFilteredSearches] = useState(recentSearches);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,55 +34,57 @@ const SearchBar = () => {
 
   // Sample tags - you can replace with your own
   const availableTags = [
-     "NO Style", 
-     "photorealistic",
-     "digital art",
-     "oil painting",
-     "watercolor",
-     "anime",
-     "cyberpunk",
-     "steampunk", 
-     "fantasy art", 
-     "minimalist",
-     "vintage", 
-     "pop art",
-     "surrealism",
-     "impressionist",
-     "sketch",
-     "custom",
+    "NO Style",
+    "photorealistic",
+    "digital art",
+    "oil painting",
+    "watercolor",
+    "anime",
+    "cyberpunk",
+    "steampunk",
+    "fantasy art",
+    "minimalist",
+    "vintage",
+    "pop art",
+    "surrealism",
+    "impressionist",
+    "sketch",
+    "custom",
   ];
-console.log(searchParams)
+  console.log(searchParams);
   // Handle Ctrl+K shortcut and outside clicks
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         setIsOpen(true);
         setTimeout(() => inputRef.current?.focus(), 100);
       }
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsOpen(false);
-        setSearchQuery('');
+        setSearchQuery("");
       }
     };
 
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (isOpen && 
-          !target.closest('.search-modal-content') && 
-          !target.closest('[data-radix-popper-content-wrapper]') &&
-          !target.closest('[data-radix-portal]')) {
+      if (
+        isOpen &&
+        !target.closest(".search-modal-content") &&
+        !target.closest("[data-radix-popper-content-wrapper]") &&
+        !target.closest("[data-radix-portal]")
+      ) {
         setIsOpen(false);
-        setSearchQuery('');
+        setSearchQuery("");
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
-    
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
@@ -83,9 +92,9 @@ console.log(searchParams)
   useEffect(() => {
     if (searchQuery.trim()) {
       setFilteredSearches(
-        recentSearches.filter(search =>
-          search.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        recentSearches.filter((search) =>
+          search.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
       );
     } else {
       setFilteredSearches(recentSearches);
@@ -93,12 +102,14 @@ console.log(searchParams)
   }, [recentSearches, searchQuery]);
 
   // Load recent searches from memory (localStorage removed for Claude.ai compatibility)
-  useEffect(()=>{
-  if(localStorage.getItem("recentSearches")){
-    const storedSearches=JSON.parse(localStorage.getItem("recentSearches")||"[]")
-    setRecentSearches(storedSearches)
-  }
-}, [])
+  useEffect(() => {
+    if (localStorage.getItem("recentSearches")) {
+      const storedSearches = JSON.parse(
+        localStorage.getItem("recentSearches") || "[]",
+      );
+      setRecentSearches(storedSearches);
+    }
+  }, []);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -109,27 +120,27 @@ console.log(searchParams)
       } else {
         updatedSearches = recentSearches;
       }
-      
+
       // Build URL parameters
       const params = new URLSearchParams();
-      params.set('query', query);
-      params.set('limit', '10');
-      params.set('page', '1');
-      
+      params.set("query", query);
+      params.set("limit", "10");
+      params.set("page", "1");
+
       // Add date range if selected
       if (dateRange?.from && dateRange?.to) {
-        params.set('dateFrom', dateRange.from.toISOString().split('T')[0]);
-        params.set('dateTo', dateRange.to.toISOString().split('T')[0]);
+        params.set("dateFrom", dateRange.from.toISOString().split("T")[0]);
+        params.set("dateTo", dateRange.to.toISOString().split("T")[0]);
       }
-      
+
       // Add tags if selected
       if (selectedTags.length > 0) {
-        params.set('tags', selectedTags.join(','));
+        params.set("tags", selectedTags.join(","));
       }
-       localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
       setSearchParams(params);
       setIsOpen(false);
-      setSearchQuery('');
+      setSearchQuery("");
     }
   };
 
@@ -144,15 +155,15 @@ console.log(searchParams)
   };
 
   const removeRecentSearch = (searchToRemove: string) => {
-    const updated = recentSearches.filter(search => search !== searchToRemove);
+    const updated = recentSearches.filter(
+      (search) => search !== searchToRemove,
+    );
     setRecentSearches(updated);
   };
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -168,7 +179,7 @@ console.log(searchParams)
     if (dateRange?.from && dateRange?.to) {
       return `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`;
     }
-    return 'Any time';
+    return "Any time";
   };
 
   return (
@@ -201,7 +212,7 @@ console.log(searchParams)
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleSearch(searchQuery);
                   }
                 }}
@@ -223,7 +234,10 @@ console.log(searchParams)
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
               <div className="flex items-center space-x-3">
                 {/* Date Range Picker */}
-                <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                <Popover
+                  open={isDatePickerOpen}
+                  onOpenChange={setIsDatePickerOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -236,13 +250,15 @@ console.log(searchParams)
                       <ChevronDown className="w-3 h-3 ml-1" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent 
-                    className="w-auto overflow-hidden p-0" 
+                  <PopoverContent
+                    className="w-auto overflow-hidden p-0"
                     align="start"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
                     <div className="p-3" onClick={(e) => e.stopPropagation()}>
-                      <Label className="text-sm font-medium mb-2 block">Select date range</Label>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Select date range
+                      </Label>
                       <CalendarComponent
                         mode="range"
                         selected={dateRange}
@@ -281,18 +297,22 @@ console.log(searchParams)
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Tag className="w-3 h-3 mr-1" />
-                      {selectedTags.length > 0 ? `${selectedTags.length} tags` : 'Tags'}
+                      {selectedTags.length > 0
+                        ? `${selectedTags.length} tags`
+                        : "Tags"}
                       <ChevronDown className="w-3 h-3 ml-1" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent 
-                    className="w-64 p-0" 
+                  <PopoverContent
+                    className="w-64 p-0"
                     align="start"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
                     <div className="p-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm font-medium">Select tags</Label>
+                        <Label className="text-sm font-medium">
+                          Select tags
+                        </Label>
                         {selectedTags.length > 0 && (
                           <Button
                             variant="ghost"
@@ -308,7 +328,9 @@ console.log(searchParams)
                         {availableTags.map((tag) => (
                           <Button
                             key={tag}
-                            variant={selectedTags.includes(tag) ? "default" : "outline"}
+                            variant={
+                              selectedTags.includes(tag) ? "default" : "outline"
+                            }
                             size="sm"
                             onClick={() => toggleTag(tag)}
                             className="text-xs h-8 justify-start"
@@ -355,7 +377,10 @@ console.log(searchParams)
                     </div>
                   )}
                   {selectedTags.map((tag) => (
-                    <div key={tag} className="flex items-center bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                    <div
+                      key={tag}
+                      className="flex items-center bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+                    >
                       <Tag className="w-3 h-3 mr-1" />
                       {tag}
                       <Button
@@ -401,7 +426,9 @@ console.log(searchParams)
                       >
                         <div className="flex items-center space-x-3">
                           <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-700">{search}</span>
+                          <span className="text-sm text-gray-700">
+                            {search}
+                          </span>
                         </div>
                         <Button
                           onClick={(e) => {
@@ -448,11 +475,15 @@ console.log(searchParams)
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-1">
-                    <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-xs">Enter</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-xs">
+                      Enter
+                    </kbd>
                     <span>to search</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-xs">Esc</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-xs">
+                      Esc
+                    </kbd>
                     <span>to close</span>
                   </div>
                 </div>

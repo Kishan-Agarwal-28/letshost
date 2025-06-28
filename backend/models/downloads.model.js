@@ -1,21 +1,23 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const downloadSchema=new Schema({
-    image:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Image",
-        required:true
+const downloadSchema = new Schema(
+  {
+    image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Image",
+      required: true,
     },
-    downloadedBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    downloadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    ipAddress: { type: String }, 
-    userAgent: { type: String } 
+    ipAddress: { type: String },
+    userAgent: { type: String },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-},{
-    timestamps:true
-})
-
-export const Download=mongoose.model("Download",downloadSchema)
+export const Download = mongoose.model("Download", downloadSchema);

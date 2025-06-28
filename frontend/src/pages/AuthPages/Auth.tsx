@@ -45,8 +45,7 @@ function Auth() {
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-        )
-        ,
+        ),
       confirmPassword: z.string(),
     })
     .superRefine((data, ctx) => {
@@ -94,12 +93,13 @@ function Auth() {
         .refine((val) => val === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
           message: "Please enter a valid email address",
         }),
-      password: z.string()
-      .min(8, "Password must be at least 8 characters long")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-      )
+      password: z
+        .string()
+        .min(8, "Password must be at least 8 characters long")
+        .regex(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+        ),
     })
     .refine((data) => data.username !== "" || data.email !== "", {
       message: "Either username or email is required",
@@ -208,27 +208,26 @@ function Auth() {
     enabled: false,
   });
   useEffect(() => {
-
-      if (
-        getStatus === "User logged in successfully" ||
-        getStatus === "User registered successfully"
-      ) {
-        getOauthUser.refetch();
-        if (getOauthUser.isFetched) {
-          if (getOauthUser.isSuccess) {
-            console.log(getOauthUser.data?.data?.data);
-            userStore.setUser(getOauthUser.data?.data?.data);
-          } else if (getOauthUser.isError) {
-            toast({
-              title: "Error",
-              description: getErrorMsg(getOauthUser),
-              variant: "error",
-              duration: 5000,
-            });
-          }
+    if (
+      getStatus === "User logged in successfully" ||
+      getStatus === "User registered successfully"
+    ) {
+      getOauthUser.refetch();
+      if (getOauthUser.isFetched) {
+        if (getOauthUser.isSuccess) {
+          console.log(getOauthUser.data?.data?.data);
+          userStore.setUser(getOauthUser.data?.data?.data);
+        } else if (getOauthUser.isError) {
+          toast({
+            title: "Error",
+            description: getErrorMsg(getOauthUser),
+            variant: "error",
+            duration: 5000,
+          });
         }
       }
-  }, [getStatus,getOauthUser.isError,getOauthUser.isSuccess, toast]);
+    }
+  }, [getStatus, getOauthUser.isError, getOauthUser.isSuccess, toast]);
   useEffect(() => {
     (async () => {
       const user = await userStore.getUser();
@@ -469,7 +468,7 @@ function Auth() {
         {/* Side Image */}
         <div className="hidden md:flex relative bg-muted w-full md:w-1/2 h-[97%] rounded-2xl justify-center items-center">
           <img
-            src="./logo.png"
+            src="https://letshost.imgix.net/assets/logo.png?fm=webp"
             alt="Image"
             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
           />

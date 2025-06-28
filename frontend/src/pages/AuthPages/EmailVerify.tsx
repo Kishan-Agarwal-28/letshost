@@ -112,7 +112,7 @@ function EmailVerify() {
           </div>
           <div className="relative hidden bg-muted md:flex w-1/3 h-[90%] rounded-2xl justify-center items-center">
             <img
-              src="../../../public//logo.png"
+              src="https://letshost.imgix.net/assets/logo.png?fm=webp"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
             />

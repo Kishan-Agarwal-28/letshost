@@ -10,7 +10,7 @@ export const verifyJWTOPT = asyncHandler(async (req, _, next) => {
       req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      return next(); 
+      return next();
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -26,7 +26,6 @@ export const verifyJWTOPT = asyncHandler(async (req, _, next) => {
     req.user = user;
     next();
   } catch (error) {
-
-    return next(); 
+    return next();
   }
 });

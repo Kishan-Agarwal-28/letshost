@@ -20,10 +20,10 @@ import FS from "fs";
 import { Pricing } from "../models/pricing.model.js";
 const formatSubdomainKey = (subdomain) => `user_${subdomain}`;
 
-const cacheSubDomain = async (subdomain, projectID, owner,Ispublic) => {
+const cacheSubDomain = async (subdomain, projectID, owner, Ispublic) => {
   const key = formatSubdomainKey(subdomain);
-  const subdomainData = { owner, projectID ,Ispublic};
-  if(redis.get(key)){
+  const subdomainData = { owner, projectID, Ispublic };
+  if (redis.get(key)) {
     await redis.del(key);
   }
   await redis.set(key, JSON.stringify(subdomainData), "PX", REDIS_EXP);
@@ -52,9 +52,12 @@ const getSubDomain = async (subdomain) => {
 };
 async function getFolderSize(folderPath) {
   try {
-    const files = await fs.readdir(folderPath, { recursive: true, withFileTypes: true });
+    const files = await fs.readdir(folderPath, {
+      recursive: true,
+      withFileTypes: true,
+    });
     let totalSize = 0;
-    
+
     for (const file of files) {
       if (file.isFile()) {
         const filePath = path.join(file.path || folderPath, file.name);
@@ -62,7 +65,7 @@ async function getFolderSize(folderPath) {
         totalSize += stats.size;
       }
     }
-    
+
     return totalSize;
   } catch (error) {
     throw new Error(`Error calculating folder size: ${error.message}`);
@@ -123,34 +126,43 @@ const registerSubDomain = asyncHandler(async (req, res) => {
   if (FS.existsSync(tempPath)) {
     const folderSize = await getFolderSize(tempPath);
     const totalSize = folderSize + user.fileLimit;
-    
+
     if (totalSize > pricing.fileLimit) {
       await fs.rm(tempPath, { recursive: true, force: true });
-      throw new apiError(400, "You have reached your limit of files size for your account");
+      throw new apiError(
+        400,
+        "You have reached your limit of files size for your account"
+      );
     }
-    
+
     user.fileLimit += folderSize;
     await uploadToS3(owner, projectID);
     await fs.rm(tempPath, { recursive: true, force: true });
 
-  const subdomain = await SubDomain.create({
-    subDomain,
-    owner,
-    projectID,
-    fileSize: folderSize
-  });
+    const subdomain = await SubDomain.create({
+      subDomain,
+      owner,
+      projectID,
+      fileSize: folderSize,
+    });
 
-  await cacheSubDomain(subDomain, projectID.toLowerCase(), owner,subdomain.public);
-  user.SDLimit = user.SDLimit - 1;
-  await user.save();
+    await cacheSubDomain(
+      subDomain,
+      projectID.toLowerCase(),
+      owner,
+      subdomain.public
+    );
+    user.SDLimit = user.SDLimit - 1;
+    await user.save();
     return res
-    .status(200)
-    .json(new apiResponse(200, subdomain, "Subdomain registered successfully"));
+      .status(200)
+      .json(
+        new apiResponse(200, subdomain, "Subdomain registered successfully")
+      );
   } else {
     throw new apiError(400, "Error uploading files to server");
   }
 });
-
 
 // Update a subdomain (change its name)
 const updateSubDomain = asyncHandler(async (req, res) => {
@@ -184,7 +196,12 @@ const updateSubDomain = asyncHandler(async (req, res) => {
     if (getOldKeyDataRedis) {
       await redis.del(oldKey);
     }
-    await cacheSubDomain(newSubDomain, subdomainRecord.projectID, owner,subdomainRecord.public);
+    await cacheSubDomain(
+      newSubDomain,
+      subdomainRecord.projectID,
+      owner,
+      subdomainRecord.public
+    );
 
     return res
       .status(200)
@@ -235,11 +252,14 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
     }
 
     folderSize = await getFolderSize(tempPath);
-    const totalSize = folderSize + user.fileLimit-existing.fileSize;
-    
+    const totalSize = folderSize + user.fileLimit - existing.fileSize;
+
     if (totalSize > pricing.fileLimit) {
       await fs.rm(tempPath, { recursive: true, force: true });
-      throw new apiError(400, "You have reached your limit of files size for your account");
+      throw new apiError(
+        400,
+        "You have reached your limit of files size for your account"
+      );
     }
 
     // Store original limit for potential rollback
@@ -249,7 +269,7 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
   }
 
   const projectID = existing.projectID;
-  
+
   try {
     await deleteObjects(`${existing.owner.toString()}/${projectID}`);
     await uploadToS3(owner, projectID);
@@ -263,7 +283,11 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(
-        new apiResponse(200, existing, "Subdomain contents changed successfully")
+        new apiResponse(
+          200,
+          existing,
+          "Subdomain contents changed successfully"
+        )
       );
   } catch (error) {
     // Rollback user fileLimit if it was updated
@@ -271,7 +295,7 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
       user.fileLimit = originalFileLimit;
       await user.save();
     }
-    
+
     // Clean up temp folder on error
     if (FS.existsSync(tempPath)) {
       await fs.rm(tempPath, { recursive: true, force: true });
@@ -379,7 +403,12 @@ const updateSubDomainVisibility = asyncHandler(async (req, res) => {
   } else {
     existing.public = false;
   }
-  await cacheSubDomain(existing.subDomain, existing.projectID, owner,existing.public);
+  await cacheSubDomain(
+    existing.subDomain,
+    existing.projectID,
+    owner,
+    existing.public
+  );
   await existing.save();
   return res
     .status(200)
@@ -418,7 +447,12 @@ const getViewSignedUrl = asyncHandler(async (req, res) => {
     );
     ViewUrl = `${existing.subDomain}.lethost.dpdns.org/?token=${token}`;
   }
-  await cacheSubDomain(existing.subDomain, existing.projectID, owner,existing.public);
+  await cacheSubDomain(
+    existing.subDomain,
+    existing.projectID,
+    owner,
+    existing.public
+  );
   return res
     .status(200)
     .json(

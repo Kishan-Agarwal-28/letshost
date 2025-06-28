@@ -36,10 +36,18 @@ router.route("/register").post(logger, registerUser);
 router.route("/login").post(logger, loginUser);
 router.route("/generateNewTokens").post(logger, generateNewTokens);
 router.route("/oauth").get(logger, registerOauthUser);
-router.route("/auth/oauth/google/callback").get(logger, handleGoogleOauthCallback);
-router.route("/auth/oauth/github/callback").get(logger, handleGithubOauthCallback);
-router.route("/auth/oauth/spotify/callback").get(logger, handleSpotifyOauthCallback);
-router.route("/auth/oauth/facebook/callback").get(logger, handleFacebookOauthCallback);
+router
+  .route("/auth/oauth/google/callback")
+  .get(logger, handleGoogleOauthCallback);
+router
+  .route("/auth/oauth/github/callback")
+  .get(logger, handleGithubOauthCallback);
+router
+  .route("/auth/oauth/spotify/callback")
+  .get(logger, handleSpotifyOauthCallback);
+router
+  .route("/auth/oauth/facebook/callback")
+  .get(logger, handleFacebookOauthCallback);
 router
   .route("/auth/oauth/microsoft/callback")
   .get(logger, handleMicrosoftOauthCallback);
@@ -57,7 +65,9 @@ router.route("/updateEmail").post(logger, verifyJWT, updateEmail);
 router.route("/forgotUserName").post(logger, verifyJWT, forgotUserName);
 router.route("/forgotEmail").post(logger, verifyJWT, forgotEmail);
 router.route("/changeUserName").post(logger, verifyJWT, changeUserName);
-router.route("/sendUpdatePasswordEmail").post(logger, verifyJWT, sendUpdatePasswordEmail);
+router
+  .route("/sendUpdatePasswordEmail")
+  .post(logger, verifyJWT, sendUpdatePasswordEmail);
 router.route("/updatePassword").post(logger, verifyJWT, updatePassword);
 router.route("/deleteUser").delete(logger, verifyJWT, deleteUser);
 router

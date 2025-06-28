@@ -3,5 +3,6 @@ const config = {
   StoreSecret: String(import.meta.env.VITE_STORE_SECRET),
   ConfirmKey: String(import.meta.env.VITE_CONFIRM_KEY),
   StripeKey: String(import.meta.env.VITE_STRIPE_SECRET),
+  BaseImageUrl: String(import.meta.env.VITE_BASE_IMAGE_URL),
 };
 export default config;

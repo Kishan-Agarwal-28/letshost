@@ -36,7 +36,7 @@ interface CompactFileUploaderProps {
   allowedFileType?: FileType; // New prop to restrict file types
   onCancel?: () => void;
   onSuccess?: () => void;
-  purpose:string;
+  purpose: string;
 }
 
 const CompactFileUploader = ({
@@ -44,7 +44,7 @@ const CompactFileUploader = ({
   cdnId,
   allowedFileType,
   onSuccess,
-  purpose
+  purpose,
 }: CompactFileUploaderProps) => {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [dragActive, setDragActive] = useState(false);
@@ -323,239 +323,238 @@ const CompactFileUploader = ({
     path: ApiRoutes.getCDN,
     enabled: false,
   });
-  const updateAvatar=useApiPost({
-    type:"patch",
-    key:["updateAvatar"],
-    path:ApiRoutes.updateAvatar,
-    sendingFile:true,
-    setUploadProgress
-  })
-  const updateCoverImage=useApiPost({
-    type:"patch",
-    key:["updateCoverImage"],
-    path:ApiRoutes.updateCoverImage,
-    sendingFile:true,
-    setUploadProgress
-  })
-  const getuser=useApiGet({
-    key:["getUser"],
-    path:ApiRoutes.getUserDetails,
-    enabled:false
-  })
+  const updateAvatar = useApiPost({
+    type: "patch",
+    key: ["updateAvatar"],
+    path: ApiRoutes.updateAvatar,
+    sendingFile: true,
+    setUploadProgress,
+  });
+  const updateCoverImage = useApiPost({
+    type: "patch",
+    key: ["updateCoverImage"],
+    path: ApiRoutes.updateCoverImage,
+    sendingFile: true,
+    setUploadProgress,
+  });
+  const getuser = useApiGet({
+    key: ["getUser"],
+    path: ApiRoutes.getUserDetails,
+    enabled: false,
+  });
   const { toast } = useToast();
 
   const uploadFiles = async () => {
     if (files.length === 0) return;
-if(purpose==="cdnUpdate"){
-    setIsUploading(true);
-    const fileType = getFileType(files[0]);
-    if (fileType !== "unsupported" && fileType !== "video") {
+    if (purpose === "cdnUpdate") {
+      setIsUploading(true);
+      const fileType = getFileType(files[0]);
+      if (fileType !== "unsupported" && fileType !== "video") {
+        setUploadProgress(0);
+        setShowUploadProgress(true);
+        const data = await cdnUpdate.mutateAsync({
+          files: actualFiles,
+          cdnProjectID: cdnId,
+        });
+        if (data.status === 200) {
+          toast({
+            title: "Success",
+            description: cdnId
+              ? "File updated successfully"
+              : "File uploaded successfully",
+            duration: 5000,
+            variant: "success",
+          });
+          onSuccess?.();
+          confettiCannon();
+          setIsUploading(false);
+          setShowUploadProgress(false);
+          setUploadProgress(0);
+          getCDN.refetch();
+        } else {
+          setUploadProgress(0);
+          setShowUploadProgress(false);
+          setIsUploading(false);
+          toast({
+            title: "Error",
+            description: getErrorMsg(cdnUpdate),
+            duration: 5000,
+            variant: "error",
+          });
+        }
+      } else if (fileType !== "unsupported" && fileType === "video") {
+        const res = await cdnUpdateVideo.mutateAsync({
+          fileMetaData: {
+            filename: actualFiles[0].name,
+            type: actualFiles[0].type,
+            size: actualFiles[0].size,
+            lastModified: new Date(actualFiles[0].lastModified).toISOString(),
+            fileType: getFileType(actualFiles[0]),
+          },
+          cdnProjectID: cdnId,
+        });
+        const formData = new FormData();
+        formData.append("file", actualFiles[0]);
+        formData.append("folder", res.data.data.folder);
+        formData.append("public_id", res.data.data.public_id);
+        formData.append("timestamp", res.data.data.timestamp);
+        formData.append("unique_filename", res.data.data.unique_filename);
+        formData.append("api_key", config.ConfirmKey);
+        formData.append("signature", res.data.data.signature);
+        formData.append(
+          "notification_url",
+          `${config.BackendUrl}/cdn/video/upload/callback`,
+        );
+
+        const uploadResult = await axios.post(
+          "https://api.cloudinary.com/v1_1/testifywebdev/video/upload",
+          formData,
+          {
+            onUploadProgress: (progressEvent) => {
+              if (
+                typeof progressEvent.total === "number" &&
+                progressEvent.total > 0
+              ) {
+                const percentCompleted = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total,
+                );
+                setShowUploadProgress(true);
+                setUploadProgress(percentCompleted);
+              }
+            },
+          },
+        );
+
+        console.log(uploadResult);
+        if (uploadResult.status === 200) {
+          clearUploadStates();
+          setUploadProgress(0);
+          setShowUploadProgress(false);
+          getCDN.refetch();
+          toast({
+            title: "Success",
+            description: "File uploaded successfully",
+            duration: 5000,
+            variant: "success",
+          });
+        } else {
+          clearUploadStates();
+          setUploadProgress(0);
+          setShowUploadProgress(false);
+          setErrors([uploadResult.data.error]);
+          toast({
+            title: "Error",
+            description: "Failed to upload file",
+            duration: 5000,
+            variant: "error",
+          });
+        }
+      }
+    } else if (purpose === "avatarUpdate") {
+      setIsUploading(true);
       setUploadProgress(0);
       setShowUploadProgress(true);
-      const data = await cdnUpdate.mutateAsync({
-        files: actualFiles,
-        cdnProjectID: cdnId,
-      });
-      if (data.status === 200) {
-        toast({
-          title: "Success",
-          description: cdnId
-            ? "File updated successfully"
-            : "File uploaded successfully",
-          duration: 5000,
-          variant: "success",
-        });
-        onSuccess?.();
-        confettiCannon();
-        setIsUploading(false);
-        setShowUploadProgress(false);
-        setUploadProgress(0);
-        getCDN.refetch();
-      } else {
-        setUploadProgress(0);
-        setShowUploadProgress(false);
-        setIsUploading(false);
-        toast({
-          title: "Error",
-          description: getErrorMsg(cdnUpdate),
-          duration: 5000,
-          variant: "error",
-        });
-      }
-    } else if (fileType !== "unsupported" && fileType === "video") {
-      const res = await cdnUpdateVideo.mutateAsync({
-        fileMetaData: {
-          filename: actualFiles[0].name,
-          type: actualFiles[0].type,
-          size: actualFiles[0].size,
-          lastModified: new Date(actualFiles[0].lastModified).toISOString(),
-          fileType: getFileType(actualFiles[0]),
-        },
-        cdnProjectID: cdnId,
-      });
-      const formData = new FormData();
-      formData.append("file", actualFiles[0]);
-      formData.append("folder", res.data.data.folder);
-      formData.append("public_id", res.data.data.public_id);
-      formData.append("timestamp", res.data.data.timestamp);
-      formData.append("unique_filename", res.data.data.unique_filename);
-      formData.append("api_key", config.ConfirmKey);
-      formData.append("signature", res.data.data.signature);
-      formData.append(
-        "notification_url",
-        `${config.BackendUrl}/cdn/video/upload/callback`,
-      );
 
-      const uploadResult = await axios.post(
-        "https://api.cloudinary.com/v1_1/testifywebdev/video/upload",
-        formData,
-        {
-          onUploadProgress: (progressEvent) => {
-            if (
-              typeof progressEvent.total === "number" &&
-              progressEvent.total > 0
-            ) {
-              const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-              );
-              setShowUploadProgress(true);
-              setUploadProgress(percentCompleted);
-            }
-          },
-        },
-      );
-
-      console.log(uploadResult);
-      if (uploadResult.status === 200) {
-        clearUploadStates();
-        setUploadProgress(0);
-        setShowUploadProgress(false);
-        getCDN.refetch();
-        toast({
-          title: "Success",
-          description: "File uploaded successfully",
-          duration: 5000,
-          variant: "success",
-        });
-      } else {
-        clearUploadStates();
-        setUploadProgress(0);
-        setShowUploadProgress(false);
-        setErrors([uploadResult.data.error]);
-        toast({
-          title: "Error",
-          description: "Failed to upload file",
-          duration: 5000,
-          variant: "error",
-        });
-      }
-    }
-  }
-else if(purpose==="avatarUpdate")
-  {
-  setIsUploading(true);
-  setUploadProgress(0);
-  setShowUploadProgress(true);
-  
-  try {
-    const fileType = getFileType(files[0]);
-    if (fileType !== "unsupported" && fileType === "image") {
-      const data = await updateAvatar.mutateAsync({
-        files: actualFiles,
-      });
-      if (data.status === 200) {
-        toast({
-          title: "Success",
-          description: "Avatar updated successfully",
-          duration: 5000,
-          variant: "success",
-        });
-        onSuccess?.();
-        clearUploadStates(); // Clear states on success
-        getuser.refetch();
-      } else {
+      try {
+        const fileType = getFileType(files[0]);
+        if (fileType !== "unsupported" && fileType === "image") {
+          const data = await updateAvatar.mutateAsync({
+            files: actualFiles,
+          });
+          if (data.status === 200) {
+            toast({
+              title: "Success",
+              description: "Avatar updated successfully",
+              duration: 5000,
+              variant: "success",
+            });
+            onSuccess?.();
+            clearUploadStates(); // Clear states on success
+            getuser.refetch();
+          } else {
+            toast({
+              title: "Error",
+              description:
+                getErrorMsg(updateAvatar) || "Failed to update avatar",
+              duration: 5000,
+              variant: "error",
+            });
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Please select a valid image file",
+            duration: 5000,
+            variant: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Avatar update error:", error);
         toast({
           title: "Error",
           description: getErrorMsg(updateAvatar) || "Failed to update avatar",
           duration: 5000,
           variant: "error",
         });
+      } finally {
+        setUploadProgress(0);
+        setShowUploadProgress(false);
+        setIsUploading(false);
       }
-    } else {
-      toast({
-        title: "Error",
-        description: "Please select a valid image file",
-        duration: 5000,
-        variant: "error",
-      });
-    }
-  } catch (error) {
-    console.error("Avatar update error:", error);
-    toast({
-      title: "Error",
-      description: getErrorMsg(updateAvatar) || "Failed to update avatar",
-      duration: 5000,
-      variant: "error",
-    });
-  } finally {
-    setUploadProgress(0);
-    setShowUploadProgress(false);
-    setIsUploading(false);
-  }
-}
-  else if(purpose==="coverImage"){
-     setIsUploading(true);
-  setUploadProgress(0);
-  setShowUploadProgress(true);
-  
-  try {
-    const fileType = getFileType(files[0]);
-    if (fileType !== "unsupported" && fileType === "image") {
-      const data = await updateCoverImage.mutateAsync({
-        files: actualFiles,
-      });
-      if (data.status === 200) {
-        toast({
-          title: "Success",
-          description: "Avatar updated successfully",
-          duration: 5000,
-          variant: "success",
-        });
-        onSuccess?.();
-        clearUploadStates(); // Clear states on success
-        getuser.refetch();
-      } else {
+    } else if (purpose === "coverImage") {
+      setIsUploading(true);
+      setUploadProgress(0);
+      setShowUploadProgress(true);
+
+      try {
+        const fileType = getFileType(files[0]);
+        if (fileType !== "unsupported" && fileType === "image") {
+          const data = await updateCoverImage.mutateAsync({
+            files: actualFiles,
+          });
+          if (data.status === 200) {
+            toast({
+              title: "Success",
+              description: "Avatar updated successfully",
+              duration: 5000,
+              variant: "success",
+            });
+            onSuccess?.();
+            clearUploadStates(); // Clear states on success
+            getuser.refetch();
+          } else {
+            toast({
+              title: "Error",
+              description:
+                getErrorMsg(updateCoverImage) || "Failed to update avatar",
+              duration: 5000,
+              variant: "error",
+            });
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Please select a valid image file",
+            duration: 5000,
+            variant: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Avatar update error:", error);
         toast({
           title: "Error",
-          description: getErrorMsg(updateCoverImage) || "Failed to update avatar",
+          description:
+            getErrorMsg(updateCoverImage) || "Failed to update avatar",
           duration: 5000,
           variant: "error",
         });
+      } finally {
+        setUploadProgress(0);
+        setShowUploadProgress(false);
+        setIsUploading(false);
       }
-    } else {
-      toast({
-        title: "Error",
-        description: "Please select a valid image file",
-        duration: 5000,
-        variant: "error",
-      });
     }
-  } catch (error) {
-    console.error("Avatar update error:", error);
-    toast({
-      title: "Error",
-      description: getErrorMsg(updateCoverImage) || "Failed to update avatar",
-      duration: 5000,
-      variant: "error",
-    });
-  } finally {
-    setUploadProgress(0);
-    setShowUploadProgress(false);
-    setIsUploading(false);
-  }
-  }
-
-}
+  };
 
   const clearUploadStates = useCallback(() => {
     // Clear file previews

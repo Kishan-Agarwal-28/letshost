@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -108,18 +107,18 @@ interface FileBreakdown {
 const Analytics: React.FC = () => {
   const getAnalytics = useApiGet({
     key: ["getAnalytics"],
-    path: ApiRoutes.getAnalytics, 
-    enabled: false
+    path: ApiRoutes.getAnalytics,
+    enabled: false,
   });
 
   const { toast } = useToast();
-  
+
   const [userData, setUserData] = useState<UserData | null>(null);
   const [usageData, setUsageData] = useState<UsageData | null>(null);
   const [calculations, setCalculations] = useState<Calculations | null>(null);
   const [fileTypeData, setFileTypeData] = useState<FileTypeData[] | null>(null);
   const [monthlyUsage, setMonthlyUsage] = useState<MonthlyUsage[] | null>(null);
-  
+
   useEffect(() => {
     getAnalytics.refetch();
   }, []);
@@ -127,7 +126,6 @@ const Analytics: React.FC = () => {
   useEffect(() => {
     console.log("useEffect");
     if (getAnalytics.isSuccess && getAnalytics.data?.data) {
-     
       setUserData(getAnalytics.data.data.data.userData);
       setUsageData(getAnalytics.data.data.data.usageData);
       setCalculations(getAnalytics.data.data.data.calculations);
@@ -142,12 +140,19 @@ const Analytics: React.FC = () => {
         duration: 5000,
       });
     }
-  }, [getAnalytics.isSuccess, getAnalytics.isError, getAnalytics.dataUpdatedAt, toast]);
+  }, [
+    getAnalytics.isSuccess,
+    getAnalytics.isError,
+    getAnalytics.dataUpdatedAt,
+    toast,
+  ]);
 
   // Individual file type breakdowns
-  const getFileTypeBreakdown = (fileType: "js" | "css" | "image" | "video"): FileBreakdown[] => {
+  const getFileTypeBreakdown = (
+    fileType: "js" | "css" | "image" | "video",
+  ): FileBreakdown[] => {
     if (!usageData?.cdnFiles) return [];
-    
+
     const files = usageData.cdnFiles.filter((f) => f.fileType === fileType);
     const colors = [
       "#8b5cf6",
@@ -171,9 +176,11 @@ const Analytics: React.FC = () => {
   const imageFiles = getFileTypeBreakdown("image");
   const videoFiles = getFileTypeBreakdown("video");
 
-  const getTotalSizeByType = (fileType: "js" | "css" | "image" | "video"): number => {
+  const getTotalSizeByType = (
+    fileType: "js" | "css" | "image" | "video",
+  ): number => {
     if (!usageData?.cdnFiles) return 0;
-    
+
     return usageData.cdnFiles
       .filter((f) => f.fileType === fileType)
       .reduce((total, file) => total + file.size, 0);
@@ -196,16 +203,21 @@ const Analytics: React.FC = () => {
   };
 
   // Loading state
-  if (getAnalytics.isLoading || !userData || !usageData || !calculations || !fileTypeData || !monthlyUsage) {
-
+  if (
+    getAnalytics.isLoading ||
+    !userData ||
+    !usageData ||
+    !calculations ||
+    !fileTypeData ||
+    !monthlyUsage
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center">
- 
         <div className="relative mb-8 opacity-40">
-                              <div className="w-24 h-24 border-4 border-muted border-t-primary rounded-full animate-spin" />
-                              <div className="absolute inset-2 w-16 h-16 border-4 border-muted border-b-primary rounded-full animate-spin" />
-                              <div className="absolute inset-4 w-8 h-8 border-4 border-muted border-l-primary rounded-full animate-spin" />
-                            </div>
+          <div className="w-24 h-24 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <div className="absolute inset-2 w-16 h-16 border-4 border-muted border-b-primary rounded-full animate-spin" />
+          <div className="absolute inset-4 w-8 h-8 border-4 border-muted border-l-primary rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
@@ -257,7 +269,10 @@ const Analytics: React.FC = () => {
                   {calculations?.subdomainUsage?.toFixed(1)}%
                 </span>
               </div>
-              <Progress value={calculations?.subdomainUsage} className="mt-2 h-2" />
+              <Progress
+                value={calculations?.subdomainUsage}
+                className="mt-2 h-2"
+              />
             </CardContent>
           </Card>
 
@@ -294,7 +309,7 @@ const Analytics: React.FC = () => {
             <CardContent>
               <div className="text-2xl font-bold text-slate-600">
                 {formatBytes(
-                  (userData?.totalMediaSize + userData?.totalJsCssSize),
+                  userData?.totalMediaSize + userData?.totalJsCssSize,
                 )}
               </div>
               <div className="flex items-center justify-between mt-2">
@@ -366,13 +381,16 @@ const Analytics: React.FC = () => {
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium">Media Files</span>
                         <span className="text-sm text-slate-600">
-                          {formatBytes(userData?.totalMediaSize )}
+                          {formatBytes(userData?.totalMediaSize)}
                         </span>
                       </div>
-                      <Progress value={calculations?.mediaUsage} className="h-2" />
+                      <Progress
+                        value={calculations?.mediaUsage}
+                        className="h-2"
+                      />
                       <p className="text-xs text-slate-500 mt-1">
-                        {calculations?.mediaUsage?.toFixed(1)}% of {userData?.cdnMedialimit}KB
-                        limit
+                        {calculations?.mediaUsage?.toFixed(1)}% of{" "}
+                        {userData?.cdnMedialimit}KB limit
                       </p>
                     </div>
                     <div>
@@ -381,13 +399,16 @@ const Analytics: React.FC = () => {
                           JS & CSS Files
                         </span>
                         <span className="text-sm text-slate-600">
-                          {formatBytes(userData?.totalJsCssSize )}
+                          {formatBytes(userData?.totalJsCssSize)}
                         </span>
                       </div>
-                      <Progress value={calculations?.jssCssUsage} className="h-2" />
+                      <Progress
+                        value={calculations?.jssCssUsage}
+                        className="h-2"
+                      />
                       <p className="text-xs text-slate-500 mt-1">
-                        {calculations?.jssCssUsage?.toFixed(1)}% of {userData?.cdnCSSJSlimit}KB
-                        limit
+                        {calculations?.jssCssUsage?.toFixed(1)}% of{" "}
+                        {userData?.cdnCSSJSlimit}KB limit
                       </p>
                     </div>
                   </div>
@@ -799,7 +820,11 @@ const Analytics: React.FC = () => {
                     <Calendar className="w-4 h-4 text-blue-600" />
                     <span className="text-lg font-semibold">
                       {Math.floor(
-                       Number( (Number(new Date()) - Number(new Date(userData?.createdAt))) / (1000 * 60 * 60 * 24))
+                        Number(
+                          (Number(new Date()) -
+                            Number(new Date(userData?.createdAt))) /
+                            (1000 * 60 * 60 * 24),
+                        ),
                       )}{" "}
                       days
                     </span>

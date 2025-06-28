@@ -26,10 +26,10 @@ const subdomainSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    fileSize:{
-      type:Number,
-      default:0
-    }
+    fileSize: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

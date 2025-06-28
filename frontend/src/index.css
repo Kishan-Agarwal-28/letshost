@@ -160,6 +160,9 @@
 * {
   user-select: none;
 }
+#root {
+  overflow-x: hidden;
+}
 @media (max-width: 768px) {
   body {
     overflow-x: hidden;

@@ -20,7 +20,7 @@ const FormFieldComp = ({
   labelValue,
   descriptionValue,
   placeholderValue,
-  value
+  value,
 }: {
   form: UseFormReturn<any>;
   needLabel?: boolean;

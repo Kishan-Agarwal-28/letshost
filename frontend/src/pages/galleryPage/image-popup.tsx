@@ -4,18 +4,21 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, ChevronLeft, ChevronRight, Heart, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type{ Items } from "@/pages/galleryPage/gallery";
+import type { Items } from "@/pages/galleryPage/gallery";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
-import {cn} from "@/lib/utils";
-import { Card,Carousel } from "@/components/ui/apple-cards-carousel";
+import { cn } from "@/lib/utils";
+import { Card, Carousel } from "@/components/ui/apple-cards-carousel";
 import { Link } from "react-router-dom";
 const Dialog = DialogPrimitive.Root;
 
 const DialogPortal = DialogPrimitive.Portal;
-
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
@@ -56,33 +59,36 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-
 interface ImagePopupProps {
-    item: Items;
+  item: Items;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onNavigate?: (direction: 'prev' | 'next') => void;
+  onNavigate?: (direction: "prev" | "next") => void;
 }
 
-const ImagePopup: React.FC<ImagePopupProps> = ({ isOpen, onOpenChange, item, onNavigate }) => {
+const ImagePopup: React.FC<ImagePopupProps> = ({
+  isOpen,
+  onOpenChange,
+  item,
+  onNavigate,
+}) => {
   const [isLiked, setIsLiked] = React.useState(false);
   const [isSaved, setIsSaved] = React.useState(false);
-  const [currentDisplayItem, setCurrentDisplayItem] = React.useState<Items>(item);
+  const [currentDisplayItem, setCurrentDisplayItem] =
+    React.useState<Items>(item);
 
-  
-  const [similarImages,setSimilarImages]=React.useState<Items[]>([])
-  const getSimilarImages=useApiGet({
-    key:["getSimilarImages"],
-    path:`${ApiRoutes.discoverImages}?limit=10`,
-    enabled:true,
-    staleTime:3000,
-  })
-React.useEffect(()=>{
-  if(getSimilarImages.isSuccess){
-
-    setSimilarImages(getSimilarImages?.data?.data.data.images)
-  }
-},[getSimilarImages])
+  const [similarImages, setSimilarImages] = React.useState<Items[]>([]);
+  const getSimilarImages = useApiGet({
+    key: ["getSimilarImages"],
+    path: `${ApiRoutes.discoverImages}?limit=10`,
+    enabled: true,
+    staleTime: 3000,
+  });
+  React.useEffect(() => {
+    if (getSimilarImages.isSuccess) {
+      setSimilarImages(getSimilarImages?.data?.data.data.images);
+    }
+  }, [getSimilarImages]);
   // Update current display item when main item changes
   React.useEffect(() => {
     setCurrentDisplayItem(item);
@@ -91,18 +97,18 @@ React.useEffect(()=>{
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
-      
+
       switch (e.key) {
         case "Escape":
           onOpenChange?.(false);
           break;
         case "ArrowLeft":
           e.preventDefault();
-          onNavigate?.('prev');
+          onNavigate?.("prev");
           break;
         case "ArrowRight":
           e.preventDefault();
-          onNavigate?.('next');
+          onNavigate?.("next");
           break;
       }
     };
@@ -112,27 +118,28 @@ React.useEffect(()=>{
   }, [isOpen, onOpenChange, onNavigate]);
 
   const nextImage = () => {
-    onNavigate?.('next');
+    onNavigate?.("next");
   };
 
   const prevImage = () => {
-    onNavigate?.('prev');
+    onNavigate?.("prev");
   };
 
-
-   const cards = similarImages?.map((card, index) => (
+  const cards = similarImages?.map((card, index) => (
     <Card key={card._id} item={card} index={index} />
   ));
-  const isMobile=useIsMobile()
+  const isMobile = useIsMobile();
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="max-w-[95vw] w-full h-[95vh] max-h-screen p-0 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col md:flex-row h-full">
           {/* Image Section */}
-          <div className={`relative flex-1 bg-black flex items-center justify-center min-h-[50vh] md:min-h-full ${isMobile ? "w-dvw" : ""}`}>
+          <div
+            className={`relative flex-1 bg-black flex items-center justify-center min-h-[50vh] md:min-h-full ${isMobile ? "w-dvw" : ""}`}
+          >
             <button
               onClick={prevImage}
               className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-1.5 md:p-2 rounded-full transition-colors"
@@ -140,18 +147,18 @@ React.useEffect(()=>{
             >
               <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
             </button>
-            
+
             <AnimatePresence mode="wait">
               <motion.img
-                key={currentDisplayItem._id }
+                key={currentDisplayItem._id}
                 src={currentDisplayItem.imageUrl}
                 alt={currentDisplayItem.title}
                 className="max-w-full max-h-full object-contain"
                 style={{
-                    width: 'min(50w, 600px)',
-                    height: `min(${isMobile ? '50vh' : '80vh'}, 600px)`,
-                    maxWidth: '100%',
-                    maxHeight: '100%'
+                  width: "min(50w, 600px)",
+                  height: `min(${isMobile ? "50vh" : "80vh"}, 600px)`,
+                  maxWidth: "100%",
+                  maxHeight: "100%",
                 }}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -180,16 +187,18 @@ React.useEffect(()=>{
                     {currentDisplayItem.title}
                   </h2>
                   <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3 md:line-clamp-none truncate">
-                 <Tooltip>
-                    <TooltipTrigger >
-
-                    {currentDisplayItem.description}
-                    </TooltipTrigger>
-                    <TooltipContent className="w-80 bg-muted-foreground  text-balance" side="bottom" tip={false}>
+                    <Tooltip>
+                      <TooltipTrigger>
                         {currentDisplayItem.description}
-                        </TooltipContent>
-                 </Tooltip>
-                   
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className="w-80 bg-muted-foreground  text-balance"
+                        side="bottom"
+                        tip={false}
+                      >
+                        {currentDisplayItem.description}
+                      </TooltipContent>
+                    </Tooltip>
                   </p>
                 </div>
 
@@ -200,26 +209,30 @@ React.useEffect(()=>{
                       onClick={() => setIsLiked(!isLiked)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <Heart 
+                      <Heart
                         className={cn(
                           "w-4 h-4 md:w-5 md:h-5",
-                          isLiked ? "fill-red-500 text-red-500" : ""
-                        )} 
+                          isLiked ? "fill-red-500 text-red-500" : "",
+                        )}
                       />
-                      <span className="text-sm md:text-base">{currentDisplayItem.likesCount + (isLiked ? 1 : 0)}</span>
+                      <span className="text-sm md:text-base">
+                        {currentDisplayItem.likesCount + (isLiked ? 1 : 0)}
+                      </span>
                     </button>
-                    
+
                     <button
                       onClick={() => setIsSaved(!isSaved)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <Bookmark 
+                      <Bookmark
                         className={cn(
                           "w-4 h-4 md:w-5 md:h-5",
-                          isSaved ? "fill-blue-500 text-blue-500" : ""
-                        )} 
+                          isSaved ? "fill-blue-500 text-blue-500" : "",
+                        )}
                       />
-                      <span className="text-sm md:text-base">{currentDisplayItem.savesCount + (isSaved ? 1 : 0)}</span>
+                      <span className="text-sm md:text-base">
+                        {currentDisplayItem.savesCount + (isSaved ? 1 : 0)}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -228,13 +241,15 @@ React.useEffect(()=>{
                 <div>
                   <div className="flex items-center space-x-3 mb-3 md:mb-4">
                     <Link to={`/creator/${currentDisplayItem.uploader._id}`}>
-                    <img
-                      src={currentDisplayItem.uploader.avatar}
-                      alt={currentDisplayItem.uploader.username}
-                      className="w-6 h-6 md:w-8 md:h-8 rounded-full"
+                      <img
+                        src={currentDisplayItem.uploader.avatar}
+                        alt={currentDisplayItem.uploader.username}
+                        className="w-6 h-6 md:w-8 md:h-8 rounded-full"
                       />
-                    <span className="text-sm md:text-base font-medium">{currentDisplayItem.uploader.username}</span>
-                      </Link>
+                      <span className="text-sm md:text-base font-medium">
+                        {currentDisplayItem.uploader.username}
+                      </span>
+                    </Link>
                   </div>
 
                   {/* Tags */}
@@ -251,32 +266,39 @@ React.useEffect(()=>{
 
                   {/* Metadata */}
                   <div className="text-xs md:text-sm text-muted-foreground mb-4 md:mb-6">
-                    <p>Created: {new Date(currentDisplayItem.createdAt).toLocaleDateString()}</p>
+                    <p>
+                      Created:{" "}
+                      {new Date(
+                        currentDisplayItem.createdAt,
+                      ).toLocaleDateString()}
+                    </p>
                     <p className="mt-1 md:mt-2">
-                      <span className="font-medium">Prompt:</span> 
+                      <span className="font-medium">Prompt:</span>
                       <span className="block md:inline md:ml-1 truncate">
-                     
                         <Tooltip>
-                    <TooltipTrigger >
-                           {currentDisplayItem.prompt}
-                   
-                    </TooltipTrigger>
-                    <TooltipContent className="w-80 bg-muted-foreground  text-balance" side="bottom" tip={false}>
-                           {currentDisplayItem.prompt}
-                        </TooltipContent>
-                 </Tooltip>
-                        </span>
+                          <TooltipTrigger>
+                            {currentDisplayItem.prompt}
+                          </TooltipTrigger>
+                          <TooltipContent
+                            className="w-80 bg-muted-foreground  text-balance"
+                            side="bottom"
+                            tip={false}
+                          >
+                            {currentDisplayItem.prompt}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
                     </p>
                   </div>
 
                   {/* Similar Images Carousel */}
-                  
-                  <div className={`${isMobile?"h-25":"h-50"}`}>
-                     <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Similar Images</h3>
-                    <Carousel items={cards}/>
-                   
-                    </div>
 
+                  <div className={`${isMobile ? "h-25" : "h-50"}`}>
+                    <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">
+                      Similar Images
+                    </h3>
+                    <Carousel items={cards} />
+                  </div>
                 </div>
               </div>
             </div>

@@ -44,7 +44,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { saveImageWithMeta, imageDB, getUserImageKeys, getUserImageRecord } from "@/db/indexDB";
+import {
+  saveImageWithMeta,
+  imageDB,
+  getUserImageKeys,
+  getUserImageRecord,
+} from "@/db/indexDB";
 import { getRandomPrompts } from "./examplePrompts";
 import {
   Dialog,
@@ -84,7 +89,7 @@ export default function AIImageGenerator() {
   const [selectedHistoryImage, setSelectedHistoryImage] =
     useState<HistoryItem | null>(null);
   const [currentTab, setCurrentTab] = useState<"generate" | "history">(
-    "generate"
+    "generate",
   );
   const [customResolution, setCustomResolution] = useState("");
   const [currentResolution, setCurrentResolution] = useState("");
@@ -96,24 +101,27 @@ export default function AIImageGenerator() {
   const userStore = useUserStore();
   const { toast } = useToast();
 
-useEffect(() => {
-  if (user?._id) {
-    const saved = localStorage.getItem(`savedImages_${user?._id}`);
-    if (saved) {
-      setSavedImages(new Set(JSON.parse(saved)));
+  useEffect(() => {
+    if (user?._id) {
+      const saved = localStorage.getItem(`savedImages_${user?._id}`);
+      if (saved) {
+        setSavedImages(new Set(JSON.parse(saved)));
+      }
     }
-  }
-}, [user?._id]);
+  }, [user?._id]);
 
-useEffect(() => {
-  if (user?._id) {
-    localStorage.setItem(`savedImages_${user?._id}`, JSON.stringify([...savedImages]));
-  }
-}, [savedImages, user?._id]);
+  useEffect(() => {
+    if (user?._id) {
+      localStorage.setItem(
+        `savedImages_${user?._id}`,
+        JSON.stringify([...savedImages]),
+      );
+    }
+  }, [savedImages, user?._id]);
   useEffect(() => {
     if (user) {
       setTokens(user.genCredits);
-      console.log("checking user api key",user.apiKey);
+      console.log("checking user api key", user.apiKey);
       if (user.apiKey && user.apiKey !== "") {
         setGeminiApiKey(user.apiKey);
         setUseGeminiApi(true);
@@ -121,56 +129,61 @@ useEffect(() => {
     }
   }, [user]);
 
-
-useEffect(() => {
-  if (imageHistory.length > 0 && user?._id) {
-    localStorage.setItem(`imageHistory_${user?._id}`, JSON.stringify(imageHistory));
-  }
-}, [imageHistory, user?._id]);
-
-useEffect(() => {
-  if (user?._id) {
-    const historyData = localStorage.getItem(`imageHistory_${user?._id}`);
-    if (historyData) {
-      setImageHistory(JSON.parse(historyData));
+  useEffect(() => {
+    if (imageHistory.length > 0 && user?._id) {
+      localStorage.setItem(
+        `imageHistory_${user?._id}`,
+        JSON.stringify(imageHistory),
+      );
     }
-  }
-}, [user?._id]);
+  }, [imageHistory, user?._id]);
 
   useEffect(() => {
-  const restoreImageHistory = async () => {
-    if (!user?._id) return;
+    if (user?._id) {
+      const historyData = localStorage.getItem(`imageHistory_${user?._id}`);
+      if (historyData) {
+        setImageHistory(JSON.parse(historyData));
+      }
+    }
+  }, [user?._id]);
 
-    const keys = await getUserImageKeys(user?._id);
+  useEffect(() => {
+    const restoreImageHistory = async () => {
+      if (!user?._id) return;
 
-    const restored = await Promise.all(
-      keys.map(async (key) => {
-        const record = await getUserImageRecord(key as IDBValidKey , user?._id);
-        if (!record || !record.base64) return null;
+      const keys = await getUserImageKeys(user?._id);
 
-        const blobUrl = base64ToBlobUrl(record.base64);
+      const restored = await Promise.all(
+        keys.map(async (key) => {
+          const record = await getUserImageRecord(
+            key as IDBValidKey,
+            user?._id,
+          );
+          if (!record || !record.base64) return null;
 
-        return {
-          id: record.id.replace(`${user?._id}_`, ''), // Remove prefix for display
-          url: blobUrl, // restored
-          prompt: record.prompt,
-          style: record.style,
-          resolution: record.resolution,
-          aspectRatio: record.aspectRatio,
-          timestamp: record.timestamp,
-          generationTime: record.generationTime,
-          public_id: record.public_id || "",
-          contributed: record.contributed || false
-        };
-      })
-    );
+          const blobUrl = base64ToBlobUrl(record.base64);
 
-    const valid = restored.filter(Boolean) as HistoryItem[];
-    setImageHistory(valid.reverse()); // most recent first
-  };
+          return {
+            id: record.id.replace(`${user?._id}_`, ""), // Remove prefix for display
+            url: blobUrl, // restored
+            prompt: record.prompt,
+            style: record.style,
+            resolution: record.resolution,
+            aspectRatio: record.aspectRatio,
+            timestamp: record.timestamp,
+            generationTime: record.generationTime,
+            public_id: record.public_id || "",
+            contributed: record.contributed || false,
+          };
+        }),
+      );
 
-  restoreImageHistory();
-}, [user?._id]);
+      const valid = restored.filter(Boolean) as HistoryItem[];
+      setImageHistory(valid.reverse()); // most recent first
+    };
+
+    restoreImageHistory();
+  }, [user?._id]);
 
   const getGeneratedImage = useApiPost({
     type: "post",
@@ -265,10 +278,10 @@ useEffect(() => {
               aspectRatio: selectedAspectRatio,
               timestamp: new Date().toISOString(),
               generationTime: Date.now() - startTime,
-               public_id: image.data.data.public_id || "",
-               contributed: false,
+              public_id: image.data.data.public_id || "",
+              contributed: false,
             };
-            await saveImageWithMeta(historyItem, base64Image,user?._id??"");
+            await saveImageWithMeta(historyItem, base64Image, user?._id ?? "");
             setImageHistory((prev) => [historyItem, ...prev]);
           } else {
             console.warn("Base64 image data is missing");
@@ -335,38 +348,41 @@ useEffect(() => {
     setShowApiKeyInput(false);
   };
   const handleClearHistory = async () => {
-  if (!user?._id) return;
+    if (!user?._id) return;
 
-  // Only remove non-saved images
-  const filteredHistory = imageHistory.filter((item) =>
-    savedImages.has(item.id)
-  );
-  setImageHistory(filteredHistory);
-  setSelectedHistoryImage(null);
+    // Only remove non-saved images
+    const filteredHistory = imageHistory.filter((item) =>
+      savedImages.has(item.id),
+    );
+    setImageHistory(filteredHistory);
+    setSelectedHistoryImage(null);
 
-  // Remove non-saved images from IndexedDB
-  const keys = await getUserImageKeys(user?._id);
-  for (const key of keys) {
-    const record = await getUserImageRecord(key, user?._id);
-    if (record && !savedImages.has(record.id.replace(`${user?._id}_`, ''))) {
-      await imageDB.delete("images", key);
+    // Remove non-saved images from IndexedDB
+    const keys = await getUserImageKeys(user?._id);
+    for (const key of keys) {
+      const record = await getUserImageRecord(key, user?._id);
+      if (record && !savedImages.has(record.id.replace(`${user?._id}_`, ""))) {
+        await imageDB.delete("images", key);
+      }
     }
-  }
 
-  // Update localStorage with only saved images
-  if (filteredHistory.length > 0) {
-    localStorage.setItem(`imageHistory_${user?._id}`, JSON.stringify(filteredHistory));
-  } else {
-    localStorage.removeItem(`imageHistory_${user?._id}`);
-  }
+    // Update localStorage with only saved images
+    if (filteredHistory.length > 0) {
+      localStorage.setItem(
+        `imageHistory_${user?._id}`,
+        JSON.stringify(filteredHistory),
+      );
+    } else {
+      localStorage.removeItem(`imageHistory_${user?._id}`);
+    }
 
-  toast({
-    title: "History Cleared",
-    description: `Cleared ${imageHistory.length - filteredHistory.length} images. Saved images preserved.`,
-    duration: 3000,
-    variant: "info",
-  });
-};
+    toast({
+      title: "History Cleared",
+      description: `Cleared ${imageHistory.length - filteredHistory.length} images. Saved images preserved.`,
+      duration: 3000,
+      variant: "info",
+    });
+  };
 
   const handleViewHistoryImage = (historyItem: HistoryItem) => {
     setSelectedHistoryImage(historyItem);
@@ -382,8 +398,8 @@ useEffect(() => {
   const tokenPercentage = (tokens / maxTokens) * 100;
 
   const examplePrompts = useMemo(() => {
-    return  getRandomPrompts(6)
-  },[])
+    return getRandomPrompts(6);
+  }, []);
   const getImageDimensions = (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -396,7 +412,7 @@ useEffect(() => {
   };
 
   const handleCustomResolutionChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
 
@@ -523,89 +539,86 @@ useEffect(() => {
       copyImageToClipboard(imageUrl);
     }
   };
-  const contributeImage=useApiPost({
+  const contributeImage = useApiPost({
     type: "post",
     key: ["contributeImage"],
     path: ApiRoutes.addToGallery,
     sendingFile: false,
-  })
-  const registerCreator=useApiPost({ 
+  });
+  const registerCreator = useApiPost({
     type: "post",
     key: ["registerCreator"],
     path: ApiRoutes.registerCreator,
-    sendingFile: false
+    sendingFile: false,
   });
-const handleContributeImage = async () => {
-  // Get the current image's public_id and check if already contributed
-  const currentImage = imageHistory.find(
-    (item) => item.url === generatedImage
-  );
-  
-  const currentImagePublicId = currentImage?.public_id || publicID;
-  
-  if (!currentImagePublicId) {
-    toast({
-      title: "Error",
-      description: "No image available to contribute",
-      duration: 3000,
-      variant: "error",
-    });
-    return;
-  }
+  const handleContributeImage = async () => {
+    // Get the current image's public_id and check if already contributed
+    const currentImage = imageHistory.find(
+      (item) => item.url === generatedImage,
+    );
 
-  // Check if already contributed
-  if (currentImage?.contributed) {
-    toast({
-      title: "Already Contributed",
-      description: "This image has already been contributed to the gallery",
-      duration: 3000,
-      variant: "info",
-    });
-    return;
-  }
+    const currentImagePublicId = currentImage?.public_id || publicID;
 
-  try {
-    if(!user?.isCreator){
-    const isCreator=await registerCreator.mutateAsync({
-    });
-    if (isCreator.status === 200) {
-      userStore.updateUser({isCreator:true})
-    const res = await contributeImage.mutateAsync({
-      public_id: currentImagePublicId,
-    });
-    
-    if (res.status === 200) {
+    if (!currentImagePublicId) {
       toast({
-        title: "Success",
-        description: "Image contributed to gallery successfully!",
+        title: "Error",
+        description: "No image available to contribute",
         duration: 3000,
-        variant: "success",
+        variant: "error",
       });
+      return;
     }
-  }
-  else{
-    toast({
-      title: "Error",
-      description: "Cannot process your contribution right now",
-      duration: 3000,
-      variant: "error",
-    });
-  }
-}
-    else{
-const res = await contributeImage.mutateAsync({
-      public_id: currentImagePublicId,
-    });
-    
-    if (res.status === 200) {
+
+    // Check if already contributed
+    if (currentImage?.contributed) {
       toast({
-        title: "Success",
-        description: "Image contributed to gallery successfully!",
+        title: "Already Contributed",
+        description: "This image has already been contributed to the gallery",
         duration: 3000,
-        variant: "success",
+        variant: "info",
       });
+      return;
     }
-    }
+
+    try {
+      if (!user?.isCreator) {
+        const isCreator = await registerCreator.mutateAsync({});
+        if (isCreator.status === 200) {
+          userStore.updateUser({ isCreator: true });
+          const res = await contributeImage.mutateAsync({
+            public_id: currentImagePublicId,
+          });
+
+          if (res.status === 200) {
+            toast({
+              title: "Success",
+              description: "Image contributed to gallery successfully!",
+              duration: 3000,
+              variant: "success",
+            });
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Cannot process your contribution right now",
+            duration: 3000,
+            variant: "error",
+          });
+        }
+      } else {
+        const res = await contributeImage.mutateAsync({
+          public_id: currentImagePublicId,
+        });
+
+        if (res.status === 200) {
+          toast({
+            title: "Success",
+            description: "Image contributed to gallery successfully!",
+            duration: 3000,
+            variant: "success",
+          });
+        }
+      }
       // Update the imageHistory state
       const updatedHistory = imageHistory.map((item) => {
         if (item.public_id === currentImagePublicId) {
@@ -613,34 +626,36 @@ const res = await contributeImage.mutateAsync({
         }
         return item;
       });
-      
-      setImageHistory(updatedHistory);
-      
-      // Update IndexedDB
-     if (user?._id) {
-  const keys = await getUserImageKeys(user?._id);
-  for (const key of keys) {
-    const record = await getUserImageRecord(key, user?._id);
-    if (record && record.public_id === currentImagePublicId) {
-      await imageDB.put("images", { ...record, contributed: true });
-      break;
-    }
-  }
 
-  // Update localStorage
-  localStorage.setItem(`imageHistory_${user?._id}`, JSON.stringify(updatedHistory));
-}
+      setImageHistory(updatedHistory);
+
+      // Update IndexedDB
+      if (user?._id) {
+        const keys = await getUserImageKeys(user?._id);
+        for (const key of keys) {
+          const record = await getUserImageRecord(key, user?._id);
+          if (record && record.public_id === currentImagePublicId) {
+            await imageDB.put("images", { ...record, contributed: true });
+            break;
+          }
+        }
+
+        // Update localStorage
+        localStorage.setItem(
+          `imageHistory_${user?._id}`,
+          JSON.stringify(updatedHistory),
+        );
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: getErrorMsg(contributeImage),
+        duration: 3000,
+        variant: "error",
+      });
+      console.error("Error:", error);
     }
-   catch (error) {
-    toast({
-      title: "Error",
-      description: getErrorMsg(contributeImage),
-      duration: 3000,
-      variant: "error",
-    });
-    console.error("Error:", error);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -1105,7 +1120,7 @@ const res = await contributeImage.mutateAsync({
                                     onClick={() =>
                                       downloadImage(
                                         generatedImage,
-                                        `ai-generated-${Date.now()}.png`
+                                        `ai-generated-${Date.now()}.png`,
                                       )
                                     }
                                   >
@@ -1127,7 +1142,7 @@ const res = await contributeImage.mutateAsync({
                                     className="bg-white/90 hover:bg-white text-black"
                                     onClick={() => {
                                       const currentImageId = imageHistory.find(
-                                        (item) => item.url === generatedImage
+                                        (item) => item.url === generatedImage,
                                       )?.id;
                                       if (currentImageId)
                                         saveImage(currentImageId);
@@ -1135,7 +1150,7 @@ const res = await contributeImage.mutateAsync({
                                   >
                                     {(() => {
                                       const currentImageId = imageHistory.find(
-                                        (item) => item.url === generatedImage
+                                        (item) => item.url === generatedImage,
                                       )?.id;
                                       const isSaved =
                                         currentImageId &&
@@ -1252,37 +1267,40 @@ const res = await contributeImage.mutateAsync({
                             Start uploading and watch your credits grow!
                           </div>
                         </div>
-                        
                       </div>
-                     {
-  generatedImage && !isGenerating && (
-    <div className="flex justify-center my-2">
-      <Button 
-        className={`${
-          imageHistory.find(item => item.url === generatedImage)?.contributed 
-            ? "bg-gray-300 hover:bg-gray-400 cursor-not-allowed" 
-            : "bg-green-300 hover:bg-green-400 hover:scale-105"
-        }`}
-        onClick={handleContributeImage}
-        disabled={
-          contributeImage.isPending || 
-          imageHistory.find(item => item.url === generatedImage)?.contributed
-        }
-      >
-        {contributeImage.isPending ? (
-          <>
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-            Contributing...
-          </>
-        ) : imageHistory.find(item => item.url === generatedImage)?.contributed ? (
-          'Already Contributed'
-        ) : (
-          'Contribute to Gallery'
-        )}
-      </Button>
-    </div>
-  )
-}
+                      {generatedImage && !isGenerating && (
+                        <div className="flex justify-center my-2">
+                          <Button
+                            className={`${
+                              imageHistory.find(
+                                (item) => item.url === generatedImage,
+                              )?.contributed
+                                ? "bg-gray-300 hover:bg-gray-400 cursor-not-allowed"
+                                : "bg-green-300 hover:bg-green-400 hover:scale-105"
+                            }`}
+                            onClick={handleContributeImage}
+                            disabled={
+                              contributeImage.isPending ||
+                              imageHistory.find(
+                                (item) => item.url === generatedImage,
+                              )?.contributed
+                            }
+                          >
+                            {contributeImage.isPending ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                                Contributing...
+                              </>
+                            ) : imageHistory.find(
+                                (item) => item.url === generatedImage,
+                              )?.contributed ? (
+                              "Already Contributed"
+                            ) : (
+                              "Contribute to Gallery"
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -1390,7 +1408,8 @@ const res = await contributeImage.mutateAsync({
                                   </Label>
                                   <p className="font-medium">
                                     {Math.round(
-                                      selectedHistoryImage.generationTime / 1000
+                                      selectedHistoryImage.generationTime /
+                                        1000,
                                     )}
                                     s
                                   </p>
@@ -1401,7 +1420,7 @@ const res = await contributeImage.mutateAsync({
                                   </Label>
                                   <p className="font-medium">
                                     {new Date(
-                                      selectedHistoryImage.timestamp
+                                      selectedHistoryImage.timestamp,
                                     ).toLocaleDateString()}
                                   </p>
                                 </div>
@@ -1413,7 +1432,7 @@ const res = await contributeImage.mutateAsync({
                                   onClick={() =>
                                     downloadImage(
                                       selectedHistoryImage.url,
-                                      `ai-generated-${selectedHistoryImage.id}.png`
+                                      `ai-generated-${selectedHistoryImage.id}.png`,
                                     )
                                   }
                                 >
@@ -1425,7 +1444,7 @@ const res = await contributeImage.mutateAsync({
                                   variant="outline"
                                   onClick={() =>
                                     copyImageToClipboard(
-                                      selectedHistoryImage.url
+                                      selectedHistoryImage.url,
                                     )
                                   }
                                 >
@@ -1472,15 +1491,20 @@ const res = await contributeImage.mutateAsync({
                                   Share
                                 </Button>
                                 <Button
-  size="sm"
-  variant="outline"
-  onClick={handleContributeImage}
-  disabled={selectedHistoryImage?.contributed}
-  className={selectedHistoryImage?.contributed ? "opacity-50 cursor-not-allowed" : ""}
->
-  {selectedHistoryImage?.contributed ? "Already Contributed" : "Contribute to Gallery"}
-</Button>
-
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleContributeImage}
+                                  disabled={selectedHistoryImage?.contributed}
+                                  className={
+                                    selectedHistoryImage?.contributed
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }
+                                >
+                                  {selectedHistoryImage?.contributed
+                                    ? "Already Contributed"
+                                    : "Contribute to Gallery"}
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -1517,20 +1541,20 @@ const res = await contributeImage.mutateAsync({
 
                             {/* Info Badge */}
                             <div className="absolute top-2 right-2 flex gap-1">
-  <div className="bg-black/80 text-white px-2 py-1 rounded text-xs">
-    {item.style || "Natural"}
-  </div>
-  {savedImages.has(item.id) && (
-    <div className="bg-green-600 text-white px-2 py-1 rounded text-xs flex items-center">
-      <Bookmark className="w-3 h-3" />
-    </div>
-  )}
-  {item.contributed && (
-    <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center">
-      <Share2 className="w-3 h-3" />
-    </div>
-  )}
-</div>
+                              <div className="bg-black/80 text-white px-2 py-1 rounded text-xs">
+                                {item.style || "Natural"}
+                              </div>
+                              {savedImages.has(item.id) && (
+                                <div className="bg-green-600 text-white px-2 py-1 rounded text-xs flex items-center">
+                                  <Bookmark className="w-3 h-3" />
+                                </div>
+                              )}
+                              {item.contributed && (
+                                <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center">
+                                  <Share2 className="w-3 h-3" />
+                                </div>
+                              )}
+                            </div>
                             {/* Date Badge */}
                             <div className="absolute bottom-2 left-2 bg-black/80 text-white px-2 py-1 rounded text-xs">
                               {new Date(item.timestamp).toLocaleDateString()}
@@ -1598,7 +1622,7 @@ const res = await contributeImage.mutateAsync({
                       if (imageToShare)
                         downloadImage(
                           imageToShare,
-                          `shared-ai-image-${Date.now()}.png`
+                          `shared-ai-image-${Date.now()}.png`,
                         );
                       setShareDialogOpen(false);
                     }}

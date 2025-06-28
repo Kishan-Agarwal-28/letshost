@@ -14,36 +14,36 @@ const userSchema = new Schema(
       index: true,
       minlength: 3,
     },
-    fullName:{
-      type:String,
-      required:true,
-      index:true,
-      minlength:3
-   },
-   description:{
-    type:String,
-    minlength:10,
-    maxlength:500
-   },
-   coverImage:{
-    type:String
-   },
-   location:{
-    type:String
-   },
-   links:[
-    {
-      socialPlatform:{
-        type:String
+    fullName: {
+      type: String,
+      required: true,
+      index: true,
+      minlength: 3,
+    },
+    description: {
+      type: String,
+      minlength: 10,
+      maxlength: 500,
+    },
+    coverImage: {
+      type: String,
+    },
+    location: {
+      type: String,
+    },
+    links: [
+      {
+        socialPlatform: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
       },
-      url:{
-        type:String
-      }
-    }
-   ],
-   isCreator:{
-    type:Boolean
-   },
+    ],
+    isCreator: {
+      type: Boolean,
+    },
     email: {
       type: String,
       required: true,
@@ -77,7 +77,7 @@ const userSchema = new Schema(
       },
       required: true,
     },
-    tier:{
+    tier: {
       type: String,
       enum: ["free", "pro"],
       default: "free",
@@ -85,28 +85,28 @@ const userSchema = new Schema(
     },
     fileLimit: {
       type: Number,
-      default:0,
+      default: 0,
     },
-    cdnCSSJSlimit:{
-         type: Number,
-         default: 0 ,
+    cdnCSSJSlimit: {
+      type: Number,
+      default: 0,
     },
-      cdnMedialimit:{ 
-         type: Number,
-    default: 0,
-},
-totalMediaSize:{
-  type: Number,
-  default: 0,
-},
-totalJsCssSize:{
-  type: Number,
-  default: 0,
-},
-genCredits:{
-  type: Number,
-  default: 10,
-},
+    cdnMedialimit: {
+      type: Number,
+      default: 0,
+    },
+    totalMediaSize: {
+      type: Number,
+      default: 0,
+    },
+    totalJsCssSize: {
+      type: Number,
+      default: 0,
+    },
+    genCredits: {
+      type: Number,
+      default: 10,
+    },
     password: {
       type: String,
       required: true,
@@ -183,9 +183,6 @@ userSchema.pre("save", async function (next) {
     next(err);
   }
 });
-
-
-
 
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);

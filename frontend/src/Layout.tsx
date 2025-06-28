@@ -10,7 +10,6 @@ import { useApiGet } from "./hooks/apiHooks";
 import ApiRoutes from "./connectors/api-routes";
 
 function Layout() {
-
   const userStore = useUserStore();
   const user = useApiGet({
     key: ["getUser"],

@@ -39,7 +39,7 @@ const ApiRoutes = {
   deleteCDN: "/cdn/deleteCdn",
   confirmVideoUpload: "/cdn/video/upload/callback",
   generateImage: "/cdn/generateImage",
-  activateTransformation: "/cdn/activateTransformation",  
+  activateTransformation: "/cdn/activateTransformation",
   getAnalytics: "/analytics/getAnalytics",
   getFileTypeBreakdown: "/analytics/getFileTypeBreakdown",
   getTotalSizeByType: "/analytics/getTotalSizeByType",

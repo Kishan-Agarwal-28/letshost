@@ -49,7 +49,13 @@ import { formatBytes } from "bytes-formatter";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import CompactFileUploader from "./compactFileUploader";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogDescription,
+} from "@/components/ui/dialog";
 dayjs.extend(relativeTime);
 
 // Aceternity Tabs Component
@@ -104,7 +110,6 @@ function CdnPage() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [searchOpen, setSearchOpen] = useState(false);
   const [updatingCdnId, setUpdatingCdnId] = useState<string | null>(null);
-
 
   const { toast } = useToast();
   const userStore = useUserStore();
@@ -448,35 +453,34 @@ const FileCard = ({
       });
     }
   };
-  const activateTransformation=useApiPost({
-    type:"post",
-    path:ApiRoutes.activateTransformation,
-    key:["activateTransformation"],
-    sendingFile:false,
-  })
-  const handleTransformation=async()=>{ 
+  const activateTransformation = useApiPost({
+    type: "post",
+    path: ApiRoutes.activateTransformation,
+    key: ["activateTransformation"],
+    sendingFile: false,
+  });
+  const handleTransformation = async () => {
     await activateTransformation.mutateAsync({
-      cdnProjectID:cdn.cdnProjectID
-    })
-  }
-  useEffect(()=>{
-    if(activateTransformation.isSuccess){
+      cdnProjectID: cdn.cdnProjectID,
+    });
+  };
+  useEffect(() => {
+    if (activateTransformation.isSuccess) {
       toast({
         title: "Success",
         description: "On-the-fly transformations activated successfully",
         duration: 5000,
-        variant: "success"
+        variant: "success",
       });
-    }
-    else if(activateTransformation.isError){
+    } else if (activateTransformation.isError) {
       toast({
         title: "Error",
         description: getErrorMsg(activateTransformation),
         duration: 5000,
-        variant: "error"
+        variant: "error",
       });
     }
-  },[activateTransformation.isSuccess,activateTransformation.isError,toast])
+  }, [activateTransformation.isSuccess, activateTransformation.isError, toast]);
   return (
     <Card
       className={`w-[30rem] min-h-190 max-h-[55rem] relative perspective-1000 ${isUpdating ? "flip-card-active" : ""}`}
@@ -599,46 +603,55 @@ const FileCard = ({
             </div>
             <Dialog>
               <DialogTrigger>
-                {(cdn.fileType === "image" || cdn.fileType === "video") &&(
-            <Button variant="outline" size="sm" className="gap-2" disabled={cdn.isTransformActive} >
-              On Fly Transformation
-              </Button>
-  )
-}
+                {(cdn.fileType === "image" || cdn.fileType === "video") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    disabled={cdn.isTransformActive}
+                  >
+                    On Fly Transformation
+                  </Button>
+                )}
               </DialogTrigger>
 
               <DialogContent className="w-svw">
-                              <DialogHeader>On-the-fly transformations</DialogHeader>
-              <DialogDescription>
-                On-the-fly transformations allows you to modify the content of your files in real
-                      time. This is useful for optimizing images, adding
-                      watermarks, or changing the color scheme of your files.
-              </DialogDescription>
+                <DialogHeader>On-the-fly transformations</DialogHeader>
+                <DialogDescription>
+                  On-the-fly transformations allows you to modify the content of
+                  your files in real time. This is useful for optimizing images,
+                  adding watermarks, or changing the color scheme of your files.
+                </DialogDescription>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-col">
                     <div className="text-sm font-medium">
-                     <span>
-                       Are you sure you want to enable on-the-fly transformations?
-                      <br />
-                      This will allow you to modify the content of your files in real time.
-                      <br />
-                      <strong>Warning:</strong> This will action cannot be undone.
-                      <br/>
-                      You can enable it only on 5 files .
-                     </span>
+                      <span>
+                        Are you sure you want to enable on-the-fly
+                        transformations?
+                        <br />
+                        This will allow you to modify the content of your files
+                        in real time.
+                        <br />
+                        <strong>Warning:</strong> This will action cannot be
+                        undone.
+                        <br />
+                        You can enable it only on 5 files .
+                      </span>
                     </div>
-                      <Button className="mt-4 bg-red-400 hover:bg-red-300" onClick={handleTransformation} disabled={activateTransformation.isPending}>
-                        Activate
-                      </Button>
-                    
+                    <Button
+                      className="mt-4 bg-red-400 hover:bg-red-300"
+                      onClick={handleTransformation}
+                      disabled={activateTransformation.isPending}
+                    >
+                      Activate
+                    </Button>
                   </div>
-                  </div>
-                  </DialogContent>
+                </div>
+              </DialogContent>
             </Dialog>
           </CardContent>
 
           <CardFooter className="flex gap-2 pt-4 justify-around">
-            
             <Button
               variant="outline"
               size="sm"

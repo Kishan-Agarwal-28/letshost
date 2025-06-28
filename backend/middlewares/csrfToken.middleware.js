@@ -14,28 +14,34 @@ const createCsrfToken = () => {
 };
 
 const hashToken = (token) => {
-  return crypto
-    .createHmac("sha256", TOKEN_SECRET)
-    .update(token)
-    .digest("hex");
+  return crypto.createHmac("sha256", TOKEN_SECRET).update(token).digest("hex");
 };
 
 // Middleware to validate CSRF token for state-changing requests
 export const csrfMiddleware = asyncHandler((req, res, next) => {
   const method = req.method;
-console.log(req.headers)
-     // Skip CSRF for these specific endpoints
-  const skipCSRFPaths = ["/api/v1/csrf-token", "/api/v1/cdn/video/upload/callback","/api/v1/users/auth/oauth/google/callback","/api/v1/users/auth/oauth/github/callback","/api/v1/users/auth/oauth/spotify/callback","/api/v1/users/auth/oauth/facebook/callback","/api/v1/users/auth/oauth/microsoft/callback","/api/v1/users/oauth"];
-    if (skipCSRFPaths.includes(req._parsedUrl.pathname)) {
-      return next();
-    }
+  console.log(req.headers);
+  // Skip CSRF for these specific endpoints
+  const skipCSRFPaths = [
+    "/api/v1/csrf-token",
+    "/api/v1/cdn/video/upload/callback",
+    "/api/v1/users/auth/oauth/google/callback",
+    "/api/v1/users/auth/oauth/github/callback",
+    "/api/v1/users/auth/oauth/spotify/callback",
+    "/api/v1/users/auth/oauth/facebook/callback",
+    "/api/v1/users/auth/oauth/microsoft/callback",
+    "/api/v1/users/oauth",
+  ];
+  if (skipCSRFPaths.includes(req._parsedUrl.pathname)) {
+    return next();
+  }
 
-  if (["POST", "PUT", "PATCH", "DELETE","GET"].includes(method)) {
+  if (["POST", "PUT", "PATCH", "DELETE", "GET"].includes(method)) {
     const csrfTokenClient = req.headers["x-csrf-token"];
     const csrfTokenServer = req.cookies["csrf_token"];
-    console.log("csrfTokenClient",csrfTokenClient);
-    console.log("csrfTokenServer",csrfTokenServer);
-    
+    console.log("csrfTokenClient", csrfTokenClient);
+    console.log("csrfTokenServer", csrfTokenServer);
+
     if (!csrfTokenClient || !csrfTokenServer) {
       throw new apiError(403, "CSRF token is missing");
     }
@@ -63,15 +69,15 @@ export const csrfTokenHandler = asyncHandler((req, res) => {
     res.cookie("csrf_token", csrfTokenHash, {
       httpOnly: true,
       secure: true,
-      sameSite:"none",
+      sameSite: "none",
     });
 
     // Store raw token in accessible cookie or return in JSON
     res.cookie("csrf_token_client", csrfToken, {
       secure: true,
-      sameSite:"none",
+      sameSite: "none",
       httpOnly: false,
-      domain:"lethost.dpdns.org"
+      domain: "lethost.dpdns.org",
     });
   }
 

@@ -15,7 +15,7 @@ export interface ICDn {
   relativePath: string;
   isTransformActive: boolean;
   transformLimit: number;
-  secureUrl: string;  
+  secureUrl: string;
   createdAt: Date;
   updatedAt: Date;
 }

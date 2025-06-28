@@ -1,13 +1,13 @@
-import {QdrantClient} from '@qdrant/js-client-rest';
+import { QdrantClient } from "@qdrant/js-client-rest";
 let quad;
 export const VECTOR_SIZE = 1024;
 export const COLLECTION_NAME = "vector-search";
 const connectvectorDB = async () => {
   try {
-   quad = new QdrantClient({
-          url: process.env.QDRANT_URI,
-       apiKey: process.env.QDRANT_API_KEY,
-       });
+    quad = new QdrantClient({
+      url: process.env.QDRANT_URI,
+      apiKey: process.env.QDRANT_API_KEY,
+    });
     console.log("vector db connected!!!!!");
   } catch (error) {
     console.log(error);
@@ -19,22 +19,22 @@ const initializeCollection = async () => {
   try {
     const collections = await quad.getCollections();
     const collectionExists = collections.collections.some(
-      col => col.name === COLLECTION_NAME
+      (col) => col.name === COLLECTION_NAME
     );
 
     if (!collectionExists) {
       await quad.createCollection(COLLECTION_NAME, {
         vectors: {
           size: VECTOR_SIZE,
-          distance: "Cosine"
+          distance: "Cosine",
         },
         optimizers_config: {
-          default_segment_number: 2
+          default_segment_number: 2,
         },
         hnsw_config: {
           payload_m: 16,
-          m: 0
-        }
+          m: 0,
+        },
       });
       console.log(`Collection ${COLLECTION_NAME} created successfully`);
     } else {
@@ -46,4 +46,4 @@ const initializeCollection = async () => {
   }
 };
 
-export { connectvectorDB, quad ,initializeCollection};
+export { connectvectorDB, quad, initializeCollection };

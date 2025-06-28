@@ -1,6 +1,5 @@
 import { scan } from "react-scan"; // must be imported before React and React DOM
 
-
 scan({
   enabled: true,
 });

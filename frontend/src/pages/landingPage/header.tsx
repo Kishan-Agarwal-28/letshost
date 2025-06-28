@@ -106,22 +106,31 @@ function Header() {
             menuOpen ? "block" : "hidden"
           } w-full md:flex md:w-auto md:items-center text-center text-white md:space-x-6 mt-4 md:mt-0 `}
         >
-          {["", "/tools", "/pricing", "/contact-us","/gallery"].map((path, idx) => {
-            const labels = ["home", "tools", "pricing", "contact us", "gallery"];
-            return (
-              <li key={path} className="py-2 md:py-0">
-                <NavLink
-                  to={path}
-                  className={({ isActive }) =>
-                    `${isActive ? "text-white" : "text-slate-400"} transition-colors duration-200`
-                  }
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {labels[idx]}
-                </NavLink>
-              </li>
-            );
-          })}
+          {["", "/tools", "/pricing", "/contact-us", "/gallery", "/docs"].map(
+            (path, idx) => {
+              const labels = [
+                "home",
+                "tools",
+                "pricing",
+                "contact us",
+                "gallery",
+                "docs",
+              ];
+              return (
+                <li key={path} className="py-2 md:py-0">
+                  <NavLink
+                    to={path}
+                    className={({ isActive }) =>
+                      `${isActive ? "text-white" : "text-slate-400"} transition-colors duration-200`
+                    }
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {labels[idx]}
+                  </NavLink>
+                </li>
+              );
+            },
+          )}
         </ul>
 
         {/* GitHub Button */}

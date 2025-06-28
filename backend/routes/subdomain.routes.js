@@ -18,7 +18,8 @@ import { logger } from "../utils/logger.js";
 const router = Router();
 router
   .route("/register")
-  .post(logger, 
+  .post(
+    logger,
     verifyJWT,
     captureRelativePaths,
     uploadFile.array("files", 400),
@@ -28,7 +29,8 @@ router.route("/update").post(logger, verifyJWT, updateSubDomain);
 router.route("/delete").post(logger, verifyJWT, deleteSubDomain);
 router
   .route("/changecontents")
-  .post(logger, 
+  .post(
+    logger,
     verifyJWT,
     captureRelativePaths,
     uploadFile.array("files", 400),
@@ -36,7 +38,9 @@ router
   );
 router.route("/getuploadsignedurl").post(logger, verifyJWT, getUploadSignedUrl);
 router.route("/getcontents").post(logger, verifyJWT, getSubDomainContents);
-router.route("/updatevisibility").post(logger, verifyJWT, updateSubDomainVisibility);
+router
+  .route("/updatevisibility")
+  .post(logger, verifyJWT, updateSubDomainVisibility);
 router.route("/getviewsignedurl").post(logger, verifyJWT, getViewSignedUrl);
 
 export default router;

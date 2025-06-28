@@ -1,4 +1,3 @@
-
 "use client";
 import React, {
   useEffect,
@@ -7,15 +6,11 @@ import React, {
   createContext,
   useContext,
 } from "react";
-import {
-  TbArrowNarrowLeft,
-   TbArrowNarrowRight,
-  TbX
-} from "react-icons/tb";
+import { TbArrowNarrowLeft, TbArrowNarrowRight, TbX } from "react-icons/tb";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import type{ JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 interface CarouselProps {
   items: JSX.Element[];
   initialScroll?: number;
@@ -179,7 +174,9 @@ export const Card = ({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  useOutsideClick(containerRef as React.RefObject<HTMLDivElement>, () => handleClose());
+  useOutsideClick(containerRef as React.RefObject<HTMLDivElement>, () =>
+    handleClose(),
+  );
 
   const handleOpen = () => {
     setOpen(true);
@@ -251,8 +248,9 @@ export const Card = ({
                     ))}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
-                    
-                    <span>📅 {new Date(item.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      📅 {new Date(item.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -265,21 +263,18 @@ export const Card = ({
         onClick={handleOpen}
         className={cn(
           "relative z-10 flex flex-col items-start justify-start overflow-hidden rounded-3xl bg-gray-100 dark:bg-neutral-900",
-          compact 
+          compact
             ? "h-24 w-24 md:h-28 md:w-28" // Compact size for sidebar
-            : "h-80 w-56 md:h-[40rem] md:w-96" // Original size
+            : "h-80 w-56 md:h-[40rem] md:w-96", // Original size
         )}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-        <div className={cn(
-          "relative z-40",
-          compact ? "p-2" : "p-8"
-        )}>
+        <div className={cn("relative z-40", compact ? "p-2" : "p-8")}>
           <motion.p
             layoutId={layout ? `category-${item.uploader.username}` : undefined}
             className={cn(
               "text-left font-sans font-medium text-white",
-              compact ? "text-xs" : "text-sm md:text-base"
+              compact ? "text-xs" : "text-sm md:text-base",
             )}
           >
             @{item.uploader.username}
@@ -288,9 +283,9 @@ export const Card = ({
             layoutId={layout ? `title-${item.title}` : undefined}
             className={cn(
               "text-left font-sans font-semibold [text-wrap:balance] text-white",
-              compact 
-                ? "mt-1 text-xs line-clamp-2" 
-                : "mt-2 max-w-xs text-xl md:text-3xl"
+              compact
+                ? "mt-1 text-xs line-clamp-2"
+                : "mt-2 max-w-xs text-xl md:text-3xl",
             )}
           >
             {item.title}
@@ -299,7 +294,6 @@ export const Card = ({
         <BlurImage
           src={item.imageUrl}
           alt={item.title}
-            
           className="absolute inset-0 z-10 object-cover"
         />
       </motion.button>
@@ -329,7 +323,6 @@ export const BlurImage = ({
       height={height}
       loading="lazy"
       decoding="async"
-
       alt={alt ? alt : "Background of a beautiful view"}
       {...rest}
     />

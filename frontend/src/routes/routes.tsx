@@ -21,9 +21,9 @@ import Tools from "@/pages/toolsPage/tools.tsx";
 import TermsAndConditions from "@/pages/termsPage/tnc.tsx";
 
 import DashboardLayout from "@/pages/dashboardPages/main.tsx";
-import  Gallery  from "@/pages/galleryPage/gallery.tsx";
+import Gallery from "@/pages/galleryPage/gallery.tsx";
 import CreatorDashboard from "@/pages/creatorpages/creatordashboard.tsx";
-
+import ImgixDocs from "@/pages/docs/docs.tsx";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -78,19 +78,10 @@ export const router = createBrowserRouter(
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/gallery"
-          element={
-            <Gallery />
-          }
-          />
-                <Route path="/terms" element={<TermsAndConditions />} />
-                <Route
-                path="/creator/:creatorId"
-                element={
-                  <CreatorDashboard/>
-                }
-                />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/creator/:creatorId" element={<CreatorDashboard />} />
+        <Route path="/docs" element={<ImgixDocs />} />
       </Route>
 
       <Route path="*" element={<Error />} />

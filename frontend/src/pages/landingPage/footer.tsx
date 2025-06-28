@@ -17,11 +17,10 @@ function Footer() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
             <span className="text-sm text-muted-foreground flex flex-col">
               Brought to you by Kishan Agarwal
-           
-            <Link to={"/terms"} className="text-sm text-primary">
-              Terms of Service
-            </Link>
-             </span>
+              <Link to={"/terms"} className="text-sm text-primary">
+                Terms of Service
+              </Link>
+            </span>
             <div className="flex items-center gap-4 text-sm">
               <a
                 href="https://github.com/kishan-agarwal-28"
@@ -58,13 +57,19 @@ function Footer() {
               <li>
                 <Link to="/tools">Tools</Link>
               </li>
-            </ul>
-            <ul className="list-disc pl-5 text-sm space-y-1">
               <li>
                 <Link to="/pricing">Pricing</Link>
               </li>
+            </ul>
+            <ul className="list-disc pl-5 text-sm space-y-1">
               <li>
                 <Link to="/contact-us">Contact Us</Link>
+              </li>
+              <li>
+                <Link to="/gallery">Gallery</Link>
+              </li>
+              <li>
+                <Link to="/docs">Docs</Link>
               </li>
             </ul>
           </div>

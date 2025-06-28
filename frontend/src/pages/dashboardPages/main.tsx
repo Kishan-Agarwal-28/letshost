@@ -73,86 +73,86 @@ function DashboardLayout() {
     AiImageGenerator: <AIImageGenerator />,
     fileUploader: <FileUploader />,
     analytics: <Analytics />,
-    Settings: <SettingsPage/>,
-    creatordashboard:<CreatorDashboard/>
+    Settings: <SettingsPage />,
+    creatordashboard: <CreatorDashboard />,
   };
 
   const [page, setPage] = useState<PageKey>("dashboard");
   const menuSections: MenuSection[] = [
-  {
-    label: "Dashboard",
-    items: [
-      {
-        id: "dashboard",
-        label: "View Dashboard",
-        icon: LuLayoutDashboard,
-        page: "dashboard"
-      }
-    ]
-  },
-  {
-    label: "CDN",
-    items: [
-      {
-        id: "cdn-dashboard",
-        label: "Dashboard",
-        icon: MdOutlineDashboardCustomize,
-        page: "cdnDashboard"
-      },
-      {
-        id: "image-editor",
-        label: "Image Transformation",
-        icon: IoMdImages,
-        page: "imageEditor"
-      },
-      {
-        id: "ai-generator",
-        label: "AI Image Generator",
-        icon: Sparkles,
-        page: "AiImageGenerator"
-      },
-      {
-        id: "file-uploader",
-        label: "Upload Files",
-        icon: Upload,
-        page: "fileUploader"
-      }
-    ]
-  },
-  {
-    label: "Analytics",
-    items: [
-      {
-        id: "analytics",
-        label: "View Analytics",
-        icon: ChartPie,
-        page: "analytics"
-      }
-    ]
-  },
-  {
-    label: "Creator Dashboard",
-    items: [
-      {
-        id: "creator-dashboard",
-        label: "View Creator Dashboard",
-        icon: RiDashboardHorizontalLine,
-        page: "creatordashboard"
-      }
-    ]
-  },
-  {
-    label: "Settings",
-    items: [
-      {
-        id: "settings",
-        label: "View Profile",
-        icon: Settings,
-        page: "Settings"
-      }
-    ]
-  }
-];
+    {
+      label: "Dashboard",
+      items: [
+        {
+          id: "dashboard",
+          label: "View Dashboard",
+          icon: LuLayoutDashboard,
+          page: "dashboard",
+        },
+      ],
+    },
+    {
+      label: "CDN",
+      items: [
+        {
+          id: "cdn-dashboard",
+          label: "Dashboard",
+          icon: MdOutlineDashboardCustomize,
+          page: "cdnDashboard",
+        },
+        {
+          id: "image-editor",
+          label: "Image Transformation",
+          icon: IoMdImages,
+          page: "imageEditor",
+        },
+        {
+          id: "ai-generator",
+          label: "AI Image Generator",
+          icon: Sparkles,
+          page: "AiImageGenerator",
+        },
+        {
+          id: "file-uploader",
+          label: "Upload Files",
+          icon: Upload,
+          page: "fileUploader",
+        },
+      ],
+    },
+    {
+      label: "Analytics",
+      items: [
+        {
+          id: "analytics",
+          label: "View Analytics",
+          icon: ChartPie,
+          page: "analytics",
+        },
+      ],
+    },
+    {
+      label: "Creator Dashboard",
+      items: [
+        {
+          id: "creator-dashboard",
+          label: "View Creator Dashboard",
+          icon: RiDashboardHorizontalLine,
+          page: "creatordashboard",
+        },
+      ],
+    },
+    {
+      label: "Settings",
+      items: [
+        {
+          id: "settings",
+          label: "View Profile",
+          icon: Settings,
+          page: "Settings",
+        },
+      ],
+    },
+  ];
 
   const handlePageUpdate = (page: PageKey) => {
     setPage(page);
@@ -160,40 +160,36 @@ function DashboardLayout() {
   return (
     <>
       <SidebarProvider>
-         <Sidebar 
-      variant="floating" 
-      className={`relative`} 
-      collapsible="icon"
-    >
-      <SidebarContent className="flex flex-col items-center">
-        {menuSections.map((section) => (
-          <SidebarGroup key={section.label}>
-            <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {section.items.map((item) => {
-                  const IconComponent = item.icon;
-                  return (
-                    <SidebarMenuItem
-                      key={item.id}
-                      className="cursor-pointer"
-                      onClick={() => handlePageUpdate(item.page)}
-                    >
-                      <SidebarMenuButton asChild>
-                        <span>
-                          <IconComponent />
-                          <span>{item.label}</span>
-                        </span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
-    </Sidebar>
+        <Sidebar variant="floating" className={`relative`} collapsible="icon">
+          <SidebarContent className="flex flex-col items-center">
+            {menuSections.map((section) => (
+              <SidebarGroup key={section.label}>
+                <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {section.items.map((item) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <SidebarMenuItem
+                          key={item.id}
+                          className="cursor-pointer"
+                          onClick={() => handlePageUpdate(item.page)}
+                        >
+                          <SidebarMenuButton asChild>
+                            <span>
+                              <IconComponent />
+                              <span>{item.label}</span>
+                            </span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
+          </SidebarContent>
+        </Sidebar>
 
         <main className="w-screen">
           <div className="flex gap-5 items-center">

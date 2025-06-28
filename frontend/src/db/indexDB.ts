@@ -16,12 +16,16 @@ let imageDB: any;
 // Helper function to ensure DB is ready
 async function ensureDBReady() {
   while (!imageDB) {
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
   return imageDB;
 }
 
-export async function saveImageWithMeta(item: HistoryItem, base64: string, userId: string) {
+export async function saveImageWithMeta(
+  item: HistoryItem,
+  base64: string,
+  userId: string,
+) {
   const db = await ensureDBReady();
   await db.put("images", {
     ...item,
@@ -30,7 +34,10 @@ export async function saveImageWithMeta(item: HistoryItem, base64: string, userI
   });
 }
 
-export async function loadImage(id: string, userId: string): Promise<string | null> {
+export async function loadImage(
+  id: string,
+  userId: string,
+): Promise<string | null> {
   const db = await ensureDBReady();
   const record = await db.get("images", `${userId}_${id}`);
   return record?.base64 ?? null;
@@ -40,7 +47,9 @@ export async function loadImage(id: string, userId: string): Promise<string | nu
 export async function getUserImageKeys(userId: string): Promise<IDBValidKey[]> {
   const db = await ensureDBReady();
   const allKeys = await db.getAllKeys("images");
-  return allKeys.filter((key:IDBValidKey)=> String(key).startsWith(`${userId}_`));
+  return allKeys.filter((key: IDBValidKey) =>
+    String(key).startsWith(`${userId}_`),
+  );
 }
 
 // Helper function to get user-specific record
@@ -65,7 +74,11 @@ export async function deleteUserImageRecord(key: IDBValidKey, userId: string) {
 }
 
 // Helper function to update user-specific record
-export async function updateUserImageRecord(key: IDBValidKey, userId: string, updates: Partial<HistoryItem & { base64: string }>) {
+export async function updateUserImageRecord(
+  key: IDBValidKey,
+  userId: string,
+  updates: Partial<HistoryItem & { base64: string }>,
+) {
   const db = await ensureDBReady();
   const keyStr = String(key);
   if (keyStr.startsWith(`${userId}_`)) {

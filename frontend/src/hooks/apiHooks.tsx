@@ -1,6 +1,11 @@
 import config from "@/config/config";
 import ApiRoutes from "@/connectors/api-routes";
-import { useQuery, useMutation, useQueryClient , useInfiniteQuery} from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 
 import axios, { type AxiosProgressEvent } from "axios";
 import { AxiosError } from "axios";
@@ -9,10 +14,8 @@ import { useUserStore } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useCallback, useRef } from "react";
 
-
 // Helper function to get CSRF token from cookies
 const getCsrfTokenFromCookie = (): string | null => {
-
   if (typeof document === "undefined") return null;
 
   const cookies = document.cookie.split(";");
@@ -25,10 +28,8 @@ const getCsrfTokenFromCookie = (): string | null => {
   return null;
 };
 
-
 // Helper function to fetch CSRF token from server
 const fetchCsrfToken = async (): Promise<string> => {
-
   try {
     const response = await axios.get(`${config.BackendUrl}/csrf-token`, {
       withCredentials: true,
@@ -42,7 +43,6 @@ const fetchCsrfToken = async (): Promise<string> => {
 
 // Helper function to ensure CSRF token is available
 const ensureCsrfToken = async (): Promise<string> => {
-
   let token = getCsrfTokenFromCookie();
 
   if (!token) {
@@ -119,8 +119,8 @@ export const useApiGet = ({
 }: UseApiGetProps) => {
   const queryClient = useQueryClient();
   const userStore = useUserStore();
-  const userLocal=localStorage.getItem("User")
-  const user=userLocal?JSON.parse(userLocal).state.user:null;
+  const userLocal = localStorage.getItem("User");
+  const user = userLocal ? JSON.parse(userLocal).state.user : null;
   const navigate = useNavigate();
   const fn = async () => {
     try {
@@ -129,7 +129,6 @@ export const useApiGet = ({
       const err = error as AxiosError;
 
       const msg = getErrorMsg(err)?.toLowerCase();
-
 
       if (
         err?.response?.status === 401 &&
@@ -152,8 +151,8 @@ export const useApiGet = ({
           msg.includes("credentials not found") ||
           msg.includes("credentials malformed") ||
           msg.includes("credentials revoked") ||
-          err.response.statusText.includes("Unauthorized"))
-          &&user
+          err.response.statusText.includes("Unauthorized")) &&
+        user
       ) {
         // This will finally trigger
         console.log("Reauth triggered due to:", msg);
@@ -213,8 +212,8 @@ export const useApiPost = ({
 
   const userStore = useUserStore();
   const navigate = useNavigate();
-   const userLocal=localStorage.getItem("User")
-  const user=userLocal?JSON.parse(userLocal).state.user:null;
+  const userLocal = localStorage.getItem("User");
+  const user = userLocal ? JSON.parse(userLocal).state.user : null;
   // Cancel function to abort ongoing requests
   const cancelRequest = useCallback(() => {
     if (abortControllerRef.current) {
@@ -330,7 +329,7 @@ export const useApiPost = ({
         abortControllerRef.current = null;
         return response;
       }
-    } catch (error:any) {
+    } catch (error: any) {
       // Check if the error is due to cancellation
       if (error.name === "AbortError" || error.code === "ERR_CANCELED") {
         console.log("Request was cancelled");
@@ -362,8 +361,8 @@ export const useApiPost = ({
           msg.includes("credentials not found") ||
           msg.includes("credentials malformed") ||
           msg.includes("credentials revoked") ||
-          err.response.statusText.includes("Unauthorized"))
-          &&user
+          err.response.statusText.includes("Unauthorized")) &&
+        user
       ) {
         console.log("Reauth triggered due to:", msg);
         try {
@@ -433,7 +432,7 @@ export const useApiPost = ({
             await axios.get(ApiRoutes.logout);
             userStore.deleteUser();
           }
-        } catch (retryErr:any) {
+        } catch (retryErr: any) {
           if (
             retryErr.name === "AbortError" ||
             retryErr.code === "ERR_CANCELED" ||
@@ -442,7 +441,7 @@ export const useApiPost = ({
             console.log("Retry request was cancelled");
             throw new Error("Request cancelled");
           }
-         
+
           throw retryErr;
         }
       }
@@ -475,7 +474,10 @@ interface UseApiInfiniteQueryProps {
   query?: string;
   getNextPageParam: (lastPage: any, allPages: any[]) => number | undefined;
   initialPageParam?: number;
-  getPreviousPageParam?: (firstPage: any, allPages: any[]) => number | undefined;
+  getPreviousPageParam?: (
+    firstPage: any,
+    allPages: any[],
+  ) => number | undefined;
 }
 
 export const useApiInfiniteQuery = ({
@@ -487,28 +489,25 @@ export const useApiInfiniteQuery = ({
   getNextPageParam,
   initialPageParam = 1,
   limit = 10,
-  tags="",
-  query="",
+  tags = "",
+  query = "",
   getPreviousPageParam,
 }: UseApiInfiniteQueryProps) => {
-
-
-  const fn = async ({ pageParam }:any) => {
+  const fn = async ({ pageParam }: any) => {
     try {
-      console.log('Fetching page:', pageParam, 'with limit:', limit);
-      
+      console.log("Fetching page:", pageParam, "with limit:", limit);
+
       // Build the URL with page parameter
-      const url = path.includes('?') 
-        ? `${path}&query=${query}&page=${pageParam}&limit=${limit}&tags=${tags}` 
+      const url = path.includes("?")
+        ? `${path}&query=${query}&page=${pageParam}&limit=${limit}&tags=${tags}`
         : `${path}?query=${query}&page=${pageParam}&limit=${limit}&tags=${tags}`;
-      
+
       const response = await Axios.get(url, option);
-      console.log('API Response:', response.data);
-      
+      console.log("API Response:", response.data);
+
       return response;
     } catch (error: unknown) {
       const err = error as AxiosError;
-      
 
       throw err;
     }

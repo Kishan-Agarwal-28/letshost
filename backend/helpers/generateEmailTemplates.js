@@ -5,7 +5,7 @@ export const generateEmailTemplates = (
   token,
   email = "",
   reason = "",
-  userID=""
+  userID = ""
 ) => {
   let html;
   let link = ""; // Define the link dynamically
@@ -123,7 +123,7 @@ export const generateEmailTemplates = (
     </div>
 </body>`;
       break;
-      case "updatePassword":
+    case "updatePassword":
       link = `${APPURL}/dashboard?uid=${userID}&token=${token}`;
       html = `
       <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
@@ -148,7 +148,7 @@ export const generateEmailTemplates = (
         </tr>
     </table>
 </body>
-`
+`;
     default:
       html = null;
   }
