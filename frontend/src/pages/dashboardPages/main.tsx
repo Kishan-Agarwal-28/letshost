@@ -6,6 +6,7 @@ import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { RiDashboardHorizontalLine } from "react-icons/ri";
 import { IoMdImages } from "react-icons/io";
 import type { JSX } from "react/jsx-runtime";
+import { lazy } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,13 +25,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useState } from "react";
-import CdnPage from "../cdnPages/cdnPage";
-import ImageEditor from "../imageTransformerspage/transformation";
-import AIImageGenerator from "../imageTransformerspage/ai-image";
-import FileUploader from "../cdnPages/fileUploader";
-import Analytics from "../analyticsPage/analytics";
-import SettingsPage from "@/pages/profileSettingsPage/settings";
-import CreatorDashboard from "../creatorpages/creatordashboard";
+import SuspenseWrapper from "../../../suspense.tsx";
+const CdnPage = lazy(() => import("../cdnPages/cdnPage"));
+const ImageEditor = lazy(() => import("../imageTransformerspage/transformation"));
+const AIImageGenerator = lazy(() => import("../imageTransformerspage/ai-image"));
+const FileUploader = lazy(() => import("../cdnPages/fileUploader"));
+const Analytics = lazy(() => import("../analyticsPage/analytics"));
+const SettingsPage = lazy(() => import("@/pages/profileSettingsPage/settings"));
+const CreatorDashboard = lazy(() => import("../creatorpages/creatordashboard"));
 
 type PageKey =
   | "dashboard"
@@ -205,7 +207,9 @@ function DashboardLayout() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <SuspenseWrapper>
           {pages[page]}
+          </SuspenseWrapper>
         </main>
       </SidebarProvider>
     </>

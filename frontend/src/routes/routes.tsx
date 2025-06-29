@@ -3,52 +3,53 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+import { lazy } from "react";
 import Layout from "../Layout";
 import LandingPage from "../pages/landingPage/main.tsx";
-import Auth from "@/pages/AuthPages/Auth.tsx";
-import EmailSent from "@/pages/AuthPages/EmailSent.tsx";
-import Error from "@/pages/errorPages/error.tsx";
-import EmailVerify from "@/pages/AuthPages/EmailVerify.tsx";
+const Auth=lazy(() => import("@/pages/AuthPages/Auth.tsx"));
+const EmailSent=lazy(()=>import("@/pages/AuthPages/EmailSent.tsx"));
+const Error = lazy(() => import("@/pages/errorPages/error.tsx"));
+const EmailVerify = lazy(() => import("@/pages/AuthPages/EmailVerify.tsx"));
+const ChangePassword = lazy(() => import("@/pages/AuthPages/changePassword.tsx"));
 import ProtectedRoute from "./ProtectedLayout.tsx";
-import ChangePassword from "@/pages/AuthPages/changePassword.tsx";
 import TokenizedRoute from "./TokenizedLayout.tsx";
 import VerifiedRoute from "./VerifiedLayout.tsx";
 import ProgramaticRoutesLayout from "./ProgramaticRoutesLayout.tsx";
-import Contact from "@/pages/contactPages/contact.tsx";
-import Pay from "@/pages/pricingPages/payment.tsx";
-import Pricing from "@/pages/landingPage/pricing.tsx";
-import Tools from "@/pages/toolsPage/tools.tsx";
-import TermsAndConditions from "@/pages/termsPage/tnc.tsx";
+const Contact = lazy(() => import("@/pages/contactPages/contact.tsx"));
+const Pay = lazy(() => import("@/pages/pricingPages/payment.tsx"));
+const Pricing = lazy(() => import("@/pages/landingPage/pricing.tsx"));
+const Tools = lazy(() => import("@/pages/toolsPage/tools.tsx"));
+const TermsAndConditions = lazy(() => import("@/pages/termsPage/tnc.tsx"));
 
-import DashboardLayout from "@/pages/dashboardPages/main.tsx";
-import Gallery from "@/pages/galleryPage/gallery.tsx";
-import CreatorDashboard from "@/pages/creatorpages/creatordashboard.tsx";
-import ImgixDocs from "@/pages/docs/docs.tsx";
-
+const DashboardLayout = lazy(() => import("@/pages/dashboardPages/main.tsx"));
+const CreatorDashboard = lazy(() => import("@/pages/creatorpages/creatordashboard.tsx"));
+const Gallery = lazy(() => import("@/pages/galleryPage/gallery.tsx"));
+const Docs = lazy(() => import("@/pages/docs/docs.tsx"));
+import SuspenseWrapper from "../../suspense.tsx";
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="" element={<Layout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/contact-us" element={<Contact />} />
+      <Route path="" element={<SuspenseWrapper><Layout /></SuspenseWrapper>}>
+        <Route path="/" element={<SuspenseWrapper><LandingPage /></SuspenseWrapper>} />
+        <Route path="/contact-us" element={<SuspenseWrapper><Contact /></SuspenseWrapper>} />
         <Route
           path="/payment"
           element={
             <VerifiedRoute>
               <ProgramaticRoutesLayout>
-                <Pay />
+               <SuspenseWrapper> <Pay /></SuspenseWrapper>
               </ProgramaticRoutesLayout>
             </VerifiedRoute>
           }
         />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/auth" element={<SuspenseWrapper><Auth /></SuspenseWrapper>} />
+        <Route path="/tools" element={<SuspenseWrapper><Tools /></SuspenseWrapper>} />
+        <Route path="/pricing" element={<SuspenseWrapper><Pricing /></SuspenseWrapper>} />
         <Route
           path="/auth/email-sent"
           element={
             <ProgramaticRoutesLayout>
-              <EmailSent />
+             <SuspenseWrapper> <EmailSent /></SuspenseWrapper>
             </ProgramaticRoutesLayout>
           }
         />
@@ -56,7 +57,7 @@ export const router = createBrowserRouter(
           path="/auth/verify"
           element={
             <TokenizedRoute>
-              <EmailVerify />
+              <SuspenseWrapper><EmailVerify /></SuspenseWrapper>
             </TokenizedRoute>
           }
         />
@@ -64,7 +65,7 @@ export const router = createBrowserRouter(
           path="/auth/reset-password"
           element={
             <TokenizedRoute>
-              <ChangePassword />
+              <SuspenseWrapper><ChangePassword /></SuspenseWrapper>
             </TokenizedRoute>
           }
         />
@@ -73,18 +74,18 @@ export const router = createBrowserRouter(
           element={
             <ProtectedRoute>
               <VerifiedRoute>
-                <DashboardLayout />
+               <SuspenseWrapper> <DashboardLayout /></SuspenseWrapper>
               </VerifiedRoute>
             </ProtectedRoute>
           }
         />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/creator/:creatorId" element={<CreatorDashboard />} />
-        <Route path="/docs" element={<ImgixDocs />} />
+        <Route path="/gallery" element={<SuspenseWrapper><Gallery /></SuspenseWrapper>} />
+        <Route path="/terms" element={<SuspenseWrapper><TermsAndConditions /></SuspenseWrapper>} />
+        <Route path="/creator/:creatorId" element={<SuspenseWrapper><CreatorDashboard /></SuspenseWrapper>} />
+        <Route path="/docs" element={<SuspenseWrapper><Docs /></SuspenseWrapper>} />
       </Route>
 
-      <Route path="*" element={<Error />} />
+      <Route path="*" element={<SuspenseWrapper><Error /></SuspenseWrapper>} />
     </>,
   ),
 );
