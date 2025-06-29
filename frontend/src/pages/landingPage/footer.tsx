@@ -32,7 +32,7 @@ function Footer() {
                 Github
               </a>
               <a
-                href="https://www.linkedin.com/in/kishan-agarwal-28"
+                href="https://www.linkedin.com/in/kishan-agarwal028/"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 hover:underline"
