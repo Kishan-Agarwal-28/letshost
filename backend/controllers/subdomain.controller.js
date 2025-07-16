@@ -71,6 +71,125 @@ async function getFolderSize(folderPath) {
     throw new Error(`Error calculating folder size: ${error.message}`);
   }
 }
+const restrictedSubdomains = [
+  "www",
+  "api",
+  "admin",
+  "blog",
+  "dashboard",
+  "support",
+  "help",
+  "contact",
+  "about",
+  "terms",
+  "privacy",
+  "legal",
+  "status",
+  "docs",
+  "forum",
+  "login",
+  "register",
+  "signin",
+  "signup",
+  "logout",
+  "home",
+  "index",
+  "store",
+  "shop",
+  "cart",
+  "assets",
+  "static",
+  "public",
+  "images",
+  "files",
+  "media",
+  "uploads",
+  "temp",
+  "resources",
+  "http",
+  "https",
+  "localhost",
+  "example",
+  "demo",
+  "test",
+  "staging",
+  "dev",
+  "testbed",
+  "preview",
+  "internal",
+  "secure",
+  "cms",
+  "panel",
+  "adminpanel",
+  "control",
+  "auth",
+  "oauth",
+  "identity",
+  "loginpage",
+  "logoutpage",
+  "error",
+  "maintenance",
+  "billing",
+  "checkout",
+  "payments",
+  "order",
+  "user",
+  "profile",
+  "account",
+  "newsletter",
+  "cartpage",
+  "assets",
+  "cdn",
+  "download",
+  "uploads",
+  "resources",
+  "server",
+  "monitoring",
+  "data",
+  "platform",
+  "api-v1",
+  "api-v2",
+  "api-v3",
+  "api-beta",
+  "adminapi",
+  "authapi",
+  "secureapi",
+  "hooks",
+  "ping",
+  "verify",
+  "robots",
+  "sitemap",
+  "notifications",
+  "messaging",
+  "uploads",
+  "imageserver",
+  "content",
+  "mediafiles",
+  "resources",
+  "downloadfiles",
+  "testing",
+  "console",
+  "cli",
+  "toolbox",
+  "tool",
+  "scripts",
+  "cloud",
+  "supportcenter",
+  "feedback",
+  "tickets",
+  "audit",
+  "logs",
+  "alert",
+  "monitoring",
+  "statuspage",
+  "incident",
+  "release",
+  "updates",
+  "live",
+  "statuspage",
+  "supportchat"
+];
+
 // Create a new subdomain
 const registerSubDomain = asyncHandler(async (req, res) => {
   let { subDomain } = req.body;
@@ -80,7 +199,9 @@ const registerSubDomain = asyncHandler(async (req, res) => {
   if (!subDomain) {
     subDomain = generateSlug({ format: "kebab", parts: 2 });
   }
-
+  if( restrictedSubdomains.includes(subDomain)) {
+    throw new apiError(400, "This subdomain is restricted, please choose another one");
+  }
   const existing = await getSubDomain(subDomain);
   if (existing) {
     const tempPath = path.join(
@@ -172,7 +293,9 @@ const updateSubDomain = asyncHandler(async (req, res) => {
   if (!newSubDomain) {
     throw new apiError(400, "New subdomain is required");
   }
-
+if( restrictedSubdomains.includes(newSubDomain)) {
+    throw new apiError(400, "This subdomain is restricted, please choose another one");
+  }
   const existing = await getSubDomain(newSubDomain);
   if (existing) {
     throw new apiError(400, "Subdomain already exists, try another one");
