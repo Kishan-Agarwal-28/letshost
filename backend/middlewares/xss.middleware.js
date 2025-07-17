@@ -44,42 +44,80 @@ function sanitizeRequestObject(obj) {
   return sanitized;
 }
 
-export function combinedSanitizer(req, res, next) {
-  try {
-    // Sanitize req.body (writable)
-    if (req.body) {
-      req.body = sanitizeRequestObject(req.body);
-    }
-    
-    // Handle req.query (read-only) - modify properties individually
-    if (req.query && Object.keys(req.query).length > 0) {
-      const sanitizedQuery = sanitizeRequestObject(req.query);
+export function combinedSanitizer(options = {}) {
+  // Default excluded routes
+  const defaultExcluded = [
+    '/health',
+    '/api/v1/csrf-token',
+    '/api/v1/cdn/video/upload/callback',
+    '/api/v1/users/auth/oauth/google/callback',
+    '/api/v1/users/auth/oauth/github/callback',
+    '/api/v1/users/auth/oauth/spotify/callback',
+    '/api/v1/users/auth/oauth/facebook/callback',
+    '/api/v1/users/auth/oauth/microsoft/callback',
+    '/api/v1/users/auth/oauth/callback',
+    '/api/v1/users/auth/oauth',
+  ];
+  
+  const excludedRoutes = options.excludedRoutes || defaultExcluded;
+  const excludedMethods = options.excludedMethods || [];
+  
+  return function(req, res, next) {
+    try {
+      // Check if current route should be excluded
+      const shouldExclude = excludedRoutes.some(route => {
+        if (typeof route === 'string') {
+          return req.path === route || req.path.startsWith(route);
+        }
+        if (route instanceof RegExp) {
+          return route.test(req.path);
+        }
+        return false;
+      });
       
-      // Clear existing properties
-      for (let key in req.query) {
-        delete req.query[key];
+      // Check if current method should be excluded
+      const methodExcluded = excludedMethods.includes(req.method);
+      
+      if (shouldExclude || methodExcluded) {
+        return next(); // Skip sanitization
       }
       
-      // Set sanitized properties
-      Object.assign(req.query, sanitizedQuery);
-    }
-    
-    // Handle req.params (read-only) - modify properties individually  
-    if (req.params && Object.keys(req.params).length > 0) {
-      const sanitizedParams = sanitizeRequestObject(req.params);
-      
-      // Clear existing properties
-      for (let key in req.params) {
-        delete req.params[key];
+      // Sanitize req.body (writable)
+      if (req.body) {
+        req.body = sanitizeRequestObject(req.body);
       }
       
-      // Set sanitized properties
-      Object.assign(req.params, sanitizedParams);
+      // Handle req.query (read-only) - modify properties individually
+      if (req.query && Object.keys(req.query).length > 0) {
+        const sanitizedQuery = sanitizeRequestObject(req.query);
+        
+        // Clear existing properties
+        for (let key in req.query) {
+          delete req.query[key];
+        }
+        
+        // Set sanitized properties
+        Object.assign(req.query, sanitizedQuery);
+      }
+      
+      // Handle req.params (read-only) - modify properties individually  
+      if (req.params && Object.keys(req.params).length > 0) {
+        const sanitizedParams = sanitizeRequestObject(req.params);
+        
+        // Clear existing properties
+        for (let key in req.params) {
+          delete req.params[key];
+        }
+        
+        // Set sanitized properties
+        Object.assign(req.params, sanitizedParams);
+      }
+      
+      next();
+    } catch (error) {
+      console.error('Sanitization error:', error);
+      next(error);
     }
-    
-    next();
-  } catch (error) {
-    console.error('Sanitization error:', error);
-    next(error);
-  }
+  };
 }
+
