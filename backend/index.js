@@ -4,6 +4,7 @@ import { connectvectorDB } from "./db/connectVectorDB.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { ipKeyGenerator } from "express-rate-limit";
 import {
   csrfMiddleware,
   csrfTokenHandler,
@@ -49,9 +50,7 @@ app.use(rateLimit({
     });
   },
   skipFailedRequests: true, // Do not respond with 429 if the limit is reached
-  keyGenerator: function (req) {
-    return req.ip;
-  },
+  keyGenerator: ipKeyGenerator,
   skip: function (req, res) {
     // Skip rate limiting for specific paths
     const skipPaths = [
@@ -60,13 +59,10 @@ app.use(rateLimit({
       "/api/v1/users/auth/oauth/spotify/callback",
       "/api/v1/users/auth/oauth/facebook/callback",
       "/api/v1/users/auth/oauth/microsoft/callback",
-      "/api/v1/users/oauth",
+      "/api/v1/users/auth/oauth",
     ];
     return skipPaths.includes(req._parsedUrl.pathname);
   },
-  onLimitReached: function (req, res, options) {
-    console.warn(`Rate limit reached for IP: ${req.ip}`);
-  }
   
 }));
 app.use(csrfMiddleware)
@@ -90,7 +86,7 @@ app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/gallery", galleryRouter);
 app.use("/api/v1/creator", creatorRouter);
 app.use("/api/v1/contact", contact);
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 3000,'0.0.0.0', () => {
   console.log(
     `Server is running on http://localhost:${process.env.PORT || 3000}`
   );
