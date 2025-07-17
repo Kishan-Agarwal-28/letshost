@@ -77,7 +77,6 @@ export const csrfTokenHandler = asyncHandler((req, res) => {
       secure: true,
       sameSite: "lax",
       httpOnly: false,
-      domain: "lethost.dpdns.org",
     });
   }
 
