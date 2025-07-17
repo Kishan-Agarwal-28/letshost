@@ -83,7 +83,7 @@ import analyticsRouter from "./routes/analytics.routes.js";
 import galleryRouter from "./routes/gallery.routes.js";
 import creatorRouter from "./routes/creator.routes.js";
 import { contact } from "./controllers/contact.controller.js";
-import { xssSanitizer } from "./middlewares/xss.middleware.js";
+
 app.use("/api/v1/csrf-token", csrfTokenHandler);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/subdomains", subdomainRouter);
