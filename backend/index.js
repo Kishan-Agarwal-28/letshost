@@ -10,7 +10,7 @@ import {
 } from "./middlewares/csrfToken.middleware.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import xss from "xss-clean";
+import { xssSanitizer } from "./middlewares/xss.middleware.js";
 import mongoSanitize from 'express-mongo-sanitize';
 
 const app = express();
@@ -37,7 +37,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(xss());
+app.use(xssSanitizer())
 app.use(mongoSanitize());
 app.use(rateLimit({
   windowMs:60 * 1000, // 1 minute
@@ -83,6 +83,7 @@ import analyticsRouter from "./routes/analytics.routes.js";
 import galleryRouter from "./routes/gallery.routes.js";
 import creatorRouter from "./routes/creator.routes.js";
 import { contact } from "./controllers/contact.controller.js";
+import { xssSanitizer } from "./middlewares/xss.middleware.js";
 app.use("/api/v1/csrf-token", csrfTokenHandler);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/subdomains", subdomainRouter);
