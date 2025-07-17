@@ -2,10 +2,13 @@ import { generateEmbedding } from "../controllers/ai.controller.js";
 import { quad } from "../db/connectVectorDB.js";
 import { VECTOR_SIZE, COLLECTION_NAME } from "../db/connectVectorDB.js";
 import { Image } from "../models/gallery.model.js";
+import mongoose from "mongoose";
+
 const createSearchableText = (title, description, prompt, tags) => {
   const tagString = Array.isArray(tags) ? tags.join(" ") : "";
   return `${title} ${description} ${prompt} ${tagString}`.trim();
 };
+
 const uploadToVectorDB = async (imageData) => {
   try {
     const { mongoId, title, description, prompt, tags } = imageData;
@@ -46,57 +49,112 @@ const uploadToVectorDB = async (imageData) => {
     throw error;
   }
 };
+
 export const fetchImageDetails = async (imageIds, userId = null) => {
   try {
-    const query = { _id: { $in: imageIds } };
+    const images = await Image.aggregate([
+      {
+        $match: { _id: { $in: imageIds } }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "uploader",
+          foreignField: "_id",
+          as: "uploader",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "image",
+          as: "likes",
+        },
+      },
+      {
+        $lookup: {
+          from: "saves",
+          localField: "_id",
+          foreignField: "image",
+          as: "saves",
+        },
+      },
+      {
+        $lookup: {
+          from: "downloads",
+          localField: "_id",
+          foreignField: "image",
+          as: "downloads",
+        },
+      },
+      {
+        $addFields: {
+          uploader: { $first: "$uploader" },
+          likesCount: { $size: "$likes" },
+          savesCount: { $size: "$saves" },
+          downloadsCount: { $size: "$downloads" },
+          // Check if current user has liked/saved this image
+          isLiked: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$likes.likedBy",
+                ],
+              }
+            : false,
+          isSaved: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$saves.savedBy",
+                ],
+              }
+            : false,
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          prompt: 1,
+          imageUrl: 1,
+          public_id: 1,
+          tags: 1,
+          uploader: 1,
+          likesCount: 1,
+          savesCount: 1,
+          downloadsCount: 1,
+          isLiked: 1,
+          isSaved: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+    ]);
 
-    // Basic projection - adjust fields as needed
-    const projection = {
-      title: 1,
-      description: 1,
-      prompt: 1,
-      imageUrl: 1,
-      public_id: 1,
-      tags: 1,
-      uploader: 1,
-      likes: 1,
-      saves: 1,
-      createdAt: 1,
-      updatedAt: 1,
-    };
-
-    const images = await Image.find(query, projection)
-      .populate("uploader", "username avatar") // Populate uploader details
-      .lean();
-
-    // If userId provided, add user-specific data (liked/saved status)
-    if (userId) {
-      return images.map((image) => ({
-        ...image,
-        isLiked: image.likes.includes(userId),
-        isSaved: image.saves.includes(userId),
-        likesCount: image.likes.length,
-        savesCount: image.saves.length,
-      }));
-    }
-
-    return images.map((image) => ({
-      ...image,
-      likesCount: image.likes.length,
-      savesCount: image.saves.length,
-    }));
+    return images;
   } catch (error) {
     console.error("Error fetching image details from MongoDB:", error);
     throw error;
   }
 };
+
 export const searchSimilarImages = async (query, options = {}) => {
   try {
     const {
       limit = 10,
       threshold = 0.7,
       userId = null,
-      offset = 0, // Add offset support
+      offset = 0,
     } = options;
 
     // Generate embedding for search query
@@ -105,7 +163,7 @@ export const searchSimilarImages = async (query, options = {}) => {
     // Search in Qdrant with higher limit for pagination
     const searchResults = await quad.search(COLLECTION_NAME, {
       vector: queryEmbedding,
-      limit: Math.max(limit, 100), // Ensure we get enough results
+      limit: Math.max(limit, 100),
       score_threshold: threshold,
       with_payload: true,
       with_vector: false,
@@ -121,7 +179,7 @@ export const searchSimilarImages = async (query, options = {}) => {
     }
 
     // Extract MongoDB IDs and scores
-    const imageIds = searchResults.map((result) => result.payload.mongoId);
+    const imageIds = searchResults.map((result) => new mongoose.Types.ObjectId(result.payload.mongoId));
     const scoreMap = new Map(
       searchResults.map((result) => [result.payload.mongoId, result.score])
     );
@@ -147,6 +205,7 @@ export const searchSimilarImages = async (query, options = {}) => {
     throw error;
   }
 };
+
 /**
  * Find similar images to a specific image by its MongoDB ID
  */
@@ -180,14 +239,14 @@ export const findSimilarImagesById = async (mongoId, options = {}) => {
     const similarImageIds = searchResults
       .filter((result) => result.payload.mongoId !== mongoId.toString())
       .slice(0, limit)
-      .map((result) => result.payload.mongoId);
+      .map((result) => new mongoose.Types.ObjectId(result.payload.mongoId));
 
     const scoreMap = new Map(
       searchResults.map((result) => [result.payload.mongoId, result.score])
     );
 
     // Fetch target image details
-    const [targetImageDetails] = await fetchImageDetails([mongoId], userId);
+    const targetImageDetails = await fetchImageDetails([new mongoose.Types.ObjectId(mongoId)], userId);
 
     // Fetch similar images details
     const similarImagesDetails = await fetchImageDetails(
@@ -204,7 +263,7 @@ export const findSimilarImagesById = async (mongoId, options = {}) => {
       .sort((a, b) => b.similarityScore - a.similarityScore);
 
     return {
-      targetImage: targetImageDetails,
+      targetImage: targetImageDetails[0],
       similarImages: similarImagesWithScores,
       totalFound: similarImagesWithScores.length,
     };
@@ -231,9 +290,9 @@ export const advancedImageSearch = async (searchParams) => {
 
     // First, get candidate images from vector search with higher limit
     const vectorResults = await searchSimilarImages(query, {
-      limit: Math.max(limit * 5, 100), // Get more candidates for filtering
+      limit: Math.max(limit * 5, 100),
       threshold,
-      userId: null, // Don't fetch user-specific data yet
+      userId: null,
     });
 
     if (vectorResults.results.length === 0) {
@@ -261,32 +320,87 @@ export const advancedImageSearch = async (searchParams) => {
       };
     }
 
-    // Apply filters and get results (don't limit here for pagination)
-    const filteredImages = await Image.find(mongoFilter)
-      .populate("uploader", "username avatar")
-      .lean();
+    // Apply filters and get results using aggregation pipeline
+    const filteredImages = await Image.aggregate([
+      {
+        $match: mongoFilter
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "uploader",
+          foreignField: "_id",
+          as: "uploader",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "image",
+          as: "likes",
+        },
+      },
+      {
+        $lookup: {
+          from: "saves",
+          localField: "_id",
+          foreignField: "image",
+          as: "saves",
+        },
+      },
+      {
+        $lookup: {
+          from: "downloads",
+          localField: "_id",
+          foreignField: "image",
+          as: "downloads",
+        },
+      },
+      {
+        $addFields: {
+          uploader: { $first: "$uploader" },
+          likesCount: { $size: "$likes" },
+          savesCount: { $size: "$saves" },
+          downloadsCount: { $size: "$downloads" },
+          isLiked: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$likes.likedBy",
+                ],
+              }
+            : false,
+          isSaved: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$saves.savedBy",
+                ],
+              }
+            : false,
+        },
+      },
+    ]);
 
     // Create score map from vector results
     const scoreMap = new Map(
       vectorResults.results.map((r) => [r._id.toString(), r.similarityScore])
     );
 
-    // Add similarity scores and user-specific data
-    let results = filteredImages.map((image) => ({
+    // Add similarity scores
+    const results = filteredImages.map((image) => ({
       ...image,
       similarityScore: scoreMap.get(image._id.toString()),
-      likesCount: image.likes.length,
-      savesCount: image.saves.length,
     }));
-
-    // Add user-specific data if userId provided
-    if (userId) {
-      results = results.map((image) => ({
-        ...image,
-        isLiked: image.likes.includes(userId),
-        isSaved: image.saves.includes(userId),
-      }));
-    }
 
     // Sort by similarity score
     results.sort((a, b) => b.similarityScore - a.similarityScore);
@@ -301,9 +415,10 @@ export const advancedImageSearch = async (searchParams) => {
     throw error;
   }
 };
+
 export const getRandomImages = async (limit = 10, userId = null) => {
   try {
-    // Get random images from MongoDB directly (more efficient than vector search)
+    // Get random images from MongoDB using aggregation pipeline
     const randomImages = await Image.aggregate([
       { $sample: { size: limit } },
       {
@@ -315,25 +430,57 @@ export const getRandomImages = async (limit = 10, userId = null) => {
           pipeline: [{ $project: { username: 1, avatar: 1 } }],
         },
       },
-      { $unwind: "$uploader" },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "image",
+          as: "likes",
+        },
+      },
+      {
+        $lookup: {
+          from: "saves",
+          localField: "_id",
+          foreignField: "image",
+          as: "saves",
+        },
+      },
+      {
+        $lookup: {
+          from: "downloads",
+          localField: "_id",
+          foreignField: "image",
+          as: "downloads",
+        },
+      },
+      {
+        $addFields: {
+          uploader: { $first: "$uploader" },
+          likesCount: { $size: "$likes" },
+          savesCount: { $size: "$saves" },
+          downloadsCount: { $size: "$downloads" },
+          isLiked: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$likes.likedBy",
+                ],
+              }
+            : false,
+          isSaved: userId
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(userId),
+                  "$saves.savedBy",
+                ],
+              }
+            : false,
+        },
+      },
     ]);
 
-    // Add user-specific data if userId provided
-    let results = randomImages.map((image) => ({
-      ...image,
-      likesCount: image.likes.length,
-      savesCount: image.saves.length,
-    }));
-
-    if (userId) {
-      results = results.map((image) => ({
-        ...image,
-        isLiked: image.likes.includes(userId),
-        isSaved: image.saves.includes(userId),
-      }));
-    }
-
-    return results;
+    return randomImages;
   } catch (error) {
     console.error("Error getting random images:", error);
     throw error;
@@ -397,3 +544,5 @@ export const updateVectorDB = async (mongoId, updatedData) => {
     throw error;
   }
 };
+
+export { uploadToVectorDB };
