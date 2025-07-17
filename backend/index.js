@@ -8,6 +8,10 @@ import {
   csrfMiddleware,
   csrfTokenHandler,
 } from "./middlewares/csrfToken.middleware.js";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import xss from "xss-clean";
+import mongoSanitize from 'express-mongo-sanitize';
 
 const app = express();
 app.use(
@@ -32,7 +36,42 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
-// app.use(csrfMiddleware)
+app.use(helmet());
+app.use(xss());
+app.use(mongoSanitize());
+app.use(rateLimit({
+  windowMs:60 * 1000, // 1 minute
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  handler: function (req, res, next) {
+    res.status(429).json({
+      message: "Too many requests from this IP, please try again later",
+    });
+  },
+  skipFailedRequests: true, // Do not respond with 429 if the limit is reached
+  keyGenerator: function (req) {
+    return req.ip;
+  },
+  skip: function (req, res) {
+    // Skip rate limiting for specific paths
+    const skipPaths = [
+      "/api/v1/users/auth/oauth/google/callback",
+      "/api/v1/users/auth/oauth/github/callback",
+      "/api/v1/users/auth/oauth/spotify/callback",
+      "/api/v1/users/auth/oauth/facebook/callback",
+      "/api/v1/users/auth/oauth/microsoft/callback",
+      "/api/v1/users/oauth",
+    ];
+    return skipPaths.includes(req._parsedUrl.pathname);
+  },
+  onLimitReached: function (req, res, options) {
+    console.warn(`Rate limit reached for IP: ${req.ip}`);
+  }
+  
+}));
+app.use(csrfMiddleware)
 connectDB();
 connectRedis();
 connectvectorDB();
