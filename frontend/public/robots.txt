@@ -1,11 +1,8 @@
-# Block all crawlers for /accounts
 User-agent: *
 Disallow: /auth/email-sent
 Disallow: /auth/verify
 Disallow: /auth/reset-password
-Disallow:/terms
+Disallow: /terms
 Disallow: /payment
- 
-# Allow all crawlers
-User-agent: *
 Allow: /
+Sitemap: https://letshost.dpdns.org/sitemap.xml

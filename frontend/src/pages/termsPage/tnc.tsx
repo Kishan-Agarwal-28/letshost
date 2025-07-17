@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 const TermsAndConditions = () => {
   return (
@@ -246,40 +247,12 @@ const TermsAndConditions = () => {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-xl">6. Community Guidelines</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-lg mb-2">
-                  6.1 Creating a Positive Environment
-                </h4>
-                <p>
-                  To keep LetsHost a welcoming space for everyone, we ask that
-                  you avoid sharing content that could be harmful, offensive, or
-                  violate laws. This includes respecting others' intellectual
-                  property rights.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-2">
-                  6.2 Being a Good Community Member
-                </h4>
-                <p>
-                  We love having you as part of our community! Please treat
-                  others with respect, use our tools responsibly, and help us
-                  maintain a positive environment by reporting any concerning
-                  content you might encounter.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+
 
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-xl">
-                8. Privacy and Data Protection
+                7. Privacy and Data Protection
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -294,13 +267,13 @@ const TermsAndConditions = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-xl">
-                9. Intellectual Property
+                8. Intellectual Property
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <h4 className="font-semibold text-lg mb-2">
-                  9.1 Platform Rights
+                  8.1 Platform Rights
                 </h4>
                 <p>
                   LetsHost and its licensors own all rights, title, and interest
@@ -321,7 +294,7 @@ const TermsAndConditions = () => {
           <Card className="mb-6 border-red-200">
             <CardHeader className="bg-red-50">
               <CardTitle className="text-xl text-red-800">
-                10. Limitation of Liability
+                9. Limitation of Liability
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -335,7 +308,7 @@ const TermsAndConditions = () => {
 
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-xl">11. Indemnification</CardTitle>
+              <CardTitle className="text-xl">10. Indemnification</CardTitle>
             </CardHeader>
             <CardContent>
               <p>
@@ -348,7 +321,7 @@ const TermsAndConditions = () => {
 
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-xl">12. Account Issues</CardTitle>
+              <CardTitle className="text-xl">11. Account Issues</CardTitle>
             </CardHeader>
             <CardContent>
               <p>
@@ -362,22 +335,19 @@ const TermsAndConditions = () => {
 
           <Card className="mb-6 bg-gray-50 dark:bg-gray-900/50">
             <CardHeader>
-              <CardTitle className="text-xl">14. Contact Information</CardTitle>
+              <CardTitle className="text-xl">12. Contact Information</CardTitle>
             </CardHeader>
             <CardContent>
               <p>
                 If you have any questions about these Terms, please contact us
                 at:
               </p>
-              <ul className="list-disc pl-6 space-y-1 mt-2">
-                <li>Email: [contact email]</li>
-                <li>Address: [business address]</li>
-              </ul>
+            <Link to="/contact-us" className="text-primary">Contact Us</Link>
             </CardContent>
           </Card>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-xl">15. Severability</CardTitle>
+              <CardTitle className="text-xl">13. Severability</CardTitle>
             </CardHeader>
             <CardContent>
               <p>
