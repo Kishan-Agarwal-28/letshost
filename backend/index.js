@@ -10,8 +10,7 @@ import {
 } from "./middlewares/csrfToken.middleware.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { xssSanitizer } from "./middlewares/xss.middleware.js";
-import mongoSanitize from 'express-mongo-sanitize';
+ import { combinedSanitizer } from './middlewares/xss.middleware.js';
 
 const app = express();
 app.use(
@@ -37,8 +36,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(xssSanitizer)
-app.use(mongoSanitize());
+app.use(combinedSanitizer);
 app.use(rateLimit({
   windowMs:60 * 1000, // 1 minute
   max: 100, // Limit each IP to 100 requests per windowMs
