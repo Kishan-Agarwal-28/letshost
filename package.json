@@ -1,0 +1,24 @@
+{
+  "name": "letshost",
+  "version": "1.0.0",
+  "description": "![LetsHost Banner](https://letshost.imgix.net/assets/Screenshot%202025-06-28%20160149.png?fm=webp)",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kishan-Agarwal-28/letshost.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kishan-Agarwal-28/letshost/issues"
+  },
+  "homepage": "https://github.com/Kishan-Agarwal-28/letshost#readme",
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}

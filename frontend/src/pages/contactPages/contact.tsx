@@ -36,7 +36,7 @@ export default function Contact() {
     const message = formRefs.current.message?.value;
     if (
       [firstName, lastName, email, phoneNumber, message].some(
-        (field) => field?.trim() === "",
+        (field) => field?.trim() === ""
       )
     ) {
       toast({

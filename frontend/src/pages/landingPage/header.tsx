@@ -129,7 +129,7 @@ function Header() {
                   </NavLink>
                 </li>
               );
-            },
+            }
           )}
         </ul>
 

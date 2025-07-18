@@ -94,7 +94,7 @@ const addCsrfInterceptor = (axiosInstance: typeof Axios) => {
     },
     (error) => {
       return Promise.reject(error);
-    },
+    }
   );
 };
 
@@ -272,7 +272,7 @@ export const useApiPost = ({
               progressEvent.total > 0
             ) {
               const progress = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
+                (progressEvent.loaded * 100) / progressEvent.total
               );
               setUploadProgress?.(progress);
             }
@@ -476,7 +476,7 @@ interface UseApiInfiniteQueryProps {
   initialPageParam?: number;
   getPreviousPageParam?: (
     firstPage: any,
-    allPages: any[],
+    allPages: any[]
   ) => number | undefined;
 }
 

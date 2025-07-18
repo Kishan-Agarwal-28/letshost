@@ -111,7 +111,7 @@ function Tools() {
     queryKey: ["getGithub"],
     queryFn: async () => {
       const response = await axios.get(
-        "https://api.github.com/users/kishan-agarwal-28/repos",
+        "https://api.github.com/users/kishan-agarwal-28/repos"
       );
       return response.data;
     },
@@ -145,7 +145,7 @@ function Tools() {
               github={data}
               npm={searchTopics.some((topic) => data.topics.includes(topic))}
             />
-          ),
+          )
       )}
     </div>
   );

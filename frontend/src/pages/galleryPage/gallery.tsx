@@ -43,7 +43,7 @@ export const ImageHoverCard = ({
   const [isLiked, setIsLiked] = useState(item.isLikedByUser || false);
   const [isSaved, setIsSaved] = useState(item.isSavedByUser || false);
   const [viewCount, setViewCount] = useState(
-    Math.floor(Math.random() * 1000) + 100,
+    Math.floor(Math.random() * 1000) + 100
   );
   const { toast } = useToast();
 
@@ -525,8 +525,8 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   const handleItemUpdate = (updatedItem: Items) => {
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item._id === updatedItem._id ? updatedItem : item,
-      ),
+        item._id === updatedItem._id ? updatedItem : item
+      )
     );
 
     // Also update selectedItem if it's the same item

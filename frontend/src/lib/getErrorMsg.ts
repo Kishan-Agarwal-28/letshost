@@ -3,7 +3,7 @@ import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 
 // Overloads
 export function getErrorMsg(
-  handler: UseMutationResult<unknown, Error, unknown, unknown>,
+  handler: UseMutationResult<unknown, Error, unknown, unknown>
 ): string;
 export function getErrorMsg(handler: UseQueryResult<unknown, Error>): string;
 export function getErrorMsg(handler: AxiosError): string;

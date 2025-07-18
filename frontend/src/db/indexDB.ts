@@ -24,7 +24,7 @@ async function ensureDBReady() {
 export async function saveImageWithMeta(
   item: HistoryItem,
   base64: string,
-  userId: string,
+  userId: string
 ) {
   const db = await ensureDBReady();
   await db.put("images", {
@@ -36,7 +36,7 @@ export async function saveImageWithMeta(
 
 export async function loadImage(
   id: string,
-  userId: string,
+  userId: string
 ): Promise<string | null> {
   const db = await ensureDBReady();
   const record = await db.get("images", `${userId}_${id}`);
@@ -48,7 +48,7 @@ export async function getUserImageKeys(userId: string): Promise<IDBValidKey[]> {
   const db = await ensureDBReady();
   const allKeys = await db.getAllKeys("images");
   return allKeys.filter((key: IDBValidKey) =>
-    String(key).startsWith(`${userId}_`),
+    String(key).startsWith(`${userId}_`)
   );
 }
 
@@ -77,7 +77,7 @@ export async function deleteUserImageRecord(key: IDBValidKey, userId: string) {
 export async function updateUserImageRecord(
   key: IDBValidKey,
   userId: string,
-  updates: Partial<HistoryItem & { base64: string }>,
+  updates: Partial<HistoryItem & { base64: string }>
 ) {
   const db = await ensureDBReady();
   const keyStr = String(key);

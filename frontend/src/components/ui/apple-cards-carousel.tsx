@@ -88,14 +88,14 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
         >
           <div
             className={cn(
-              "absolute right-0 z-[1000] h-auto w-[5%] overflow-hidden bg-gradient-to-l",
+              "absolute right-0 z-[1000] h-auto w-[5%] overflow-hidden bg-gradient-to-l"
             )}
           ></div>
 
           <div
             className={cn(
               "flex flex-row justify-start gap-4 pl-4",
-              "mx-auto max-w-7xl", // remove max-w-4xl if you want the carousel to span the full width of its container
+              "mx-auto max-w-7xl" // remove max-w-4xl if you want the carousel to span the full width of its container
             )}
           >
             {items.map((item, index) => (
@@ -175,7 +175,7 @@ export const Card = ({
   }, [open]);
 
   useOutsideClick(containerRef as React.RefObject<HTMLDivElement>, () =>
-    handleClose(),
+    handleClose()
   );
 
   const handleOpen = () => {
@@ -265,7 +265,7 @@ export const Card = ({
           "relative z-10 flex flex-col items-start justify-start overflow-hidden rounded-3xl bg-gray-100 dark:bg-neutral-900",
           compact
             ? "h-24 w-24 md:h-28 md:w-28" // Compact size for sidebar
-            : "h-80 w-56 md:h-[40rem] md:w-96", // Original size
+            : "h-80 w-56 md:h-[40rem] md:w-96" // Original size
         )}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
@@ -274,7 +274,7 @@ export const Card = ({
             layoutId={layout ? `category-${item.uploader.username}` : undefined}
             className={cn(
               "text-left font-sans font-medium text-white",
-              compact ? "text-xs" : "text-sm md:text-base",
+              compact ? "text-xs" : "text-sm md:text-base"
             )}
           >
             @{item.uploader.username}
@@ -285,7 +285,7 @@ export const Card = ({
               "text-left font-sans font-semibold [text-wrap:balance] text-white",
               compact
                 ? "mt-1 text-xs line-clamp-2"
-                : "mt-2 max-w-xs text-xl md:text-3xl",
+                : "mt-2 max-w-xs text-xl md:text-3xl"
             )}
           >
             {item.title}
@@ -315,7 +315,7 @@ export const BlurImage = ({
       className={cn(
         "h-full w-full transition duration-300",
         isLoading ? "blur-sm" : "blur-0",
-        className,
+        className
       )}
       onLoad={() => setLoading(false)}
       src={src as string}

@@ -27,8 +27,12 @@ import {
 import { useState } from "react";
 import SuspenseWrapper from "../../../suspense.tsx";
 const CdnPage = lazy(() => import("../cdnPages/cdnPage"));
-const ImageEditor = lazy(() => import("../imageTransformerspage/transformation"));
-const AIImageGenerator = lazy(() => import("../imageTransformerspage/ai-image"));
+const ImageEditor = lazy(
+  () => import("../imageTransformerspage/transformation")
+);
+const AIImageGenerator = lazy(
+  () => import("../imageTransformerspage/ai-image")
+);
 const FileUploader = lazy(() => import("../cdnPages/fileUploader"));
 const Analytics = lazy(() => import("../analyticsPage/analytics"));
 const SettingsPage = lazy(() => import("@/pages/profileSettingsPage/settings"));
@@ -207,9 +211,7 @@ function DashboardLayout() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <SuspenseWrapper>
-          {pages[page]}
-          </SuspenseWrapper>
+          <SuspenseWrapper>{pages[page]}</SuspenseWrapper>
         </main>
       </SidebarProvider>
     </>

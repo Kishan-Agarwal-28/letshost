@@ -497,7 +497,7 @@ export default function CreatorDashboard() {
                     <p className="text-[17px] leading-[150%] tracking-[-0.5px] antialiased font-sans font-bold box-border m-0 block bg-transparent border-none outline-none text-white fill-white">
                       {dayjs().diff(
                         dayjs(analytics?.creatorInfo.createdAt),
-                        "year",
+                        "year"
                       )}
                     </p>
                   </div>
@@ -507,7 +507,7 @@ export default function CreatorDashboard() {
                 <p>
                   {dayjs().diff(
                     dayjs(analytics?.creatorInfo.createdAt),
-                    "year",
+                    "year"
                   )}{" "}
                   years ago
                 </p>
@@ -672,8 +672,8 @@ export default function CreatorDashboard() {
                             (analytics?.overview.totalSaves ?? 0) +
                             (analytics?.overview.totalDownloads ?? 0)) /
                           3
-                        ).toFixed(2),
-                      ),
+                        ).toFixed(2)
+                      )
                     )}
                   </p>
                   <p className="text-sm text-gray-500">Total Engagement</p>
@@ -826,8 +826,8 @@ export default function CreatorDashboard() {
                           (analytics?.overview.avgSavesPerImage ?? 0) +
                           (analytics?.overview.avgDownloadsPerImage ?? 0)) /
                         3
-                      ).toFixed(2),
-                    ),
+                      ).toFixed(2)
+                    )
                   )}
                 </p>
                 <p className="text-orange-200 text-xs mt-1">per image</p>

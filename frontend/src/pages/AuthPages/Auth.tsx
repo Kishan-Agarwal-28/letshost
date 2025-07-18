@@ -32,11 +32,11 @@ function Auth() {
         .min(3, "Username must be at least 3 characters long")
         .regex(
           /^[a-zA-Z0-9]+$/,
-          "Username can only contain letters and numbers",
+          "Username can only contain letters and numbers"
         )
         .refine(
           (value) => !value.includes(" "),
-          "Username cannot contain spaces",
+          "Username cannot contain spaces"
         ),
       email: z.string().email("Please enter a valid email address"),
       password: z
@@ -44,7 +44,7 @@ function Auth() {
         .min(8, "Password must be at least 8 characters long")
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         ),
       confirmPassword: z.string(),
     })
@@ -83,7 +83,7 @@ function Auth() {
         .min(3, "Username must be at least 3 characters long")
         .regex(
           /^[a-zA-Z0-9]+$/,
-          "Username can only contain letters and numbers",
+          "Username can only contain letters and numbers"
         )
         .refine((val) => !val.includes(" "), "Username cannot contain spaces")
         .or(z.literal("")), // allow empty string
@@ -98,7 +98,7 @@ function Auth() {
         .min(8, "Password must be at least 8 characters long")
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         ),
     })
     .refine((data) => data.username !== "" || data.email !== "", {

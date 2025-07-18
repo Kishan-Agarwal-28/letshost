@@ -793,7 +793,7 @@ const Docs: React.FC = () => {
         categoryParams.forEach((param: Param) => {
           params.push({ ...param, category });
         });
-      },
+      }
     );
     return params;
   }, []);
@@ -805,7 +805,7 @@ const Docs: React.FC = () => {
       (param: ParamWithCategory) =>
         param.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         param.param.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        param.description.toLowerCase().includes(searchQuery.toLowerCase()),
+        param.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, allParams]);
   useEffect(() => {
@@ -822,10 +822,10 @@ const Docs: React.FC = () => {
           id: key,
           label: key.charAt(0).toUpperCase() + key.slice(1),
           count: params.length,
-        }),
+        })
       ),
     ],
-    [allParams.length],
+    [allParams.length]
   );
 
   useEffect(() => {
@@ -838,7 +838,7 @@ const Docs: React.FC = () => {
       });
       const queryString = params.toString();
       setImageUrl(
-        queryString ? `${baseImageUrl}?${queryString}` : baseImageUrl,
+        queryString ? `${baseImageUrl}?${queryString}` : baseImageUrl
       );
     };
 
@@ -1058,7 +1058,7 @@ const Docs: React.FC = () => {
           {(Object.entries(Params) as [CategoryName, readonly Param[]][])
             .filter(
               ([category]) =>
-                selectedCategory === "all" || selectedCategory === category,
+                selectedCategory === "all" || selectedCategory === category
             )
             .map(([category, params]) => (
               <div key={category} className="space-y-2">

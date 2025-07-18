@@ -187,7 +187,7 @@ const restrictedSubdomains = [
   "updates",
   "live",
   "statuspage",
-  "supportchat"
+  "supportchat",
 ];
 
 // Create a new subdomain
@@ -199,8 +199,11 @@ const registerSubDomain = asyncHandler(async (req, res) => {
   if (!subDomain) {
     subDomain = generateSlug({ format: "kebab", parts: 2 });
   }
-  if( restrictedSubdomains.includes(subDomain)) {
-    throw new apiError(400, "This subdomain is restricted, please choose another one");
+  if (restrictedSubdomains.includes(subDomain)) {
+    throw new apiError(
+      400,
+      "This subdomain is restricted, please choose another one"
+    );
   }
   const existing = await getSubDomain(subDomain);
   if (existing) {
@@ -293,8 +296,11 @@ const updateSubDomain = asyncHandler(async (req, res) => {
   if (!newSubDomain) {
     throw new apiError(400, "New subdomain is required");
   }
-if( restrictedSubdomains.includes(newSubDomain)) {
-    throw new apiError(400, "This subdomain is restricted, please choose another one");
+  if (restrictedSubdomains.includes(newSubDomain)) {
+    throw new apiError(
+      400,
+      "This subdomain is restricted, please choose another one"
+    );
   }
   const existing = await getSubDomain(newSubDomain);
   if (existing) {

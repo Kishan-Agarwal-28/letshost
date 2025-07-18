@@ -159,7 +159,7 @@ function CdnPage() {
       filtered = filtered.filter(
         (cdn) =>
           cdn.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          cdn.cdnProjectID.toLowerCase().includes(searchQuery.toLowerCase()),
+          cdn.cdnProjectID.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -194,7 +194,7 @@ function CdnPage() {
         acc[cdn.fileType] = (acc[cdn.fileType] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     const tabsData = [
@@ -218,7 +218,7 @@ function CdnPage() {
         acc[cdn.fileType].push(cdn);
         return acc;
       },
-      {} as Record<string, ICDn[]>,
+      {} as Record<string, ICDn[]>
     );
   }, [filteredAndSortedCdns, activeTab]);
 

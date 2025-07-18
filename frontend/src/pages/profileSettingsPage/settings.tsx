@@ -78,21 +78,21 @@ function SettingsPage() {
         .min(8, "Password must be at least 8 characters long")
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         ),
       password: z
         .string()
         .min(8, "Password must be at least 8 characters long")
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         ),
       confirmPassword: z
         .string()
         .min(8, "Password must be at least 8 characters long")
         .regex(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         ),
     })
     .superRefine((data, ctx) => {
@@ -158,7 +158,7 @@ function SettingsPage() {
   const userStore = useUserStore();
 
   const onChangePasswordSubmit = async (
-    data: z.infer<typeof changePasswordSchema>,
+    data: z.infer<typeof changePasswordSchema>
   ) => {
     const res = await updatePassword.mutateAsync({
       verificationToken: searchParams.get("token"),
@@ -304,7 +304,7 @@ function SettingsPage() {
         toast({
           title: "Error",
           description: getErrorMsg(changeUsername).concat(
-            getErrorMsg(changeEmail),
+            getErrorMsg(changeEmail)
           ),
           variant: "error",
           duration: 5000,
@@ -321,7 +321,7 @@ function SettingsPage() {
     {
       providerName: "google",
       connected: user?.oauth?.providers.find(
-        (provider) => provider.providerName === "google",
+        (provider) => provider.providerName === "google"
       )
         ? true
         : false,
@@ -329,7 +329,7 @@ function SettingsPage() {
     {
       providerName: "github",
       connected: user?.oauth?.providers.find(
-        (provider) => provider.providerName === "github",
+        (provider) => provider.providerName === "github"
       )
         ? true
         : false,
@@ -549,7 +549,7 @@ function SettingsPage() {
                   <Form {...changePasswordForm}>
                     <form
                       onSubmit={changePasswordForm.handleSubmit(
-                        onChangePasswordSubmit,
+                        onChangePasswordSubmit
                       )}
                       className="space-y-4"
                     >

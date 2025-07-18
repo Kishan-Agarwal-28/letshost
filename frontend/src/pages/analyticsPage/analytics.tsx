@@ -149,7 +149,7 @@ const Analytics: React.FC = () => {
 
   // Individual file type breakdowns
   const getFileTypeBreakdown = (
-    fileType: "js" | "css" | "image" | "video",
+    fileType: "js" | "css" | "image" | "video"
   ): FileBreakdown[] => {
     if (!usageData?.cdnFiles) return [];
 
@@ -177,7 +177,7 @@ const Analytics: React.FC = () => {
   const videoFiles = getFileTypeBreakdown("video");
 
   const getTotalSizeByType = (
-    fileType: "js" | "css" | "image" | "video",
+    fileType: "js" | "css" | "image" | "video"
   ): number => {
     if (!usageData?.cdnFiles) return 0;
 
@@ -309,7 +309,7 @@ const Analytics: React.FC = () => {
             <CardContent>
               <div className="text-2xl font-bold text-slate-600">
                 {formatBytes(
-                  userData?.totalMediaSize + userData?.totalJsCssSize,
+                  userData?.totalMediaSize + userData?.totalJsCssSize
                 )}
               </div>
               <div className="flex items-center justify-between mt-2">
@@ -823,8 +823,8 @@ const Analytics: React.FC = () => {
                         Number(
                           (Number(new Date()) -
                             Number(new Date(userData?.createdAt))) /
-                            (1000 * 60 * 60 * 24),
-                        ),
+                            (1000 * 60 * 60 * 24)
+                        )
                       )}{" "}
                       days
                     </span>

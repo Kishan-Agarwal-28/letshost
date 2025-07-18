@@ -54,7 +54,7 @@ export const fetchImageDetails = async (imageIds, userId = null) => {
   try {
     const images = await Image.aggregate([
       {
-        $match: { _id: { $in: imageIds } }
+        $match: { _id: { $in: imageIds } },
       },
       {
         $lookup: {
@@ -105,18 +105,12 @@ export const fetchImageDetails = async (imageIds, userId = null) => {
           // Check if current user has liked/saved this image
           isLiked: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$likes.likedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$likes.likedBy"],
               }
             : false,
           isSaved: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$saves.savedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$saves.savedBy"],
               }
             : false,
         },
@@ -150,12 +144,7 @@ export const fetchImageDetails = async (imageIds, userId = null) => {
 
 export const searchSimilarImages = async (query, options = {}) => {
   try {
-    const {
-      limit = 10,
-      threshold = 0.7,
-      userId = null,
-      offset = 0,
-    } = options;
+    const { limit = 10, threshold = 0.7, userId = null, offset = 0 } = options;
 
     // Generate embedding for search query
     const queryEmbedding = await generateEmbedding(query);
@@ -179,7 +168,9 @@ export const searchSimilarImages = async (query, options = {}) => {
     }
 
     // Extract MongoDB IDs and scores
-    const imageIds = searchResults.map((result) => new mongoose.Types.ObjectId(result.payload.mongoId));
+    const imageIds = searchResults.map(
+      (result) => new mongoose.Types.ObjectId(result.payload.mongoId)
+    );
     const scoreMap = new Map(
       searchResults.map((result) => [result.payload.mongoId, result.score])
     );
@@ -246,7 +237,10 @@ export const findSimilarImagesById = async (mongoId, options = {}) => {
     );
 
     // Fetch target image details
-    const targetImageDetails = await fetchImageDetails([new mongoose.Types.ObjectId(mongoId)], userId);
+    const targetImageDetails = await fetchImageDetails(
+      [new mongoose.Types.ObjectId(mongoId)],
+      userId
+    );
 
     // Fetch similar images details
     const similarImagesDetails = await fetchImageDetails(
@@ -323,7 +317,7 @@ export const advancedImageSearch = async (searchParams) => {
     // Apply filters and get results using aggregation pipeline
     const filteredImages = await Image.aggregate([
       {
-        $match: mongoFilter
+        $match: mongoFilter,
       },
       {
         $lookup: {
@@ -373,18 +367,12 @@ export const advancedImageSearch = async (searchParams) => {
           downloadsCount: { $size: "$downloads" },
           isLiked: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$likes.likedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$likes.likedBy"],
               }
             : false,
           isSaved: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$saves.savedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$saves.savedBy"],
               }
             : false,
         },
@@ -462,18 +450,12 @@ export const getRandomImages = async (limit = 10, userId = null) => {
           downloadsCount: { $size: "$downloads" },
           isLiked: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$likes.likedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$likes.likedBy"],
               }
             : false,
           isSaved: userId
             ? {
-                $in: [
-                  new mongoose.Types.ObjectId(userId),
-                  "$saves.savedBy",
-                ],
+                $in: [new mongoose.Types.ObjectId(userId), "$saves.savedBy"],
               }
             : false,
         },

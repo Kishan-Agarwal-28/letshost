@@ -5,11 +5,13 @@
 ---
 
 ## 🚀 Introduction
+
 LetsHost is a modern, full-stack platform for hosting, managing, and analyzing digital content. Built for scalability, security, and developer experience, LetsHost combines a robust backend, a beautiful frontend, and advanced AI-powered services to deliver a seamless experience for creators and users alike.
 
 ---
 
 ## 📚 Table of Contents
+
 - [Introduction](#introduction)
 - [Features](#features)
 - [Architecture](#architecture)
@@ -23,6 +25,7 @@ LetsHost is a modern, full-stack platform for hosting, managing, and analyzing d
 ---
 
 ## ✨ Features
+
 - 🔐 **Authentication & Authorization**: Secure OAuth, JWT, and CSRF protection
 - 📦 **Content Hosting & CDN**: Fast, reliable content delivery with AWS S3 and Cloudinary
 - 🤖 **AI-Powered Analytics**: Gain insights with advanced analytics and vector search
@@ -36,6 +39,7 @@ LetsHost is a modern, full-stack platform for hosting, managing, and analyzing d
 ---
 
 ## 🏗️ Architecture
+
 LetsHost is organized into four main components:
 
 ```
@@ -53,14 +57,15 @@ vectorbackend/ # Node.js service for vector DB management
 ---
 
 ## 🛠️ Tech Stack
+
 - **Frontend**: React, TypeScript, Vite, Lottie, modern CSS
 - **Backend**: Node.js, Express, MongoDB, Redis, AWS S3, Cloudinary
 - **AI/Embedder**: Python, FastAPI, vector DB
 
-
 ---
 
 ## 📁 Directory Structure
+
 ```
 backend/
   controllers/   # Business logic
@@ -89,18 +94,21 @@ vectorbackend/
 ## 🧑‍💻 Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+ recommended)
 - Python 3.9+
 - MongoDB
 - Redis
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <REPO_URL>
 cd letshost
 ```
 
 ### 2. Backend Setup
+
 ```bash
 cd backend
 npm install
@@ -108,6 +116,7 @@ npm start
 ```
 
 ### 3. Frontend Setup
+
 ```bash
 cd frontend
 npm install
@@ -115,6 +124,7 @@ npm run dev
 ```
 
 ### 4. Embedder Setup
+
 ```bash
 cd embedder
 pip install -r requirements.txt
@@ -122,6 +132,7 @@ uvicorn main:app --reload
 ```
 
 ### 5. Vector Backend Setup
+
 ```bash
 cd vectorbackend
 npm install
@@ -131,12 +142,14 @@ npm start
 ---
 
 ## 📖 API Documentation
+
 - All API endpoints are organized by feature in `backend/routes/`.
 - Authentication required for most endpoints (see `middlewares/`).
 
 ---
 
 ## 🤝 Contributing
+
 We welcome contributions from the community!
 
 1. Fork the repository
@@ -150,7 +163,7 @@ Please follow the code style and add tests where appropriate.
 ---
 
 ## 📄 License
+
 This project is licensed under the ![MIT License](LICENSE).
 
 ---
-

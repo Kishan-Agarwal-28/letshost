@@ -93,8 +93,8 @@ const SearchBar = () => {
     if (searchQuery.trim()) {
       setFilteredSearches(
         recentSearches.filter((search) =>
-          search.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
+          search.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       );
     } else {
       setFilteredSearches(recentSearches);
@@ -105,7 +105,7 @@ const SearchBar = () => {
   useEffect(() => {
     if (localStorage.getItem("recentSearches")) {
       const storedSearches = JSON.parse(
-        localStorage.getItem("recentSearches") || "[]",
+        localStorage.getItem("recentSearches") || "[]"
       );
       setRecentSearches(storedSearches);
     }
@@ -156,14 +156,14 @@ const SearchBar = () => {
 
   const removeRecentSearch = (searchToRemove: string) => {
     const updated = recentSearches.filter(
-      (search) => search !== searchToRemove,
+      (search) => search !== searchToRemove
     );
     setRecentSearches(updated);
   };
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 

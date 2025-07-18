@@ -141,7 +141,7 @@ const CompactFileUploader = ({
         return "js";
       return "unsupported";
     },
-    [SUPPORTED_TYPES, allowedFileType],
+    [SUPPORTED_TYPES, allowedFileType]
   );
 
   const getFileIcon = (type: FileType): React.ReactNode => {
@@ -174,7 +174,7 @@ const CompactFileUploader = ({
       }
       return "";
     },
-    [getFileType],
+    [getFileType]
   );
 
   const validateFile = useCallback(
@@ -196,7 +196,7 @@ const CompactFileUploader = ({
 
       return null;
     },
-    [FILE_LIMITS, getFileType, allowedFileType],
+    [FILE_LIMITS, getFileType, allowedFileType]
   );
 
   const processFiles = useCallback(
@@ -231,7 +231,7 @@ const CompactFileUploader = ({
         setErrors([]);
       }
     },
-    [files, createPreview, validateFile],
+    [files, createPreview, validateFile]
   );
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -254,7 +254,7 @@ const CompactFileUploader = ({
         processFiles(Array.from(e.dataTransfer.files));
       }
     },
-    [processFiles],
+    [processFiles]
   );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -403,7 +403,7 @@ const CompactFileUploader = ({
         formData.append("signature", res.data.data.signature);
         formData.append(
           "notification_url",
-          `${config.BackendUrl}/cdn/video/upload/callback`,
+          `${config.BackendUrl}/cdn/video/upload/callback`
         );
 
         const uploadResult = await axios.post(
@@ -416,13 +416,13 @@ const CompactFileUploader = ({
                 progressEvent.total > 0
               ) {
                 const percentCompleted = Math.round(
-                  (progressEvent.loaded * 100) / progressEvent.total,
+                  (progressEvent.loaded * 100) / progressEvent.total
                 );
                 setShowUploadProgress(true);
                 setUploadProgress(percentCompleted);
               }
             },
-          },
+          }
         );
 
         console.log(uploadResult);

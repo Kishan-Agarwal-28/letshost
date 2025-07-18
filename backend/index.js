@@ -11,7 +11,7 @@ import {
 } from "./middlewares/csrfToken.middleware.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
- import { combinedSanitizer } from './middlewares/xss.middleware.js';
+import { combinedSanitizer } from "./middlewares/xss.middleware.js";
 
 const app = express();
 app.use(
@@ -38,28 +38,30 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(combinedSanitizer());
-app.use( rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    message: "Too many requests from this IP, please try again later"
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req, res) => {
-    const skipPaths = [
-      "/api/v1/users/auth/oauth/google/callback",
-      "/api/v1/users/auth/oauth/github/callback",
-      "/api/v1/users/auth/oauth/spotify/callback",
-      "/api/v1/users/auth/oauth/facebook/callback",
-      "/api/v1/users/auth/oauth/microsoft/callback",
-      "/api/v1/users/auth/oauth",
-    ];
-    
-    return skipPaths.includes(req.path);
-  }
-}));
-app.use(csrfMiddleware)
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+      message: "Too many requests from this IP, please try again later",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req, res) => {
+      const skipPaths = [
+        "/api/v1/users/auth/oauth/google/callback",
+        "/api/v1/users/auth/oauth/github/callback",
+        "/api/v1/users/auth/oauth/spotify/callback",
+        "/api/v1/users/auth/oauth/facebook/callback",
+        "/api/v1/users/auth/oauth/microsoft/callback",
+        "/api/v1/users/auth/oauth",
+      ];
+
+      return skipPaths.includes(req.path);
+    },
+  })
+);
+app.use(csrfMiddleware);
 connectDB();
 connectRedis();
 connectvectorDB();
@@ -80,7 +82,7 @@ app.use("/api/v1/analytics", analyticsRouter);
 app.use("/api/v1/gallery", galleryRouter);
 app.use("/api/v1/creator", creatorRouter);
 app.use("/api/v1/contact", contact);
-app.listen(process.env.PORT || 3000,'0.0.0.0', () => {
+app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
   console.log(
     `Server is running on http://localhost:${process.env.PORT || 3000}`
   );

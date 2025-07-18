@@ -247,8 +247,6 @@ const TermsAndConditions = () => {
             </CardContent>
           </Card>
 
-
-
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-xl">
@@ -342,7 +340,9 @@ const TermsAndConditions = () => {
                 If you have any questions about these Terms, please contact us
                 at:
               </p>
-            <Link to="/contact-us" className="text-primary">Contact Us</Link>
+              <Link to="/contact-us" className="text-primary">
+                Contact Us
+              </Link>
             </CardContent>
           </Card>
           <Card className="mb-6">

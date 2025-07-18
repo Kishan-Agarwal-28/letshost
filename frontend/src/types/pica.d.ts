@@ -12,12 +12,12 @@ declare module "pica" {
     resize: (
       from: HTMLImageElement | HTMLCanvasElement,
       to: HTMLCanvasElement,
-      options?: PicaResizeOptions,
+      options?: PicaResizeOptions
     ) => Promise<HTMLCanvasElement>;
     toBlob: (
       canvas: HTMLCanvasElement,
       mimeType?: string,
-      quality?: number,
+      quality?: number
     ) => Promise<Blob>;
   }
 

@@ -179,7 +179,7 @@ interface Template {
 }
 const ImageEditor: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string>(
-    "https://picsum.photos/800/600",
+    "https://picsum.photos/800/600"
   );
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -230,7 +230,7 @@ const ImageEditor: React.FC = () => {
       } else {
         localStorage.setItem(
           "templates",
-          JSON.stringify([...templates, templateData]),
+          JSON.stringify([...templates, templateData])
         );
         toast({
           title: "Template added successfully",
@@ -256,14 +256,14 @@ const ImageEditor: React.FC = () => {
         });
       } else {
         const template = templates.find(
-          (template: Template) => template.id === id,
+          (template: Template) => template.id === id
         );
         if (template) {
           localStorage.setItem(
             "templates",
             JSON.stringify(
-              templates.filter((template: Template) => template.id !== id),
-            ),
+              templates.filter((template: Template) => template.id !== id)
+            )
           );
           toast({
             title: "Template deleted successfully",
@@ -285,7 +285,7 @@ const ImageEditor: React.FC = () => {
   };
   useEffect(() => {
     const templatesFromLocalStorage = JSON.parse(
-      localStorage.getItem("templates") || "[]",
+      localStorage.getItem("templates") || "[]"
     );
     setTemplates(templatesFromLocalStorage);
   }, []);
@@ -334,7 +334,7 @@ const ImageEditor: React.FC = () => {
   const handleApplyTemplate = (id: string) => {
     if (templates.length === 0) {
       const templatesFromLocalStorage = JSON.parse(
-        localStorage.getItem("templates") || "[]",
+        localStorage.getItem("templates") || "[]"
       );
       if (templatesFromLocalStorage.length === 0) {
         toast({
@@ -345,7 +345,7 @@ const ImageEditor: React.FC = () => {
         });
       } else {
         templatesFromLocalStorage.filter(
-          (template: Template) => template.id === id,
+          (template: Template) => template.id === id
         );
         setOptions(templatesFromLocalStorage[0].options);
         toast({
@@ -357,7 +357,7 @@ const ImageEditor: React.FC = () => {
       }
     } else {
       const template = templates.find(
-        (template: Template) => template.id === id,
+        (template: Template) => template.id === id
       );
       if (template) {
         setOptions(template.options);
@@ -432,11 +432,11 @@ const ImageEditor: React.FC = () => {
         return newHistory;
       });
     },
-    [historyIndex],
+    [historyIndex]
   );
   const debouncedSaveToHistory = useMemo(
     () => debounce(saveToHistory, 500),
-    [saveToHistory],
+    [saveToHistory]
   );
   // Initialize history with current state
   useEffect(() => {
@@ -532,7 +532,7 @@ const ImageEditor: React.FC = () => {
             const blob = await picaInstance.toBlob(
               outputCanvas,
               "image/jpeg",
-              0.9,
+              0.9
             );
             const previewUrl = URL.createObjectURL(blob);
 
@@ -557,14 +557,14 @@ const ImageEditor: React.FC = () => {
         setIsProcessing(false);
       }
     },
-    [],
+    []
   );
 
   // Create debounce on resize with stable reference
   const debouncedResize = useRef(
     debounce(async (width: number, height: number, file: File | null) => {
       await resizeImageWithPica(width, height, file);
-    }, 300),
+    }, 300)
   ).current;
 
   // Trigger resize on width/height change if socialPlatform is 'custom'
@@ -577,7 +577,7 @@ const ImageEditor: React.FC = () => {
       debouncedResize(
         options.resize.width,
         options.resize.height,
-        originalImage,
+        originalImage
       );
     }
   }, [
@@ -612,7 +612,7 @@ const ImageEditor: React.FC = () => {
   const updateOptions = <K extends keyof AllOptions>(
     category: K,
     key: keyof AllOptions[K],
-    value: AllOptions[K][keyof AllOptions[K]],
+    value: AllOptions[K][keyof AllOptions[K]]
   ) => {
     const newOptions = {
       ...options,
@@ -679,7 +679,7 @@ const ImageEditor: React.FC = () => {
     containerWidth: number,
     containerHeight: number,
     elementWidth: number = 0,
-    elementHeight: number = 0,
+    elementHeight: number = 0
   ) => {
     const padding = 20;
     switch (preset) {
@@ -782,12 +782,12 @@ const ImageEditor: React.FC = () => {
         composite: {
           ...prev.composite,
           textOverlays: prev.composite.textOverlays.map((overlay) =>
-            overlay.id === id ? { ...overlay, ...updates } : overlay,
+            overlay.id === id ? { ...overlay, ...updates } : overlay
           ),
         },
       }));
     },
-    [],
+    []
   );
 
   // Update badge overlay
@@ -798,12 +798,12 @@ const ImageEditor: React.FC = () => {
         composite: {
           ...prev.composite,
           badges: prev.composite.badges.map((badge) =>
-            badge.id === id ? { ...badge, ...updates } : badge,
+            badge.id === id ? { ...badge, ...updates } : badge
           ),
         },
       }));
     },
-    [],
+    []
   );
 
   // Remove overlays
@@ -813,7 +813,7 @@ const ImageEditor: React.FC = () => {
       composite: {
         ...options.composite,
         textOverlays: options.composite.textOverlays.filter(
-          (overlay) => overlay.id !== id,
+          (overlay) => overlay.id !== id
         ),
       },
     };
@@ -914,7 +914,7 @@ const ImageEditor: React.FC = () => {
         img.height,
         options.resize.width - options.borders.padding.size * 2,
         options.resize.height - options.borders.padding.size * 2,
-        options.resize.fit,
+        options.resize.fit
       );
 
       // Apply transformations with borders and padding
@@ -934,7 +934,7 @@ const ImageEditor: React.FC = () => {
       if (options.rotation.flip || options.rotation.flop) {
         ctx.scale(
           options.rotation.flop ? -1 : 1,
-          options.rotation.flip ? -1 : 1,
+          options.rotation.flip ? -1 : 1
         );
       }
 
@@ -949,7 +949,7 @@ const ImageEditor: React.FC = () => {
           -rotatedWidth / 2,
           -rotatedHeight / 2,
           rotatedWidth,
-          rotatedHeight,
+          rotatedHeight
         );
       }
 
@@ -1023,7 +1023,7 @@ const ImageEditor: React.FC = () => {
           -rotatedWidth / 2 + borderOffset,
           -rotatedHeight / 2 + borderOffset,
           rotatedWidth - options.borders.border.width,
-          rotatedHeight - options.borders.border.width,
+          rotatedHeight - options.borders.border.width
         );
       }
 
@@ -1042,7 +1042,7 @@ const ImageEditor: React.FC = () => {
           const pos = getPresetPosition(
             overlay.presetPosition,
             canvas.width,
-            canvas.height,
+            canvas.height
           );
           textX = pos.x;
           textY = pos.y;
@@ -1104,7 +1104,7 @@ const ImageEditor: React.FC = () => {
             canvas.width,
             canvas.height,
             badgeWidth,
-            badgeHeight,
+            badgeHeight
           );
           badgeX = pos.x;
           badgeY = pos.y;
@@ -1132,7 +1132,7 @@ const ImageEditor: React.FC = () => {
         ctx.fillText(
           badge.text,
           badgeX + badgeWidth / 2,
-          badgeY + badgeHeight / 2,
+          badgeY + badgeHeight / 2
         );
 
         ctx.restore();
@@ -1143,7 +1143,7 @@ const ImageEditor: React.FC = () => {
         canvas.toBlob(
           (blob) => resolve(blob!),
           `image/${options.output.format}`,
-          options.output.quality / 100,
+          options.output.quality / 100
         );
       });
 
@@ -1170,7 +1170,7 @@ const ImageEditor: React.FC = () => {
     imgHeight: number,
     containerWidth: number,
     containerHeight: number,
-    fit: ResizeOptions["fit"],
+    fit: ResizeOptions["fit"]
   ) => {
     let width, height, x, y;
 
@@ -1179,7 +1179,7 @@ const ImageEditor: React.FC = () => {
         // Scale to cover the entire container, cropping if necessary
         const coverScale = Math.max(
           containerWidth / imgWidth,
-          containerHeight / imgHeight,
+          containerHeight / imgHeight
         );
         width = imgWidth * coverScale;
         height = imgHeight * coverScale;
@@ -1192,7 +1192,7 @@ const ImageEditor: React.FC = () => {
         // Scale to fit within container, maintaining aspect ratio
         const containScale = Math.min(
           containerWidth / imgWidth,
-          containerHeight / imgHeight,
+          containerHeight / imgHeight
         );
         width = imgWidth * containScale;
         height = imgHeight * containScale;
@@ -1214,7 +1214,7 @@ const ImageEditor: React.FC = () => {
         // Default to contain
         const defaultScale = Math.min(
           containerWidth / imgWidth,
-          containerHeight / imgHeight,
+          containerHeight / imgHeight
         );
         width = imgWidth * defaultScale;
         height = imgHeight * defaultScale;
@@ -1229,7 +1229,7 @@ const ImageEditor: React.FC = () => {
     e: React.MouseEvent,
     id: string,
     type: "text" | "badge",
-    action: "move" | "rotate",
+    action: "move" | "rotate"
   ) => {
     e.stopPropagation();
     e.preventDefault();
@@ -1287,7 +1287,7 @@ const ImageEditor: React.FC = () => {
         }
       }
     },
-    [dragState, updateTextOverlay, updateBadgeOverlay],
+    [dragState, updateTextOverlay, updateBadgeOverlay]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -1490,7 +1490,7 @@ const ImageEditor: React.FC = () => {
                                       e,
                                       overlay.id,
                                       "text",
-                                      "rotate",
+                                      "rotate"
                                     )
                                   }
                                   title="Drag to rotate"
@@ -1543,7 +1543,7 @@ const ImageEditor: React.FC = () => {
                                       e,
                                       badge.id,
                                       "badge",
-                                      "rotate",
+                                      "rotate"
                                     )
                                   }
                                   title="Drag to rotate"
@@ -1597,7 +1597,7 @@ const ImageEditor: React.FC = () => {
                         <Form {...templateForm}>
                           <form
                             onSubmit={templateForm.handleSubmit(
-                              handleTemplateSave,
+                              handleTemplateSave
                             )}
                           >
                             <FormFieldComp
@@ -1670,7 +1670,7 @@ const ImageEditor: React.FC = () => {
                                   {key !== "custom" &&
                                     `(${preset.width}×${preset.height})`}
                                 </SelectItem>
-                              ),
+                              )
                             )}
                           </SelectContent>
                         </Select>
@@ -1686,7 +1686,7 @@ const ImageEditor: React.FC = () => {
                               updateOptions(
                                 "resize",
                                 "width",
-                                parseInt(e.target.value) || 0,
+                                parseInt(e.target.value) || 0
                               )
                             }
                             disabled={isProcessing}
@@ -1701,7 +1701,7 @@ const ImageEditor: React.FC = () => {
                               updateOptions(
                                 "resize",
                                 "height",
-                                parseInt(e.target.value) || 0,
+                                parseInt(e.target.value) || 0
                               )
                             }
                             disabled={isProcessing}
@@ -1757,7 +1757,7 @@ const ImageEditor: React.FC = () => {
                             updateOptions(
                               "rotation",
                               "flip",
-                              !options.rotation.flip,
+                              !options.rotation.flip
                             )
                           }
                           className="flex-1"
@@ -1774,7 +1774,7 @@ const ImageEditor: React.FC = () => {
                             updateOptions(
                               "rotation",
                               "flop",
-                              !options.rotation.flop,
+                              !options.rotation.flop
                             )
                           }
                           className="flex-1"
@@ -2007,7 +2007,7 @@ const ImageEditor: React.FC = () => {
                                 <Select
                                   value={overlay.positionMode}
                                   onValueChange={(
-                                    value: "freehand" | "preset",
+                                    value: "freehand" | "preset"
                                   ) =>
                                     updateTextOverlay(overlay.id, {
                                       positionMode: value,
@@ -2234,7 +2234,7 @@ const ImageEditor: React.FC = () => {
                                 <Select
                                   value={badge.positionMode}
                                   onValueChange={(
-                                    value: "freehand" | "preset",
+                                    value: "freehand" | "preset"
                                   ) =>
                                     updateBadgeOverlay(badge.id, {
                                       positionMode: value,

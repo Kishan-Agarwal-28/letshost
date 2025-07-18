@@ -89,7 +89,7 @@ export default function AIImageGenerator() {
   const [selectedHistoryImage, setSelectedHistoryImage] =
     useState<HistoryItem | null>(null);
   const [currentTab, setCurrentTab] = useState<"generate" | "history">(
-    "generate",
+    "generate"
   );
   const [customResolution, setCustomResolution] = useState("");
   const [currentResolution, setCurrentResolution] = useState("");
@@ -114,7 +114,7 @@ export default function AIImageGenerator() {
     if (user?._id) {
       localStorage.setItem(
         `savedImages_${user?._id}`,
-        JSON.stringify([...savedImages]),
+        JSON.stringify([...savedImages])
       );
     }
   }, [savedImages, user?._id]);
@@ -133,7 +133,7 @@ export default function AIImageGenerator() {
     if (imageHistory.length > 0 && user?._id) {
       localStorage.setItem(
         `imageHistory_${user?._id}`,
-        JSON.stringify(imageHistory),
+        JSON.stringify(imageHistory)
       );
     }
   }, [imageHistory, user?._id]);
@@ -157,7 +157,7 @@ export default function AIImageGenerator() {
         keys.map(async (key) => {
           const record = await getUserImageRecord(
             key as IDBValidKey,
-            user?._id,
+            user?._id
           );
           if (!record || !record.base64) return null;
 
@@ -175,7 +175,7 @@ export default function AIImageGenerator() {
             public_id: record.public_id || "",
             contributed: record.contributed || false,
           };
-        }),
+        })
       );
 
       const valid = restored.filter(Boolean) as HistoryItem[];
@@ -352,7 +352,7 @@ export default function AIImageGenerator() {
 
     // Only remove non-saved images
     const filteredHistory = imageHistory.filter((item) =>
-      savedImages.has(item.id),
+      savedImages.has(item.id)
     );
     setImageHistory(filteredHistory);
     setSelectedHistoryImage(null);
@@ -370,7 +370,7 @@ export default function AIImageGenerator() {
     if (filteredHistory.length > 0) {
       localStorage.setItem(
         `imageHistory_${user?._id}`,
-        JSON.stringify(filteredHistory),
+        JSON.stringify(filteredHistory)
       );
     } else {
       localStorage.removeItem(`imageHistory_${user?._id}`);
@@ -412,7 +412,7 @@ export default function AIImageGenerator() {
   };
 
   const handleCustomResolutionChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
 
@@ -554,7 +554,7 @@ export default function AIImageGenerator() {
   const handleContributeImage = async () => {
     // Get the current image's public_id and check if already contributed
     const currentImage = imageHistory.find(
-      (item) => item.url === generatedImage,
+      (item) => item.url === generatedImage
     );
 
     const currentImagePublicId = currentImage?.public_id || publicID;
@@ -643,7 +643,7 @@ export default function AIImageGenerator() {
         // Update localStorage
         localStorage.setItem(
           `imageHistory_${user?._id}`,
-          JSON.stringify(updatedHistory),
+          JSON.stringify(updatedHistory)
         );
       }
     } catch (error) {
@@ -1120,7 +1120,7 @@ export default function AIImageGenerator() {
                                     onClick={() =>
                                       downloadImage(
                                         generatedImage,
-                                        `ai-generated-${Date.now()}.png`,
+                                        `ai-generated-${Date.now()}.png`
                                       )
                                     }
                                   >
@@ -1142,7 +1142,7 @@ export default function AIImageGenerator() {
                                     className="bg-white/90 hover:bg-white text-black"
                                     onClick={() => {
                                       const currentImageId = imageHistory.find(
-                                        (item) => item.url === generatedImage,
+                                        (item) => item.url === generatedImage
                                       )?.id;
                                       if (currentImageId)
                                         saveImage(currentImageId);
@@ -1150,7 +1150,7 @@ export default function AIImageGenerator() {
                                   >
                                     {(() => {
                                       const currentImageId = imageHistory.find(
-                                        (item) => item.url === generatedImage,
+                                        (item) => item.url === generatedImage
                                       )?.id;
                                       const isSaved =
                                         currentImageId &&
@@ -1273,7 +1273,7 @@ export default function AIImageGenerator() {
                           <Button
                             className={`${
                               imageHistory.find(
-                                (item) => item.url === generatedImage,
+                                (item) => item.url === generatedImage
                               )?.contributed
                                 ? "bg-gray-300 hover:bg-gray-400 cursor-not-allowed"
                                 : "bg-green-300 hover:bg-green-400 hover:scale-105"
@@ -1282,7 +1282,7 @@ export default function AIImageGenerator() {
                             disabled={
                               contributeImage.isPending ||
                               imageHistory.find(
-                                (item) => item.url === generatedImage,
+                                (item) => item.url === generatedImage
                               )?.contributed
                             }
                           >
@@ -1292,7 +1292,7 @@ export default function AIImageGenerator() {
                                 Contributing...
                               </>
                             ) : imageHistory.find(
-                                (item) => item.url === generatedImage,
+                                (item) => item.url === generatedImage
                               )?.contributed ? (
                               "Already Contributed"
                             ) : (
@@ -1408,8 +1408,7 @@ export default function AIImageGenerator() {
                                   </Label>
                                   <p className="font-medium">
                                     {Math.round(
-                                      selectedHistoryImage.generationTime /
-                                        1000,
+                                      selectedHistoryImage.generationTime / 1000
                                     )}
                                     s
                                   </p>
@@ -1420,7 +1419,7 @@ export default function AIImageGenerator() {
                                   </Label>
                                   <p className="font-medium">
                                     {new Date(
-                                      selectedHistoryImage.timestamp,
+                                      selectedHistoryImage.timestamp
                                     ).toLocaleDateString()}
                                   </p>
                                 </div>
@@ -1432,7 +1431,7 @@ export default function AIImageGenerator() {
                                   onClick={() =>
                                     downloadImage(
                                       selectedHistoryImage.url,
-                                      `ai-generated-${selectedHistoryImage.id}.png`,
+                                      `ai-generated-${selectedHistoryImage.id}.png`
                                     )
                                   }
                                 >
@@ -1444,7 +1443,7 @@ export default function AIImageGenerator() {
                                   variant="outline"
                                   onClick={() =>
                                     copyImageToClipboard(
-                                      selectedHistoryImage.url,
+                                      selectedHistoryImage.url
                                     )
                                   }
                                 >
@@ -1622,7 +1621,7 @@ export default function AIImageGenerator() {
                       if (imageToShare)
                         downloadImage(
                           imageToShare,
-                          `shared-ai-image-${Date.now()}.png`,
+                          `shared-ai-image-${Date.now()}.png`
                         );
                       setShareDialogOpen(false);
                     }}

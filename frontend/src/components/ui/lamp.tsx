@@ -33,7 +33,7 @@ export const LampContainer = ({
     <div
       className={cn(
         "relative flex min-h-screen flex-col items-center justify-center overflow-hidden w-full rounded-md z-0",
-        className,
+        className
       )}
     >
       {/* Only keeping the glowing conic lamp effect */}

@@ -7,7 +7,7 @@ import React, { useRef } from "react";
 function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mousePosition = useMousePosition(
-    containerRef as React.RefObject<HTMLDivElement>,
+    containerRef as React.RefObject<HTMLDivElement>
   );
 
   return (

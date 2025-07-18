@@ -152,7 +152,7 @@ export default function Dashboard() {
   };
   const handleUpdateSubdomainVisibility = (
     subdomain: string,
-    visibility: boolean,
+    visibility: boolean
   ) => {
     updateSubdomainVisibility.mutate({
       subDomain: subdomain,
@@ -162,8 +162,8 @@ export default function Dashboard() {
     // Update state optimistically
     setSubdomains((prevSubdomains) =>
       prevSubdomains.map((item) =>
-        item.subDomain === subdomain ? { ...item, public: visibility } : item,
-      ),
+        item.subDomain === subdomain ? { ...item, public: visibility } : item
+      )
     );
   };
 
@@ -171,8 +171,8 @@ export default function Dashboard() {
     if (deleteSubdomain.isSuccess) {
       setSubdomains((prevSubdomains) =>
         prevSubdomains.filter(
-          (item) => item.subDomain !== deleteSubdomain.variables.subDomain,
-        ),
+          (item) => item.subDomain !== deleteSubdomain.variables.subDomain
+        )
       );
       toast({
         title: "Success",
@@ -231,7 +231,7 @@ export default function Dashboard() {
           subdomain.subDomain
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          subdomain.projectID.toLowerCase().includes(searchTerm.toLowerCase()),
+          subdomain.projectID.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -404,7 +404,7 @@ export default function Dashboard() {
                         onCheckedChange={(checked) =>
                           handleUpdateSubdomainVisibility(
                             subdomain?.subDomain,
-                            checked,
+                            checked
                           )
                         }
                       />

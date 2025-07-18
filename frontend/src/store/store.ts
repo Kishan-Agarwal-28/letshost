@@ -139,7 +139,7 @@ export const useUserStore = create<IStore>()(
             }
           };
         },
-      },
-    ),
-  ),
+      }
+    )
+  )
 );

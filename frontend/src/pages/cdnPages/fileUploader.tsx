@@ -96,7 +96,7 @@ const FileUploader = ({ className }: { className?: string }) => {
       SUPPORTED_TYPES.video,
       SUPPORTED_TYPES.css,
       SUPPORTED_TYPES.js,
-    ],
+    ]
   );
 
   const getFileIcon = (type: FileType): React.ReactNode => {
@@ -129,7 +129,7 @@ const FileUploader = ({ className }: { className?: string }) => {
       }
       return "";
     },
-    [getFileType],
+    [getFileType]
   );
 
   const validateFile = useCallback(
@@ -147,7 +147,7 @@ const FileUploader = ({ className }: { className?: string }) => {
 
       return null;
     },
-    [FILE_LIMITS, getFileType],
+    [FILE_LIMITS, getFileType]
   );
 
   const processFiles = useCallback(
@@ -193,7 +193,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         setErrors([]);
       }
     },
-    [files, createPreview, getFileType, validateFile],
+    [files, createPreview, getFileType, validateFile]
   );
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -216,7 +216,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         processFiles(Array.from(e.dataTransfer.files));
       }
     },
-    [processFiles],
+    [processFiles]
   );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,7 +241,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         }
       }
     },
-    [processFiles],
+    [processFiles]
   );
 
   const handleUrlSubmit = async () => {
@@ -367,7 +367,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         formData.append("signature", res.data.data.signature);
         formData.append(
           "notification_url",
-          `${config.BackendUrl}/cdn/video/upload/callback`,
+          `${config.BackendUrl}/cdn/video/upload/callback`
         );
 
         const uploadResult = await axios.post(
@@ -380,13 +380,13 @@ const FileUploader = ({ className }: { className?: string }) => {
                 progressEvent.total > 0
               ) {
                 const percentCompleted = Math.round(
-                  (progressEvent.loaded * 100) / progressEvent.total,
+                  (progressEvent.loaded * 100) / progressEvent.total
                 );
                 setShowUploadProgress(true);
                 setUploadProgress(percentCompleted);
               }
             },
-          },
+          }
         );
 
         if (uploadResult.status === 200) {
