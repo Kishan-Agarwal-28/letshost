@@ -4,14 +4,14 @@ import { connectvectorDB } from "./db/connectVectorDB.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { ipKeyGenerator } from "express-rate-limit";
+
 import {
   csrfMiddleware,
   csrfTokenHandler,
 } from "./middlewares/csrfToken.middleware.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { combinedSanitizer } from "./middlewares/xss.middleware.js";
+// import { combinedSanitizer } from "./middlewares/xss.middleware.js";
 
 const app = express();
 app.use(
@@ -37,7 +37,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(combinedSanitizer());
+// app.use(combinedSanitizer());
 app.use(
   rateLimit({
     windowMs: 60 * 1000, // 1 minute
