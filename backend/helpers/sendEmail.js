@@ -1,10 +1,18 @@
 import { Resend } from "resend";
 import { APPNAME } from "../constants.js";
 import { generateEmailTemplates } from "./generateEmailTemplates.js";
+import { generatePlainTextEmailTemplates } from "./generateEmailTextTemplates.js";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async (to, reason, data, html, userID) => {
   const htmlTemplate = generateEmailTemplates(
+    data.username,
+    data.token,
+    data?.email,
+    reason,
+    userID
+  );
+  const textTemplate = generatePlainTextEmailTemplates(
     data.username,
     data.token,
     data?.email,
@@ -23,6 +31,7 @@ export const sendEmail = async (to, reason, data, html, userID) => {
             ? `Your sign-in email was changed for ${APPNAME}`
             : reason,
     html: htmlTemplate == null ? html : htmlTemplate,
+    text:textTemplate== null ? textTemplate : textTemplate
   };
   try {
     const email = await resend.emails.send(options);
