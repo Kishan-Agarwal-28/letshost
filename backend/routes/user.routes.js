@@ -56,7 +56,7 @@ router.route("/changePassword").post(logger, changePassword);
 
 //secured routes
 router.route("/logout").get(logger, verifyJWT, logoutUser);
-router.route("/verify").post(logger, verifyJWT, verifyUser);
+router.route("/verify").post(logger, verifyUser);
 router
   .route("/resendVerificationToken")
   .get(logger, verifyJWT, resendVerificationToken);
