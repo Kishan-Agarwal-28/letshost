@@ -54,7 +54,7 @@ const ApiRoutes = {
   getSimilarImages: "/gallery/similar",
   advancedSearch: "/gallery/advanced-search",
   discoverImages: "/gallery/discover",
-  downloadImage: "/gallery/download",
+  downloadImage: "/gallery/downloadImage",
   registerCreator: "/creator/registerCreator",
   updateFullName: "/creator/updateFullName",
   updateDescription: "/creator/updateDescription",

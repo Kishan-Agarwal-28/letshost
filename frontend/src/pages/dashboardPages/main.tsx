@@ -1,12 +1,12 @@
 import Dashboard from "@/pages/dashboardPages/dashboard.tsx";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Sparkles, ChartPie, Upload, Settings } from "lucide-react";
+import { Sparkles, ChartPie, Upload, Settings,  ImageUp, ImagePlus } from "lucide-react";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { RiDashboardHorizontalLine } from "react-icons/ri";
 import { IoMdImages } from "react-icons/io";
 import type { JSX } from "react/jsx-runtime";
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -37,6 +37,8 @@ const FileUploader = lazy(() => import("../cdnPages/fileUploader"));
 const Analytics = lazy(() => import("../analyticsPage/analytics"));
 const SettingsPage = lazy(() => import("@/pages/profileSettingsPage/settings"));
 const CreatorDashboard = lazy(() => import("../creatorpages/creatordashboard"));
+const Gallery = lazy(() => import("@/pages/galleryPage/gallery"));
+import { useSearchParams } from "react-router-dom";
 
 type PageKey =
   | "dashboard"
@@ -46,7 +48,9 @@ type PageKey =
   | "fileUploader"
   | "Settings"
   | "analytics"
-  | "creatordashboard";
+  | "creatordashboard"
+  | "gallery-likes"
+  | "gallery-saves";
 
 interface MenuItem {
   id: string;
@@ -81,9 +85,30 @@ function DashboardLayout() {
     analytics: <Analytics />,
     Settings: <SettingsPage />,
     creatordashboard: <CreatorDashboard />,
+    "gallery-likes": <Gallery />,
+    "gallery-saves": <Gallery />,
   };
 
   const [page, setPage] = useState<PageKey>("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+useEffect(() => {
+  if (searchParams.get("page")) {
+    const pageParam = searchParams.get("page") as PageKey;
+    setPage(pageParam);
+
+    const params = Object.fromEntries(searchParams.entries());
+
+    if (pageParam === "gallery-likes") {
+      setSearchParams({ ...params, showLikes: "true" });
+    } else if (pageParam === "gallery-saves") {
+      setSearchParams({ ...params, showSaves: "true" });
+    }
+  } else {
+    setSearchParams({ page });
+  }
+}, []);
+
+
   const menuSections: MenuSection[] = [
     {
       label: "Dashboard",
@@ -148,6 +173,23 @@ function DashboardLayout() {
       ],
     },
     {
+      label: "Gallery",
+      items: [
+        {
+          id: "gallery-likes",
+          label: "View Liked Images",
+          icon: ImagePlus,
+          page: "gallery-likes",
+        },
+        {
+          id: "gallery-saves",
+          label: "View Saved Images",
+          icon: ImageUp,
+          page: "gallery-saves",
+        }
+      ],
+    },
+    {
       label: "Settings",
       items: [
         {
@@ -162,6 +204,15 @@ function DashboardLayout() {
 
   const handlePageUpdate = (page: PageKey) => {
     setPage(page);
+   if(page==="gallery-likes"){
+    setSearchParams({ page, showLikes: "true" });
+  }
+  else if(page==="gallery-saves"){
+    setSearchParams({ page, showSaves: "true" });
+  }
+ else{
+    setSearchParams({ page });
+ }
   };
   return (
     <>
@@ -178,7 +229,7 @@ function DashboardLayout() {
                       return (
                         <SidebarMenuItem
                           key={item.id}
-                          className="cursor-pointer"
+                          className={`cursor-pointer ${item.page === page ? "bg-sidebar-accent rounded-md" : ""}`}
                           onClick={() => handlePageUpdate(item.page)}
                         >
                           <SidebarMenuButton asChild>

@@ -8,7 +8,7 @@ import {
   Bookmark,
   Eye,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import ApiRoutes from "@/connectors/api-routes";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,9 @@ import { getErrorMsg } from "@/lib/getErrorMsg";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import ImagePopup from "./image-popup";
 import SearchBar from "./gallerySearch";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import useUser from "@/hooks/useUser";
+
 interface ImageHoverCardProps {
   imageUrl: string;
   title?: string;
@@ -26,10 +28,9 @@ interface ImageHoverCardProps {
   index?: number;
   item: Items;
   onOpenPopup: (item: Items, index: number) => void;
-  onItemUpdate: (updatedItem: Items) => void; // Add this line
+  onItemUpdate: (updatedItem: Items) => void;
 }
 
-// Update the ImageHoverCard component signature:
 export const ImageHoverCard = ({
   imageUrl,
   title = "Untitled",
@@ -38,7 +39,7 @@ export const ImageHoverCard = ({
   index = 0,
   item,
   onOpenPopup,
-  onItemUpdate, // Add this parameter
+  onItemUpdate,
 }: ImageHoverCardProps) => {
   const [isLiked, setIsLiked] = useState(item.isLikedByUser || false);
   const [isSaved, setIsSaved] = useState(item.isSavedByUser || false);
@@ -46,15 +47,52 @@ export const ImageHoverCard = ({
     Math.floor(Math.random() * 1000) + 100
   );
   const { toast } = useToast();
-
-  const handleDownload = (e: React.MouseEvent) => {
+const navigate = useNavigate();
+const  user  = useUser();
+  const downloadImage = useApiPost({
+    type: "post",
+    key: ["downloadImage"],
+    path: ApiRoutes.downloadImage,
+    sendingFile: false,
+  });
+  const handleDownload = async(e: React.MouseEvent) => {
     e.stopPropagation();
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = `${title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if(!user){
+      navigate("/auth?mode=login");
+      toast({
+        title: "Error",
+        description: "Please login to download images",
+        duration: 5000,
+        variant: "error",
+      });
+      return;
+    }
+    downloadImage.mutateAsync({ imageId:item._id })
+    if(!downloadImage.isSuccess) {
+      toast({
+        title: "Error",
+        description: "Failed to download image",
+        duration: 5000,
+        variant: "error",
+      });
+    }
+    const imageUrl=downloadImage.data?.data.imageUrl;
+    const imageBlob=await fetch(imageUrl);
+    const blob=await imageBlob.blob();
+    const link=URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = link;
+    a.download = `${title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(link);
+    toast({
+      title: "Success",
+      description: "Image downloaded successfully",
+      duration: 5000,
+      variant: "success",
+    });
   };
 
   useEffect(() => {
@@ -136,6 +174,16 @@ export const ImageHoverCard = ({
 
   const handleLike = async (e: React.MouseEvent, imageId: string) => {
     e.stopPropagation();
+    if (!user) {
+      navigate("/auth?mode=login");
+      toast({
+        title: "Error",
+        description: "Please login to like images",
+        duration: 5000,
+        variant: "error",
+      });
+      return;
+    }
     try {
       const data = await addLikes.mutateAsync({
         imageId,
@@ -181,6 +229,16 @@ export const ImageHoverCard = ({
 
   const handleSave = async (e: React.MouseEvent, imageId: string) => {
     e.stopPropagation();
+    if (!user) {
+      navigate("/auth?mode=login");
+      toast({
+        title: "Error",
+        description: "Please login to save images",
+        duration: 5000,
+        variant: "error",
+      });
+      return;
+    }
     try {
       const data = await saveToGallery.mutateAsync({ imageId });
 
@@ -372,6 +430,17 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  // ✨ NEW: Map to store image ID to index mapping for O(1) updates
+  const imageIndexMap = useRef<Map<string, number>>(new Map());
+
+  // ✨ NEW: Function to rebuild the index map when items change
+  const rebuildIndexMap = (newItems: Items[]) => {
+    imageIndexMap.current.clear();
+    newItems.forEach((item, index) => {
+      imageIndexMap.current.set(item._id, index);
+    });
+  };
+
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.1,
     rootMargin: "200px",
@@ -381,10 +450,13 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   useEffect(() => {
     console.log("search params", searchParams);
   }, [searchParams]);
+  
   const query = searchParams.get("query");
   const limit = searchParams.get("limit") || "20";
   const page = searchParams.get("page") || "1";
   const tags = searchParams.get("tags");
+ const location=useLocation(); 
+  const {toast} = useToast();
   const getApiRoute = () => {
     if (query && tags) {
       return ApiRoutes.advancedSearch;
@@ -393,10 +465,12 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     } else if (creatorId) {
       console.log("creatorId", creatorId);
       return `${ApiRoutes.getImagesOfUser}?creatorId=${creatorId}`;
-    } else {
+    }
+     else {
       return ApiRoutes.getGallery;
     }
   };
+  
   const getQueryParams = () => {
     const params: any = {
       limit: parseInt(limit),
@@ -495,6 +569,8 @@ function Gallery({ creatorId }: { creatorId?: string }) {
 
       console.log("All flattened items:", allItems.length);
       setItems(allItems);
+      // ✨ NEW: Rebuild index map when items change
+      rebuildIndexMap(allItems);
     }
   }, [
     infiniteQuery.isSuccess,
@@ -522,19 +598,216 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     setSelectedIndex(newIndex);
     setSelectedItem(items[newIndex]);
   };
+
+  // ✨ OPTIMIZED: O(1) item update using index map
   const handleItemUpdate = (updatedItem: Items) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === updatedItem._id ? updatedItem : item
-      )
-    );
+    const itemIndex = imageIndexMap.current.get(updatedItem._id);
+    
+    if (itemIndex !== undefined) {
+      // O(1) update - directly update the specific index
+      setItems((prevItems) => {
+        const newItems = [...prevItems];
+        newItems[itemIndex] = updatedItem;
+        return newItems;
+      });
+    } else {
+      // Fallback to original O(n) method if index not found
+      // This should rarely happen, but provides safety
+      console.warn(`Item with ID ${updatedItem._id} not found in index map, falling back to O(n) update`);
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item._id === updatedItem._id ? updatedItem : item
+        )
+      );
+      // Rebuild index map to prevent future issues
+      rebuildIndexMap(items);
+    }
 
     // Also update selectedItem if it's the same item
     if (selectedItem && selectedItem._id === updatedItem._id) {
       setSelectedItem(updatedItem);
     }
   };
+useEffect(() => {
+  const imageId = searchParams.get("imageId");
+  
+  if (imageId && items.length > 0) {
+    // Find the item with matching imageId
+    const itemIndex = items.findIndex(item => item._id === imageId);
+    
+    if (itemIndex !== -1) {
+      const foundItem = items[itemIndex];
+      setSelectedItem(foundItem);
+      setSelectedIndex(itemIndex);
+      setIsPopupOpen(true);
+    } else {
+      console.warn(`Image with ID ${imageId} not found in current items`);
+      // Optionally, you could show a toast notification here
+      toast({
+        title: "Image not found",
+        description: "The requested image could not be found in the current gallery.",
+        duration: 5000,
+        variant: "error",
+      });
+    }
+  }
+}, [searchParams, items]);
+if(searchParams.get("showLikes")&&location.pathname.toString().includes("dashboard")){
 
+  return(
+    <>
+      <div className="min-h-screen py-12 px-4">
+    <SearchBar />
+      <ResponsiveMasonry
+        columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
+      >
+        <Masonry gutter="20px">
+          {items.map((item, i) => {
+            if(item.isLikedByUser){
+            return (
+              <ImageHoverCard
+                key={`${item.public_id}-${i}`}
+                imageUrl={item.imageUrl}
+                title={item.title}
+                description={item.description}
+                alt={`Gallery image ${i + 1}`}
+                index={i}
+                item={item}
+                onOpenPopup={handleOpenPopup}
+                onItemUpdate={handleItemUpdate}
+              />
+            );
+          }
+          })}
+        </Masonry>
+      </ResponsiveMasonry>
+
+      {infiniteQuery.hasNextPage && (
+        <div ref={inViewRef} className="flex justify-center mt-8 py-4">
+          {infiniteQuery.isFetchingNextPage ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+              <span className="text-gray-600">Loading more images...</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => infiniteQuery.fetchNextPage()}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              disabled={!infiniteQuery.hasNextPage}
+            >
+              Load More
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* End of results message */}
+      {!infiniteQuery.hasNextPage && items.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <div className="text-gray-500">
+            You've reached the end of the gallery
+          </div>
+        </div>
+      )}
+
+      {/* Image Popup */}
+      {selectedItem && (
+  <ImagePopup
+    isOpen={isPopupOpen}
+    onOpenChange={(open) => {
+      setIsPopupOpen(open);
+      // Clear imageId from URL when closing popup
+      if (!open && searchParams.get("imageId")) {
+        searchParams.delete("imageId");
+      }
+    }}
+    item={selectedItem}
+    onNavigate={handleNavigate}
+    onItemUpdate={handleItemUpdate}
+  />
+)}
+    </div>
+    </>
+  )
+}
+if(searchParams.get("showSaves")&&location.pathname.toString().includes("dashboard")){
+
+  return(
+    <>
+      <div className="min-h-screen py-12 px-4">
+    <SearchBar />
+      <ResponsiveMasonry
+        columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
+      >
+        <Masonry gutter="20px">
+          {items.map((item, i) => {
+            if(item.isSavedByUser){
+            return (
+              <ImageHoverCard
+                key={`${item.public_id}-${i}`}
+                imageUrl={item.imageUrl}
+                title={item.title}
+                description={item.description}
+                alt={`Gallery image ${i + 1}`}
+                index={i}
+                item={item}
+                onOpenPopup={handleOpenPopup}
+                onItemUpdate={handleItemUpdate}
+              />
+            );
+          }
+          })}
+        </Masonry>
+      </ResponsiveMasonry>
+
+      {infiniteQuery.hasNextPage && (
+        <div ref={inViewRef} className="flex justify-center mt-8 py-4">
+          {infiniteQuery.isFetchingNextPage ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+              <span className="text-gray-600">Loading more images...</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => infiniteQuery.fetchNextPage()}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              disabled={!infiniteQuery.hasNextPage}
+            >
+              Load More
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* End of results message */}
+      {!infiniteQuery.hasNextPage && items.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <div className="text-gray-500">
+            You've reached the end of the gallery
+          </div>
+        </div>
+      )}
+
+      {/* Image Popup */}
+      {selectedItem && (
+  <ImagePopup
+    isOpen={isPopupOpen}
+    onOpenChange={(open) => {
+      setIsPopupOpen(open);
+      // Clear imageId from URL when closing popup
+      if (!open && searchParams.get("imageId")) {
+        searchParams.delete("imageId");
+      }
+    }}
+    item={selectedItem}
+    onNavigate={handleNavigate}
+    onItemUpdate={handleItemUpdate}
+  />
+)}
+    </div>
+    </>
+  )
+}
   // Loading state
   if (infiniteQuery.isLoading) {
     return (
@@ -640,13 +913,20 @@ function Gallery({ creatorId }: { creatorId?: string }) {
 
       {/* Image Popup */}
       {selectedItem && (
-        <ImagePopup
-          isOpen={isPopupOpen}
-          onOpenChange={setIsPopupOpen}
-          item={selectedItem}
-          onNavigate={handleNavigate}
-        />
-      )}
+  <ImagePopup
+    isOpen={isPopupOpen}
+    onOpenChange={(open) => {
+      setIsPopupOpen(open);
+      // Clear imageId from URL when closing popup
+      if (!open && searchParams.get("imageId")) {
+        searchParams.delete("imageId");
+      }
+    }}
+    item={selectedItem}
+    onNavigate={handleNavigate}
+    onItemUpdate={handleItemUpdate}
+  />
+)}
     </div>
   );
 }

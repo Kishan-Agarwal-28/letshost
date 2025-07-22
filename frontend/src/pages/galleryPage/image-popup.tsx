@@ -15,7 +15,12 @@ import { useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { cn } from "@/lib/utils";
 import { Card, Carousel } from "@/components/ui/apple-cards-carousel";
-import { Link } from "react-router-dom";
+import { Link ,useNavigate, useSearchParams} from "react-router-dom";
+import { useApiPost } from "@/hooks/apiHooks";
+import { toast } from "@/hooks/use-toast";
+import { getErrorMsg } from "@/lib/getErrorMsg";
+import useUser from "@/hooks/useUser";
+
 const Dialog = DialogPrimitive.Root;
 
 const DialogPortal = DialogPrimitive.Portal;
@@ -64,6 +69,7 @@ interface ImagePopupProps {
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   onNavigate?: (direction: "prev" | "next") => void;
+  onItemUpdate: (updatedItem: Items) => void;
 }
 
 const ImagePopup: React.FC<ImagePopupProps> = ({
@@ -71,6 +77,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
   onOpenChange,
   item,
   onNavigate,
+  onItemUpdate,
 }) => {
   const [isLiked, setIsLiked] = React.useState(false);
   const [isSaved, setIsSaved] = React.useState(false);
@@ -78,6 +85,17 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
     React.useState<Items>(item);
 
   const [similarImages, setSimilarImages] = React.useState<Items[]>([]);
+  const navigate = useNavigate();
+  const user = useUser();
+  const [searchParams,setSearchParams] = useSearchParams();
+  
+React.useEffect(() => {
+  if(searchParams.get("imageId")!== item._id) {
+    setSearchParams({ imageId: item._id });
+
+  }
+});
+
   const getSimilarImages = useApiGet({
     key: ["getSimilarImages"],
     path: `${ApiRoutes.discoverImages}?limit=10`,
@@ -124,7 +142,130 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
   const prevImage = () => {
     onNavigate?.("prev");
   };
+ const addLikes = useApiPost({
+    type: "post",
+    key: ["addLikes"],
+    path: ApiRoutes.likeImage,
+    sendingFile: false,
+  });
+  const saveToGallery = useApiPost({
+    type: "post",
+    key: ["saveToGallery"],
+    path: ApiRoutes.saveImage,
+    sendingFile: false,
+  });
 
+  const handleLike = async (e: React.MouseEvent, imageId: string) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate("/auth?mode=login");
+      toast({
+        title: "Error",
+        description: "Please login to like images",
+        duration: 5000,
+        variant: "error",
+      });
+      return;
+    }
+    try {
+      const data = await addLikes.mutateAsync({
+        imageId,
+      });
+      if (data.status === 200) {
+        const isLiked = data.data.data.action === "liked";
+        setIsLiked(isLiked);
+
+        // Update the parent component's state
+        const updatedItem = {
+          ...item,
+          isLikedByUser: isLiked,
+          likesCount: isLiked
+            ? item.likesCount + 1
+            : Math.max(0, item.likesCount - 1),
+        };
+        onItemUpdate(updatedItem);
+
+        toast({
+          title: "Success",
+          description: data.data.message,
+          duration: 5000,
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Image not liked",
+          duration: 5000,
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: getErrorMsg(addLikes),
+        duration: 5000,
+        variant: "error",
+      });
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent, imageId: string) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate("/auth?mode=login");
+      toast({
+        title: "Error",
+        description: "Please login to save images",
+        duration: 5000,
+        variant: "error",
+      });
+      return;
+    }
+    try {
+      const data = await saveToGallery.mutateAsync({ imageId });
+
+      if (data.status === 200) {
+        const isSaved = data.data.data.action === "saved";
+        setIsSaved(isSaved);
+
+        // Update the parent component's state
+        const updatedItem = {
+          ...item,
+          isSavedByUser: isSaved,
+          savesCount: isSaved
+            ? item.savesCount + 1
+            : Math.max(0, item.savesCount - 1),
+        };
+        onItemUpdate(updatedItem);
+
+        toast({
+          title: "Success",
+          description: data.data.message,
+          duration: 5000,
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save image",
+          duration: 5000,
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+
+      toast({
+        title: "Error",
+        description:
+          getErrorMsg(saveToGallery) ||
+          "Something went wrong while saving the image.",
+        duration: 5000,
+        variant: "error",
+      });
+    }
+  };
   const cards = similarImages?.map((card, index) => (
     <Card key={card._id} item={card} index={index} />
   ));
@@ -206,7 +347,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
                 <div className="flex items-center justify-between py-3 md:py-4 border-y border-border">
                   <div className="flex items-center space-x-4 md:space-x-6">
                     <button
-                      onClick={() => setIsLiked(!isLiked)}
+                      onClick={(e) => handleLike?.(e,currentDisplayItem._id)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Heart
@@ -216,12 +357,12 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
                         )}
                       />
                       <span className="text-sm md:text-base">
-                        {currentDisplayItem.likesCount + (isLiked ? 1 : 0)}
+                        {currentDisplayItem.likesCount}
                       </span>
                     </button>
 
                     <button
-                      onClick={() => setIsSaved(!isSaved)}
+                      onClick={(e) => handleSave?.(e,currentDisplayItem._id)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Bookmark
@@ -231,7 +372,7 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
                         )}
                       />
                       <span className="text-sm md:text-base">
-                        {currentDisplayItem.savesCount + (isSaved ? 1 : 0)}
+                        {currentDisplayItem.savesCount}
                       </span>
                     </button>
                   </div>

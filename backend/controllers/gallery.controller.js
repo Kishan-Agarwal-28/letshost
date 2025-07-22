@@ -360,8 +360,8 @@ const getImagesOfUser = asyncHandler(async (req, res) => {
 
 const getGallery = asyncHandler(async (req, res) => {
   const { limit = 10, page = 1 } = req.query;
-  const limitNum = parseInt(limit, 10);
-  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10)||10;
+  const pageNum = parseInt(page, 10)||1;
 
   console.log("Fetching page:", pageNum, "with limit:", limitNum);
 
