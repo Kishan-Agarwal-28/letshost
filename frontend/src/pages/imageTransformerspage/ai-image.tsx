@@ -121,7 +121,7 @@ export default function AIImageGenerator() {
   useEffect(() => {
     if (user) {
       setTokens(user.genCredits);
-      console.log("checking user api key", user.apiKey);
+      // console.log("checking user api key", user.apiKey);
       if (user.apiKey && user.apiKey !== "") {
         setGeminiApiKey(user.apiKey);
         setUseGeminiApi(true);
@@ -250,19 +250,19 @@ export default function AIImageGenerator() {
         setIsGenerating(false);
         if (!useGeminiApi) {
           setTokens(image.data.data.credits);
-          console.log("credits", image.data.data.credits);
+          // console.log("credits", image.data.data.credits);
           setPublicID(image.data.data.public_id);
           userStore.updateUser({ genCredits: image.data.data.credits });
         }
-        console.log("image", image.data.data.image);
-        console.log(image.data.data);
+        // console.log("image", image.data.data.image);
+        // console.log(image.data.data);
         if (
           image?.data?.data?.image &&
           Array.isArray(image.data.data?.image) &&
           image.data.data?.image.length > 0
         ) {
           const base64Image = image.data.data?.image[1]?.inlineData.data;
-          console.log("Base64 image data:", base64Image);
+          // console.log("Base64 image data:", base64Image);
           if (base64Image) {
             const imageUrl = base64ToBlobUrl(base64Image);
             setGeneratedImage(imageUrl);

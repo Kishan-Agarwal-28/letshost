@@ -356,7 +356,7 @@ const FileUploader = ({ className }: { className?: string }) => {
           },
         });
 
-        console.log(res.data.data);
+        // console.log(res.data.data);
         const formData = new FormData();
         formData.append("file", actualFiles[0]);
         formData.append("folder", res.data.data.folder);

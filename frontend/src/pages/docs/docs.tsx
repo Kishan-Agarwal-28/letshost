@@ -808,10 +808,10 @@ const Docs: React.FC = () => {
         param.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, allParams]);
-  useEffect(() => {
-    console.log("Search query:", searchQuery);
-    console.log("Filtered results:", filteredParams);
-  }, [searchQuery, filteredParams]);
+  // useEffect(() => {
+  //   // console.log("Search query:", searchQuery);
+  //   // console.log("Filtered results:", filteredParams);
+  // }, [searchQuery, filteredParams]);
 
   // Categories for filtering
   const categories = useMemo(

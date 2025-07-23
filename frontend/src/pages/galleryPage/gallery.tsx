@@ -447,9 +447,9 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   });
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    console.log("search params", searchParams);
-  }, [searchParams]);
+  // useEffect(() => {
+  //   console.log("search params", searchParams);
+  // }, [searchParams]);
   
   const query = searchParams.get("query");
   const limit = searchParams.get("limit") || "20";
@@ -463,7 +463,7 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     } else if (query) {
       return ApiRoutes.searchImages;
     } else if (creatorId) {
-      console.log("creatorId", creatorId);
+      // console.log("creatorId", creatorId);
       return `${ApiRoutes.getImagesOfUser}?creatorId=${creatorId}`;
     }
      else {
@@ -498,21 +498,21 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     path: getApiRoute(),
     enabled: true,
     getNextPageParam: (lastPage) => {
-      console.log("getNextPageParam called with:", lastPage);
+      // console.log("getNextPageParam called with:", lastPage);
 
       const responseData = lastPage?.data?.data;
       if (!responseData) {
-        console.log("No response data found");
+        // console.log("No response data found");
         return undefined;
       }
 
       if (responseData.pagination?.hasNextPage) {
         const nextPage = responseData.pagination.currentPage + 1;
-        console.log("Next page:", nextPage);
+        // console.log("Next page:", nextPage);
         return nextPage;
       }
 
-      console.log("No more pages available");
+      // console.log("No more pages available");
       return undefined;
     },
     initialPageParam: getQueryParams().page,
@@ -534,7 +534,7 @@ function Gallery({ creatorId }: { creatorId?: string }) {
       infiniteQuery.hasNextPage &&
       !infiniteQuery.isFetchingNextPage
     ) {
-      console.log("Fetching next page due to inView...");
+      // console.log("Fetching next page due to inView...");
       infiniteQuery.fetchNextPage();
     }
   }, [inView, infiniteQuery.hasNextPage, infiniteQuery.isFetchingNextPage]);
@@ -562,12 +562,12 @@ function Gallery({ creatorId }: { creatorId?: string }) {
           getApiRoute() === ApiRoutes.advancedSearch
         ) {
           const responseData = page.data.data.results;
-          console.log("responsedata", responseData);
+          // console.log("responsedata", responseData);
           return responseData;
         }
       });
 
-      console.log("All flattened items:", allItems.length);
+      // console.log("All flattened items:", allItems.length);
       setItems(allItems);
       // ✨ NEW: Rebuild index map when items change
       rebuildIndexMap(allItems);

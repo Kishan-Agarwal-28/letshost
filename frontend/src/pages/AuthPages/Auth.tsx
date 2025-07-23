@@ -215,7 +215,7 @@ function Auth() {
       getOauthUser.refetch();
       if (getOauthUser.isFetched) {
         if (getOauthUser.isSuccess) {
-          console.log(getOauthUser.data?.data?.data);
+          // console.log(getOauthUser.data?.data?.data);
           userStore.setUser(getOauthUser.data?.data?.data);
         } else if (getOauthUser.isError) {
           toast({
@@ -242,7 +242,7 @@ function Auth() {
             duration: 5000,
           });
           if (getOauthUser.data?.data?.data?.isVerified) {
-            console.log("inside isverified");
+            // console.log("inside isverified");
             navigate(`/dashboard?uid=${user._id}`);
           } else {
             navigate("/auth/email-sent", { state: { fromApp: true } });

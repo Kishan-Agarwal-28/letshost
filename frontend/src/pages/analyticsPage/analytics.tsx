@@ -124,7 +124,7 @@ const Analytics: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("useEffect");
+    // console.log("useEffect");
     if (getAnalytics.isSuccess && getAnalytics.data?.data) {
       setUserData(getAnalytics.data.data.data.userData);
       setUsageData(getAnalytics.data.data.data.usageData);

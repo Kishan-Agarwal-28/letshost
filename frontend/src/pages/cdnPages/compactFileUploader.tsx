@@ -425,7 +425,7 @@ const CompactFileUploader = ({
           }
         );
 
-        console.log(uploadResult);
+        // console.log(uploadResult);
         if (uploadResult.status === 200) {
           clearUploadStates();
           setUploadProgress(0);

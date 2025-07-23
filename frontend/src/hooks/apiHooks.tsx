@@ -155,7 +155,7 @@ export const useApiGet = ({
         user
       ) {
         // This will finally trigger
-        console.log("Reauth triggered due to:", msg);
+        // console.log("Reauth triggered due to:", msg);
         try {
           const res = await Axios.post(ApiRoutes.generateNewTokens, option);
 
@@ -332,7 +332,7 @@ export const useApiPost = ({
     } catch (error: any) {
       // Check if the error is due to cancellation
       if (error.name === "AbortError" || error.code === "ERR_CANCELED") {
-        console.log("Request was cancelled");
+        ("Request was cancelled");
         abortControllerRef.current = null;
         throw new Error("Request cancelled");
       }
@@ -364,7 +364,7 @@ export const useApiPost = ({
           err.response.statusText.includes("Unauthorized")) &&
         user
       ) {
-        console.log("Reauth triggered due to:", msg);
+        // console.log("Reauth triggered due to:", msg);
         try {
           // Check if request was cancelled before reauth
           if (signal.aborted) {
@@ -438,7 +438,7 @@ export const useApiPost = ({
             retryErr.code === "ERR_CANCELED" ||
             retryErr.message === "Request cancelled"
           ) {
-            console.log("Retry request was cancelled");
+            // console.log("Retry request was cancelled");
             throw new Error("Request cancelled");
           }
 
@@ -495,7 +495,7 @@ export const useApiInfiniteQuery = ({
 }: UseApiInfiniteQueryProps) => {
   const fn = async ({ pageParam }: any) => {
     try {
-      console.log("Fetching page:", pageParam, "with limit:", limit);
+      // console.log("Fetching page:", pageParam, "with limit:", limit);
 
       // Build the URL with page parameter
       const url = path.includes("?")
@@ -503,7 +503,7 @@ export const useApiInfiniteQuery = ({
         : `${path}?query=${query}&page=${pageParam}&limit=${limit}&tags=${tags}`;
 
       const response = await Axios.get(url, option);
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       return response;
     } catch (error: unknown) {
