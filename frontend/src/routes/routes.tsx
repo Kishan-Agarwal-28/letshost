@@ -178,9 +178,9 @@ export const router = createBrowserRouter(
         <SuspenseWrapper>
           <ProtectedRoute>
             <VerifiedRoute>
-              <ProgramaticRoutesLayout>
+             
                   <ConfirmPayment />
-              </ProgramaticRoutesLayout>
+
             </VerifiedRoute>
           </ProtectedRoute>
         </SuspenseWrapper>
