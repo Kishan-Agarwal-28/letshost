@@ -1,5 +1,5 @@
 import Lottie from "lottie-react";
-import animation from "@/../lottie/error404.json";
+import animation from "@/../lottie/error_404_error.json";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 function Error() {
