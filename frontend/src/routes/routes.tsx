@@ -30,6 +30,7 @@ const CreatorDashboard = lazy(
 const Gallery = lazy(() => import("@/pages/galleryPage/gallery.tsx"));
 const Docs = lazy(() => import("@/pages/docs/docs.tsx"));
 import SuspenseWrapper from "../../suspense.tsx";
+import ConfirmPayment from "@/pages/pricingPages/confirmPayment.tsx";
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -171,7 +172,20 @@ export const router = createBrowserRouter(
           }
         />
       </Route>
-
+      <Route
+      path="/payment/checkout"
+      element={
+        <SuspenseWrapper>
+          <ProtectedRoute>
+            <VerifiedRoute>
+              <ProgramaticRoutesLayout>
+                  <ConfirmPayment />
+              </ProgramaticRoutesLayout>
+            </VerifiedRoute>
+          </ProtectedRoute>
+        </SuspenseWrapper>
+      }
+    />
       <Route
         path="*"
         element={

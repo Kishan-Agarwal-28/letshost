@@ -1,11 +1,11 @@
 import Lottie from "lottie-react";
-import animation from "@/../lottie/error404.json";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-function Error() {
-  const navigate = useNavigate();
+import animation from "@/../lottie/verify.json";
+function ConfirmPayment() {
+    const navigate = useNavigate();
   return (
-    <>
+     <>
       <div className="w-full h-dvh flex justify-center items-center bg-zinc-950 flex-col overflow-hidden">
         <Lottie
           animationData={animation}
@@ -20,7 +20,6 @@ function Error() {
         </Button>
       </div>
     </>
-  );
+  )
 }
-
-export default Error;
+export default ConfirmPayment
