@@ -173,7 +173,7 @@ export const router = createBrowserRouter(
         />
       </Route>
       <Route
-      path="/payment/checkout"
+      path="/payment/checkout/return"
       element={
         <SuspenseWrapper>
           <ProtectedRoute>
