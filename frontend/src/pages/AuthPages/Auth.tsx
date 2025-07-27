@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { AiFillGoogleCircle, AiOutlineGithub } from "react-icons/ai";
-import { FaEyeSlash, FaEye } from "react-icons/fa";
 import config from "@/config/config";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +14,10 @@ import { getErrorMsg } from "@/lib/getErrorMsg";
 import { useUserStore } from "@/store/store";
 import ApiRoutes from "@/connectors/api-routes";
 import ForgotPassword from "./ForgotPassword";
+import { PasswordInput } from "@/components/ui/password-input";
+import {FormControl,  FormDescription, FormItem, FormLabel, FormMessage ,FormField} from "@/components/ui/form";
+
+
 function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -24,6 +27,9 @@ function Auth() {
   });
 
   const userStore = useUserStore();
+  const [is2FARequired, setIs2FARequired] = useState(false);
+
+
   //@handling form and their types
   const signUpSchema = z
     .object({
@@ -106,9 +112,6 @@ function Auth() {
       path: ["username"],
     });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const modeParam = searchParams.get("mode");
   const validMode =
     modeParam === "login" || modeParam === "signup" ? modeParam : "signup";
@@ -133,10 +136,12 @@ function Auth() {
   const switchToLogin = () => {
     setSearchParams({ mode: "login" });
     signUpForm.reset();
+    setIs2FARequired(false);
   };
   const switchToSignup = () => {
     setSearchParams({ mode: "signup" });
     loginForm.reset();
+    setIs2FARequired(false);
   };
 
   //@handling sending of data to backend
@@ -150,7 +155,6 @@ function Auth() {
     key: ["login"],
     path: ApiRoutes.login,
   });
-
   const onSignuUpSubmit = (data: z.infer<typeof signUpSchema>) => {
     register.mutate(data);
   };
@@ -178,13 +182,27 @@ function Auth() {
 
       // Login success
       if (login.isSuccess) {
-        const isVerified = login.data?.data?.data?.user?.isVerified;
-        const userId = login.data?.data?.data?.user?._id;
-        await userStore.setUser(login.data?.data?.data?.user);
-        if (isVerified) {
-          navigate(`/dashboard?uid=${userId}`);
+        const responseData = login.data?.data?.data;
+        
+        // Check if 2FA is required
+        if (login.data?.data?.message === "User logged in successfully but pending 2FA") {
+          setIs2FARequired(true);
+          toast({
+            title: "2FA Required",
+            description: "Please authenticate with your security key to complete login.",
+            variant: "default",
+            duration: 5000,
+          });
         } else {
-          navigate("/auth/email-sent", { state: { fromApp: true } });
+          // Normal login flow
+          const isVerified = responseData?.user?.isVerified;
+          const userId = responseData?.user?._id;
+          await userStore.setUser(responseData?.user);
+          if (isVerified) {
+            navigate(`/dashboard?uid=${userId}`);
+          } else {
+            navigate("/auth/email-sent", { state: { fromApp: true } });
+          }
         }
       }
 
@@ -198,7 +216,12 @@ function Auth() {
         });
       }
     })();
-  }, [register.isSuccess, register.isError, login.isSuccess, login.isError]);
+  }, [
+    register.isSuccess, 
+    register.isError, 
+    login.isSuccess, 
+    login.isError,
+  ]);
 
   //@handling oauth
   const getStatus = searchParams.get("status");
@@ -215,7 +238,6 @@ function Auth() {
       getOauthUser.refetch();
       if (getOauthUser.isFetched) {
         if (getOauthUser.isSuccess) {
-          // console.log(getOauthUser.data?.data?.data);
           userStore.setUser(getOauthUser.data?.data?.data);
         } else if (getOauthUser.isError) {
           toast({
@@ -228,6 +250,7 @@ function Auth() {
       }
     }
   }, [getStatus, getOauthUser.isError, getOauthUser.isSuccess, toast]);
+
   useEffect(() => {
     (async () => {
       const user = await userStore.getUser();
@@ -242,7 +265,6 @@ function Auth() {
             duration: 5000,
           });
           if (getOauthUser.data?.data?.data?.isVerified) {
-            // console.log("inside isverified");
             navigate(`/dashboard?uid=${user._id}`);
           } else {
             navigate("/auth/email-sent", { state: { fromApp: true } });
@@ -251,13 +273,21 @@ function Auth() {
       }
     })();
   }, [userStore, navigate, toast]);
+
+  // Render 2FA authentication screen
+  if (is2FARequired) {
+    navigate("/user/auth/additional-safety/2fa?mode=login&action=enable",{state:{fromApp:true, loginRequired:true,
+      challenge:login.data?.data.data.challenge
+    }});
+  }
+
   return (
     <>
       <div className="flex flex-col md:flex-row justify-center items-center h-dvh w-full relative text-white perspective-distant overflow-hidden p-4 md:p-8">
         <div
           className={`relative transition-all duration-500 ease-in-out transform-3d w-full md:w-1/2 ${validMode === "login" ? "rotate-y-180" : ""} flex justify-center items-center`}
         >
-          // {/* Sign Up Side */}
+          {/* Sign Up Side */}
           <div className="absolute w-full h-full backface-hidden flex justify-center items-center">
             <div className="bg-black rounded-2xl w-[90%] md:w-[80%] min-h-[90%] flex flex-col justify-center items-center shadow-2xl p-6 sm:p-8">
               <h1 className="text-2xl font-bold text-center">
@@ -301,50 +331,35 @@ function Auth() {
                       placeholderValue="example@gmail.com"
                       type="email"
                     />
-                    <div className="relative">
-                      <FormFieldComp
-                        form={signUpForm}
-                        name="password"
-                        labelValue="Password"
-                        descriptionValue="Enter your Password"
-                        placeholderValue="Password"
-                        type={showPassword ? "text" : "password"}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                      >
-                        {showPassword ? (
-                          <FaEyeSlash size={20} />
-                        ) : (
-                          <FaEye size={20} />
-                        )}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <FormFieldComp
-                        form={signUpForm}
-                        name="confirmPassword"
-                        labelValue="Confirm Password"
-                        descriptionValue="Confirm your Password"
-                        placeholderValue="Confirm Password"
-                        type={showConfirmPassword ? "text" : "password"}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                      >
-                        {showConfirmPassword ? (
-                          <FaEyeSlash size={20} />
-                        ) : (
-                          <FaEye size={20} />
-                        )}
-                      </button>
-                    </div>
+                   
+                     <FormField
+          control={signUpForm.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <PasswordInput placeholder="********" {...field} />
+              </FormControl>
+              <FormDescription>Enter your password.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+                           <FormField
+                                    control={signUpForm.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormControl>
+                                          <PasswordInput placeholder="********" {...field} />
+                                        </FormControl>
+                                        <FormDescription>Confirm your Password</FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
                     <Button
                       type="submit"
                       disabled={register.isPending}
@@ -355,7 +370,7 @@ function Auth() {
                     <p className="text-sm text-muted-foreground text-center">
                       Already have an account?{" "}
                       <span
-                        className={`text-secondary hover:underline ${register.isPending ? "cursor-not-allowed" : "cursor-pointer"}`}
+                        className={`text-secondary-foreground hover:underline ${register.isPending ? "cursor-not-allowed" : "cursor-pointer"}`}
                         onClick={
                           !register.isPending ? switchToLogin : undefined
                         }
@@ -420,28 +435,23 @@ function Auth() {
                       placeholderValue="example@gmail.com"
                       type="email"
                     />
-                    <div className="relative">
-                      <FormFieldComp
-                        form={loginForm}
-                        name="password"
-                        labelValue="Password"
-                        descriptionValue="Enter your Password"
-                        placeholderValue="Password"
-                        type={showLoginPassword ? "text" : "password"}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                      >
-                        {showLoginPassword ? (
-                          <FaEyeSlash size={20} />
-                        ) : (
-                          <FaEye size={20} />
-                        )}
-                      </button>
-                      <ForgotPassword />
-                    </div>
+                     <div className="relative w-full flex justify-end flex-col">
+                      <FormField
+          control={loginForm.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <PasswordInput placeholder="********" {...field} />
+              </FormControl>
+              <FormDescription>Enter your password.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <ForgotPassword/>
+                     </div>
                     <Button
                       type="submit"
                       disabled={login.isPending}
@@ -452,7 +462,7 @@ function Auth() {
                     <p className="text-sm text-muted-foreground text-center">
                       Don't have an account?{" "}
                       <span
-                        className={`text-secondary hover:underline ${login.isPending ? "cursor-not-allowed" : "cursor-pointer"}`}
+                        className={`text-secondary-foreground hover:underline ${login.isPending ? "cursor-not-allowed" : "cursor-pointer"}`}
                         onClick={!login.isPending ? switchToSignup : undefined}
                       >
                         Signup

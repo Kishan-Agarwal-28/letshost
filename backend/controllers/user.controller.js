@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { sendEmail } from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
-import { APPURL, VERIFICATIONTOKENEXPIRYTIME } from "../constants.js";
+import { APPURL, VERIFICATIONTOKENEXPIRYTIME ,APPNAME} from "../constants.js";
 import bcrypt from "bcrypt";
 import { registerUserRedirectUri } from "../helpers/oAuth.helper.js";
 import { AuthorizationCode } from "simple-oauth2";
@@ -22,6 +22,10 @@ import {
   deleteMediaFromCDN,
 } from "../services/cloudinary.service.js";
 import { redis } from "../db/connectRedis.js";
+import { generateRegistrationOptions,verifyRegistrationResponse, generateAuthenticationOptions,verifyAuthenticationResponse, } from "@simplewebauthn/server";
+import {Pricing} from "../models/pricing.model.js"
+import { checkEmail } from "../services/checkMail.service.js";
+import validator from 'validator';
 const cookieOptions = {
   httpOnly: true,
   secure: true,
@@ -62,7 +66,7 @@ const registerUser = asyncHandler(async (req, res) => {
       existingUser.oauth.providers.providerName !== null &&
       !existingUser.password
     ) {
-      const passwordSaved = await bcrypt.hash(password, 20);
+      const passwordSaved = await bcrypt.hash(password, 10);
       const updatedUser = await User.findByIdAndUpdate(existingUser._id, {
         $set: {
           password: passwordSaved,
@@ -78,12 +82,19 @@ const registerUser = asyncHandler(async (req, res) => {
         .status(200)
         .json(new apiResponse(200, updatedUser, "User updated successfully"));
     } else {
+      if(!await checkEmail(email)){
+        throw new apiError(400,"Email is not deliverable or is disposable");
+      }
+      if(!validator.isStrongPassword(password)){
+        throw new apiError(400,"Password is not strong enough");
+      }
       const verificationToken = nanoid(10);
       const verificationTokenExpiryDate =
         Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
       const avatar = await uploadOnCloudinary(
         `https://ui-avatars.com/api/?name=${username.replace(" ", "+")}&background=random&rounded=true&format=png&size=128`
       );
+      const pricing=await Pricing.findOne({tier:"free"});
       const user = await User.create({
         username,
         fullName: username,
@@ -92,6 +103,9 @@ const registerUser = asyncHandler(async (req, res) => {
         verificationToken,
         verificationTokenExpiryDate,
         avatar: avatar.url,
+        fileLimit: pricing.fileLimit,
+        cdnCSSJSlimit: pricing.cdnCSSJSlimit,
+        cdnMedialimit: pricing.cdnMedialimit,
       });
 
       const createdUser = await User.findById(user._id).select(
@@ -103,10 +117,15 @@ const registerUser = asyncHandler(async (req, res) => {
           "User not created something went wrong while registering the user"
         );
       }
-      await sendEmail(createdUser.email, "verify", {
+      await sendEmail({
+        to:createdUser.email, 
+        reason:"verify",
+        data:{
         username: createdUser.username,
         token: createdUser.verificationToken,
-      });
+      },
+      toBeVerified:false
+    });
       const { accessToken, refreshToken } =
         await generateAccessTokenAndRefreshToken(user);
       return res
@@ -139,26 +158,30 @@ const loginUser = asyncHandler(async (req, res) => {
       await generateAccessTokenAndRefreshToken(user);
 
     await user.save({ validateBeforeSave: false });
-    const logginedUser = await User.findById(user._id).select(
-      "-password -refreshToken"
-    );
-    if (!logginedUser) {
-      throw new apiError(500, "Failed to login the user");
+       if(!user.TwoFAEnabled){
+        const logginedUser=await User.findById(user._id).select("-password -refreshToken");
+        if(!logginedUser){
+            throw new apiError(500,"Failed to login the user")
+        }
+        
+        return res.status(200)
+        .cookie("accessToken",accessToken,cookieOptions)
+        .cookie("refreshToken",refreshToken,cookieOptions)
+        .json(new apiResponse(200,{user:logginedUser,accessToken,refreshToken},"User logged in successfully"))
     }
-
-    return res
-      .status(200)
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .json(
-        new apiResponse(
-          200,
-          { user: logginedUser, accessToken, refreshToken },
-          "User logged in successfully"
-        )
-      );
-  }
-});
+    else{
+        const opts = await generateAuthenticationOptions({
+            rpID: APPURL,
+        })
+        user.TwoFAchallenge=opts.challenge;
+        await user.save({validateBeforeSave:false});
+        
+        return res
+        .cookie("user",user._id,cookieOptions) 
+        .json(new apiResponse(200,{challenge:opts},"User logged in successfully but pending 2FA"))
+    }
+    }
+})
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -240,10 +263,15 @@ const forgotPassword = asyncHandler(async (req, res) => {
   user.verificationTokenExpiryDate =
     Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
   await user.save({ validateBeforeSave: false });
-  await sendEmail(user.email, "forgotPassword", {
+  await sendEmail({
+    to:user.email,
+    reason: "forgotPassword", 
+    data:{
     username: user.username,
     token: user.verificationToken,
-  });
+  },
+  toBeVerified:false
+});
   return res
     .status(200)
     .json(new apiResponse(200, {}, "Password reset link sent to your email"));
@@ -280,15 +308,17 @@ const sendUpdatePasswordEmail = asyncHandler(async (req, res) => {
   user.verificationTokenExpiryDate =
     Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
   await user.save({ validateBeforeSave: false });
-  await sendEmail(
-    user.email,
-    "updatePassword",
-    {
+  await sendEmail({
+    to:user.email,
+    reason:"updatePassword",
+    data:{
       username: user.username,
       token: user.verificationToken,
     },
-    null,
-    user._id
+    html:null,
+    userID:user._id,
+    toBeVerified:false
+  }
   );
   return res
     .status(200)
@@ -335,10 +365,15 @@ const resendVerificationToken = asyncHandler(async (req, res) => {
   user.verificationTokenExpiryDate =
     Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
   await user.save({ validateBeforeSave: false });
-  await sendEmail(user.email, "verify", {
+  await sendEmail({
+    to:user.email, 
+    reason:"verify",
+    data:{
     username: user.username,
     token: user.verificationToken,
-  });
+  },
+  toBeVerified:false
+});
   return res
     .status(200)
     .json(new apiResponse(200, {}, "Verification token sent to your email"));
@@ -355,10 +390,15 @@ const changeEmail = asyncHandler(async (req, res) => {
   user.verificationTokenExpiryDate =
     Date.now() + VERIFICATIONTOKENEXPIRYTIME * 1000;
   await user.save({ validateBeforeSave: false });
-  await sendEmail(user.email, "emailChangeVerification", {
+  await sendEmail({to:user.email,
+    reason: "emailChangeVerification", 
+    data:{
     username: user.username,
     token: user.verificationToken,
-  });
+  },
+  toBeVerified:false
+}
+);
   return res
     .status(200)
     .json(new apiResponse(200, {}, "Email change link sent to your email"));
@@ -373,14 +413,22 @@ const updateEmail = asyncHandler(async (req, res) => {
   if (user.verificationTokenExpiryDate < Date.now()) {
     throw new apiError(400, "Verification token expired");
   } else {
+    if(!await checkEmail(req.body.email)){
+    throw new apiError(400,"Email is not deliverable or is disposable");
+  }
     const oldEmail = user.email;
     user.email = req.body.email;
     user.verificationToken = undefined;
     user.verificationTokenExpiryDate = undefined;
     await user.save({ validateBeforeSave: false });
-    await sendEmail(oldEmail, "emailChange", {
+    await sendEmail({
+      to:oldEmail,
+      reason: "emailChange",
+      data:{
       username: user.username,
       email: user.email,
+    },
+    toBeVerified:false
     });
     return res
       .status(200)
@@ -388,34 +436,32 @@ const updateEmail = asyncHandler(async (req, res) => {
   }
 });
 const forgotUserName = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select(
-    "-password -refreshToken -verificationToken -verificationTokenExpiryDate"
-  );
-  if (!user) {
-    throw new apiError(404, "User not found");
-  }
-  if (user.email === req.body.email) {
-    return res
-      .status(200)
-      .json(new apiResponse(200, user.username, "username found successfully"));
-  } else {
-    throw new apiError(404, "Email not found");
-  }
+  const user=await User.findOne({email:req.body.email}).select(
+    " -refreshToken -verificationToken -verificationTokenExpiryDate"
+    );
+    if(!user){
+      throw new apiError(404,"User not found");
+    }
+    if(bcrypt.compareSync(req.body.password,user.password)){
+      return res.status(200).json(new apiResponse(200,{username:user.username},"Username found successfully"))
+    }
+    else{
+      throw new apiError(400,"Invalid Credentials")
+    }
 });
 const forgotEmail = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select(
-    "-password -refreshToken -verificationToken -verificationTokenExpiryDate"
-  );
-  if (!user) {
-    throw new apiError(404, "User not found");
-  }
-  if (user.username === req.body.username) {
-    return res
-      .status(200)
-      .json(new apiResponse(200, user.email, "email found successfully"));
-  } else {
-    throw new apiError(404, "Username not found");
-  }
+  const user=await User.findOne({username:req.body.username}).select(
+    " -refreshToken -verificationToken -verificationTokenExpiryDate"
+    );
+    if(!user){
+      throw new apiError(404,"User not found");
+    }
+    if(bcrypt.compareSync(req.body.password,user.password)){
+      return res.status(200).json(new apiResponse(200,{email:user.email},"Email found successfully"))
+    }
+    else{
+      throw new apiError(400,"Invalid Credentials")
+    }
 });
 const changeUserName = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select(
@@ -513,6 +559,8 @@ const getUserDetails = asyncHandler(async (req, res) => {
         isVerified: 1,
         verificationToken: 1,
         verificationTokenExpiryDate: 1,
+        TwoFAEnabled: 1,
+        TwoFAverified: 1,
         refreshToken: 1,
       },
     },
@@ -832,9 +880,7 @@ const handleSpotifyOauthCallback = async (req, res) => {
               "User not created something went wrong while registering the user"
             );
           }
-          await sendEmail(createdUser.email, "verify", {
-            username: createdUser.username,
-            token: createdUser.verificationToken,
+          await sendEmail({ to: createdUser.email, reason: "verify", data: { username: createdUser.username, token: createdUser.verificationToken }, toBeVerified: true 
           });
           const { accessToken, refreshToken } =
             await generateAccessTokenAndRefreshToken(user);
@@ -1257,6 +1303,141 @@ const deleteUser = asyncHandler(async (req, res) => {
     throw new apiError(500, `Failed to delete user: ${error.message}`);
   }
 });
+const checkPassword=asyncHandler(async(req,res)=>{
+  const user=await User.findById(req.user._id);
+  if(!user){
+    throw new apiError(404,"User not found")
+  }
+  if(bcrypt.compareSync(req.body.password,user.password)){
+    return res.status(200).json(new apiResponse(200,{status:true},"Password is correct"))
+  }
+  else{
+    return res.status(200).json(new apiResponse(200,{status:false},"Password is incorrect"))
+  }
+})
+// ---------------------------------------------------------------------------------------------------------------------------------------
+// 2fa controllers
+// ---------------------------------------------------------------------------------------------------------------------------------------
+const initialize2FA=asyncHandler(async(req,res)=>{
+    const user=await User.findById(req.user._id).select(" -refreshToken -verificationToken -verificationTokenExpiryDate");
+    if(!user){
+        throw new apiError(404,"User not found")
+    }
+     const {password}=req.body;
+     if(!password){
+      throw new apiError(400,"Password is required to initialize 2FA")
+     }
+     if(!bcrypt.compareSync(password,user.password)){
+      throw new apiError(400,"Password is incorrect")
+     }
+    const challengePayload=await generateRegistrationOptions({
+        rpID:APPURL,
+        rpName:APPNAME,
+        attestationType:"none",
+        userName:user.username,
+        timeout:60000,
+        extensions:{
+            credProps:true,
+        }
+    })
+    user.TwoFAchallenge=challengePayload.challenge;
+    await user.save({validateBeforeSave:false});
+    return res.status(200).json(new apiResponse(200,challengePayload,"2FA initialized successfully"))
+})
+const verify2FA=asyncHandler(async(req,res)=>{
+    const user=await User.findById(req.user._id).select("-password -refreshToken -verificationToken -verificationTokenExpiryDate");
+    if(!user){
+        throw new apiError(404,"User not found")
+    }
+    const {cred}=req.body;
+    if(user.TwoFAverified){
+        throw new apiError(400,"User is already verified")
+    }
+    if(user.TwoFAchallenge===null){
+        throw new apiError(400,"2FA not initialized")
+    }
+    const verificationResult = await verifyRegistrationResponse({
+        expectedChallenge: user.TwoFAchallenge,
+        expectedOrigin: APPURL,
+        expectedRPID: APPURL,
+        response: cred,
+    })
+    if (!verificationResult.verified) {
+        throw new apiError(400,"Verification failed")
+    }
+    if(verificationResult.registrationInfo === undefined){
+        throw new apiError(500,"Registration info not found")
+    }
+    user.PassKey= verificationResult.registrationInfo.credential;
+    user.TwoFAEnabled=true;
+    await user.save({validateBeforeSave:false});
+    return res.status(200).json(new apiResponse(200,user,"2FA verified successfully"))
+})
+const verify2FALogin=asyncHandler(async(req,res)=>{
+    const userID=req.cookies?.user;
+    console.log(userID);
+    const user=await User.findById(userID).select("-password -refreshToken -verificationToken -verificationTokenExpiryDate");
+    if(!user){
+        throw new apiError(404,"User not found")
+    }
+    user.TwoFAverified=false;
+    await user.save({validateBeforeSave:false});
+    const {cred}=req.body;
+    console.log(cred);
+    if(user.TwoFAchallenge===null){
+        throw new apiError(400,"2FA challenge not found")
+    }
+    if(user.PassKey===null){
+        throw new apiError(500,"2FA key not found")
+        }
+    const result = await verifyAuthenticationResponse({
+        expectedChallenge: user.TwoFAchallenge,
+        expectedOrigin: APPURL,
+        expectedRPID: APPURL,
+        response: cred,
+        credential:{
+          id: user.PassKey.id,
+          publicKey:new Uint8Array(user.PassKey.publicKey.buffer),
+          counter:user.PassKey.counter,
+          transports:user.PassKey.transports
+        } 
+    })
+    if (!result.verified) {
+        throw new apiError(400,"Verification failed")
+    }
+        user.TwoFAverified=true;
+        await user.save({validateBeforeSave:false});
+        const {accessToken,refreshToken}= await generateAccessTokenAndRefreshToken(user);
+        
+        return res
+        .clearCookie("user")
+        .cookie("accessToken",accessToken,cookieOptions)
+        .cookie("refreshToken",refreshToken,cookieOptions)    
+        .json(new apiResponse(200,user,"User logged in successfully"))
+});
+const disable2FA=asyncHandler(async(req,res)=>{
+    const user=await User.findById(req.user._id).select(" -refreshToken -verificationToken -verificationTokenExpiryDate");
+    if(!user){
+        throw new apiError(404,"User not found")
+    }
+    if(!req.body.password){
+        throw new apiError(400,"Password is required")
+    }
+    if(!bcrypt.compareSync(req.body.password,user.password)){
+        throw new apiError(400,"Password is incorrect")
+        }
+    if(user.TwoFAEnabled){
+        user.TwoFAEnabled=false;
+        user.TwoFAverified=false;
+        user.TwoFAchallenge=null;
+        user.PassKey=null;
+        await user.save({validateBeforeSave:false});
+        return res.status(200).json(new apiResponse(200,user,"2FA disabled successfully"))
+    }
+    else{
+        return res.status(200).json(new apiResponse(200,user,"2FA is already disabled"))
+    }
+})
 export {
   registerUser,
   registerOauthUser,
@@ -1282,4 +1463,9 @@ export {
   sendUpdatePasswordEmail,
   updatePassword,
   deleteUser,
+  initialize2FA,
+  verify2FA,
+  verify2FALogin,
+  checkPassword,
+  disable2FA,
 };

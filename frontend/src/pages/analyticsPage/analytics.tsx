@@ -35,12 +35,17 @@ import {
   Zap,
   Crown,
   Calendar,
+  TrendingDown,
+  CircleAlert,
 } from "lucide-react";
 import { useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMsg } from "@/lib/getErrorMsg";
-
+import { formatBytes } from "bytes-formatter";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 // Types
 interface UserData {
   username: string;
@@ -95,7 +100,7 @@ interface MonthlyUsage {
   month: string;
   subdomains: number;
   files: number;
-  storage: number;
+  storage: string;
 }
 
 interface FileBreakdown {
@@ -130,7 +135,15 @@ const Analytics: React.FC = () => {
       setUsageData(getAnalytics.data.data.data.usageData);
       setCalculations(getAnalytics.data.data.data.calculations);
       setFileTypeData(getAnalytics.data.data.data.fileTypeData);
-      setMonthlyUsage(getAnalytics.data.data.data.monthlyUsage);
+      const tempMonthlyUsage:MonthlyUsage[] = getAnalytics.data.data.data.monthlyUsage;
+      tempMonthlyUsage.forEach((usage:MonthlyUsage, index:number) => {
+        tempMonthlyUsage[index].storage = formatBytes(Number(usage.storage));
+        tempMonthlyUsage[index].subdomains = usage.subdomains;
+        tempMonthlyUsage[index].files = usage.files;
+      });
+
+      setMonthlyUsage(tempMonthlyUsage);
+      
     }
     if (getAnalytics.isError) {
       toast({
@@ -186,13 +199,7 @@ const Analytics: React.FC = () => {
       .reduce((total, file) => total + file.size, 0);
   };
 
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
+
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -289,7 +296,7 @@ const Analytics: React.FC = () => {
               </div>
               <div className="flex items-center justify-between mt-2">
                 <p className="text-xs text-slate-600">
-                  of {userData?.fileLimit} limit
+                  of {formatBytes(userData?.fileLimit)} limit
                 </p>
                 <span className="text-xs text-slate-500">
                   {calculations?.fileUsage?.toFixed(1)}%
@@ -346,9 +353,27 @@ const Analytics: React.FC = () => {
                 {userData?.genCredits}
               </div>
               <p className="text-xs text-slate-600 mt-2">Available credits</p>
-              <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
+              <div className={`mt-2 text-xs ${userData.genCredits>3? "text-green-600":userData.genCredits===0? "text-red-600":"text-yellow-600"} flex items-center gap-1`}>
+              {
+                userData.genCredits>3?(
+                  <>
+                    <TrendingUp className="w-3 h-3" />
                 Active
+                  </>
+                ):(
+                  userData.genCredits===0?(
+                    <>
+                    <TrendingDown className="w-3 h-3" />
+                  Active
+                      </>
+                  ):(
+                  <>
+                  <CircleAlert className="w-3 h-3" />
+                  Inactive
+                  </>
+                  )
+                )
+              }
               </div>
             </CardContent>
           </Card>
@@ -389,8 +414,8 @@ const Analytics: React.FC = () => {
                         className="h-2"
                       />
                       <p className="text-xs text-slate-500 mt-1">
-                        {calculations?.mediaUsage?.toFixed(1)}% of{" "}
-                        {userData?.cdnMedialimit}KB limit
+                        {formatBytes(calculations?.mediaUsage)}% of{" "}
+                        {formatBytes(userData?.cdnMedialimit)} limit
                       </p>
                     </div>
                     <div>
@@ -407,8 +432,8 @@ const Analytics: React.FC = () => {
                         className="h-2"
                       />
                       <p className="text-xs text-slate-500 mt-1">
-                        {calculations?.jssCssUsage?.toFixed(1)}% of{" "}
-                        {userData?.cdnCSSJSlimit}KB limit
+                        {formatBytes(calculations?.jssCssUsage)}% of{" "}
+                        {formatBytes(userData?.cdnCSSJSlimit)} limit
                       </p>
                     </div>
                   </div>
@@ -775,9 +800,9 @@ const Analytics: React.FC = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={monthlyUsage}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="month" label={{value:"Month",position:"center",style:{textAnchor:"middle"}}}/>
+                    <YAxis dataKey={"files"} label={{value:"Files",position:"insideBottomLeft",style:{textAnchor:"middle",transform:"translate(20px,-10px)"}}}/>
                     <Tooltip />
                     <Area
                       type="monotone"
@@ -819,14 +844,7 @@ const Analytics: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-blue-600" />
                     <span className="text-lg font-semibold">
-                      {Math.floor(
-                        Number(
-                          (Number(new Date()) -
-                            Number(new Date(userData?.createdAt))) /
-                            (1000 * 60 * 60 * 24)
-                        )
-                      )}{" "}
-                      days
+                      {dayjs(userData?.createdAt).fromNow()}
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 mt-1">

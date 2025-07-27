@@ -42,6 +42,9 @@
     <loc>https://letshost.dpdns.org/docs</loc>
   </url>
   <url>
+    <loc>https://letshost.dpdns.org/seo-generator</loc>
+  </url>
+  <url>
     <loc>https://letshost.dpdns.org/creator</loc>
     <!-- Optional: add dynamic routes here if possible -->
   </url>

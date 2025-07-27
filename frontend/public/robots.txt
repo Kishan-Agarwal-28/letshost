@@ -4,5 +4,7 @@ Disallow: /auth/verify
 Disallow: /auth/reset-password
 Disallow: /terms
 Disallow: /payment
+Disallow: /payment/checkout/return
+Disallow: /user/auth/additional-safety/2fa
 Allow: /
 Sitemap: https://letshost.dpdns.org/sitemap.xml

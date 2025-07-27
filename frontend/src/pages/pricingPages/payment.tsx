@@ -52,9 +52,13 @@ const Pay = () => {
   const options = { clientSecret };
 
   return (
+    <>
+  
+
     <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
       <EmbeddedCheckout />
     </EmbeddedCheckoutProvider>
+    </>
   );
 };
 

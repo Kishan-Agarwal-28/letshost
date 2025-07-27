@@ -62,6 +62,15 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
   });
   const onSubmit = async (values: RegisterDomainFormData) => {
     setUploadProgress(0);
+    if(values.files.length>400){
+      toast({
+        title:"Error",
+        description:"You can only upload 400 files at a time",
+        variant:"error",
+        duration:5000,
+      })
+      return;
+    }
     registerDomain.mutate({
       subDomain: values.subDomain,
       files: values.files,

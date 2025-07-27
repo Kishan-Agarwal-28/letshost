@@ -71,6 +71,9 @@ function Footer() {
               <li>
                 <Link to="/docs">Docs</Link>
               </li>
+              <li>
+                <Link to="/seo-generator">SEO Generator</Link>
+              </li>
             </ul>
           </div>
         </div>

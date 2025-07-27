@@ -3,8 +3,12 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
+
 const TermsAndConditions = () => {
   return (
+    <>
+   
+
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader className="text-center">
@@ -369,6 +373,7 @@ const TermsAndConditions = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

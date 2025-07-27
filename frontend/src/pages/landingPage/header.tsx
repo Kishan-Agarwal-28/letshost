@@ -106,7 +106,7 @@ function Header() {
             menuOpen ? "block" : "hidden"
           } w-full md:flex md:w-auto md:items-center text-center text-white md:space-x-6 mt-4 md:mt-0 `}
         >
-          {["", "/tools", "/pricing", "/contact-us", "/gallery", "/docs"].map(
+          {["", "/tools", "/pricing", "/contact-us", "/gallery", "/docs","/seo-generator"].map(
             (path, idx) => {
               const labels = [
                 "home",
@@ -115,6 +115,7 @@ function Header() {
                 "contact us",
                 "gallery",
                 "docs",
+                "seo generator",
               ];
               return (
                 <li key={path} className="py-2 md:py-0">

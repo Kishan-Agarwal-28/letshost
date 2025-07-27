@@ -3,7 +3,7 @@ import { devtools, persist, createJSONStorage } from "zustand/middleware";
 
 import { encryptJSON, decryptJSON } from "@/lib/encrypt";
 import { immer } from "zustand/middleware/immer";
-
+import  type { Base64URLString, CredentialDeviceType,AuthenticatorTransportFuture} from "@simplewebauthn/browser"
 export interface ICDn {
   cdnProjectID: string;
   filename: string;
@@ -19,7 +19,20 @@ export interface ICDn {
   createdAt: Date;
   updatedAt: Date;
 }
+type Passkey = {
+  id: Base64URLString;
+  publicKey: Uint8Array;
 
+  user: IUser
+
+  webauthnUserID: Base64URLString;
+ 
+  counter: number;
+  deviceType: CredentialDeviceType;
+  backedUp: boolean;
+
+  transports?: AuthenticatorTransportFuture[];
+};
 export interface IUser {
   _id: string;
   username: string;
@@ -63,6 +76,10 @@ export interface IUser {
   updatedAt: Date;
   refreshToken: string;
   isVerified: boolean;
+  TwoFAEnabled: boolean;
+  TwoFAverified: boolean;
+  PassKey?: Passkey;
+  TwoFAchallenge?: string;
 }
 
 interface IStore {
