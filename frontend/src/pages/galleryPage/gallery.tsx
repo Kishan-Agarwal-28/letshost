@@ -19,6 +19,7 @@ import ImagePopup from "./image-popup";
 import SearchBar from "./gallerySearch";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import useUser from "@/hooks/useUser";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImageHoverCardProps {
   imageUrl: string;
@@ -48,6 +49,7 @@ export const ImageHoverCard = ({
   );
   const { toast } = useToast();
 const navigate = useNavigate();
+const isMobile=useIsMobile();
 const  user  = useUser();
   const downloadImage = useApiPost({
     type: "post",
@@ -77,6 +79,14 @@ const  user  = useUser();
       });
     }
     const imageUrl=downloadImage.data?.data.imageUrl;
+    if(isMobile){
+      const downloadUrl=imageUrl.replace(
+    "/upload/",
+    "/upload/fl_attachment/"
+  );
+      window.open(downloadUrl,"_blank");
+      return;
+    }
     const imageBlob=await fetch(imageUrl);
     const blob=await imageBlob.blob();
     const link=URL.createObjectURL(blob);
