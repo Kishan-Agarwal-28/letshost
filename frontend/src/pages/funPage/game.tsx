@@ -226,7 +226,7 @@ const OthelloPiece = ({cell}:{cell:number} ) => {
 
   return (
     <motion.div
-      className={`w-10 h-10 rounded-full transition-transform duration-500
+      className={`w-8 h-120 rounded-full transition-transform duration-500
         ${cell === BLACK
           ? 'bg-gradient-to-br from-gray-900 via-black to-gray-800 shadow-[inset_0_3px_8px_rgba(0,0,0,0.6),_0_4px_6px_rgba(0,0,0,0.8),_0_-2px_4px_rgba(255,255,255,0.1)]'
           : 'bg-gradient-to-br from-white via-gray-200 to-gray-300 shadow-[inset_0_3px_8px_rgba(0,0,0,0.3),_0_4px_6px_rgba(0,0,0,0.6),_0_-2px_4px_rgba(255,255,255,0.2)]'
