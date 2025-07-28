@@ -57,6 +57,10 @@ const  user  = useUser();
     path: ApiRoutes.downloadImage,
     sendingFile: false,
   });
+  const getMimeType=(url:string)=>{
+    const mimeType=url.split(".").pop();
+    return mimeType;
+  }
   const handleDownload = async(e: React.MouseEvent) => {
     e.stopPropagation();
     if(!user){
@@ -69,8 +73,9 @@ const  user  = useUser();
       });
       return;
     }
-    downloadImage.mutateAsync({ imageId:item._id })
-    if(!downloadImage.isSuccess) {
+   const result= await downloadImage.mutateAsync({ imageId:item._id })
+   
+    if(result.data.status!==200) {
       toast({
         title: "Error",
         description: "Failed to download image",
@@ -78,13 +83,16 @@ const  user  = useUser();
         variant: "error",
       });
     }
-    const imageUrl=downloadImage.data?.data.imageUrl;
+    const imageUrl=await result.data?.data.imageUrl;
+    
+    const mimeType=getMimeType(imageUrl);
     if(isMobile){
+      const filename=`${title.toLowerCase().replace(/\s+/g, "-").replace(/[:*?"<>|\\/]/g, "") }-${Date.now()}`
       const downloadUrl=imageUrl.replace(
     "/upload/",
-    "/upload/fl_attachment/"
+    `/upload/fl_attachment:${encodeURIComponent(filename)}`
   );
-      window.open(downloadUrl,"_blank");
+      window.open(downloadUrl,"_blank",);
       return;
     }
     const imageBlob=await fetch(imageUrl);
@@ -92,7 +100,7 @@ const  user  = useUser();
     const link=URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = link;
-    a.download = `${title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}.jpg`;
+    a.download = `${title.toLowerCase().replace(/\s+/g, "-").replace(/[:*?"<>|\\/]/g, "")}-${Date.now()}.${mimeType}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
