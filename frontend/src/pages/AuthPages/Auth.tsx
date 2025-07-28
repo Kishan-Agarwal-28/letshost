@@ -16,11 +16,12 @@ import ApiRoutes from "@/connectors/api-routes";
 import ForgotPassword from "./ForgotPassword";
 import { PasswordInput } from "@/components/ui/password-input";
 import {FormControl,  FormDescription, FormItem, FormLabel, FormMessage ,FormField} from "@/components/ui/form";
-
+import { useOffline } from "@/hooks/use-offline";
 
 function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isOffline=useOffline();
   const [searchParams, setSearchParams] = useSearchParams({
     mode: "signup",
     status: "",
@@ -435,7 +436,7 @@ function Auth() {
                       placeholderValue="example@gmail.com"
                       type="email"
                     />
-                     <div className="relative w-full flex justify-end flex-col">
+                     <div className="relative w-full flex justify-end flex-col text-sm">
                       <FormField
           control={loginForm.control}
           name="password"
@@ -478,7 +479,7 @@ function Auth() {
         {/* Side Image */}
         <div className="hidden md:flex relative bg-muted w-full md:w-1/2 h-[97%] rounded-2xl justify-center items-center">
           <img
-            src="https://letshost.imgix.net/assets/logo.png?fm=webp"
+            src={`${!isOffline?"https://letshost.imgix.net/assets/logo.png?fm=webp":"logo.png"}`}
             alt="Image"
             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
           />

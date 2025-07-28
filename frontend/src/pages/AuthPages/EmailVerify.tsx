@@ -11,10 +11,12 @@ import { useNavigate } from "react-router-dom";
 import ApiRoutes from "@/connectors/api-routes";
 import useUser from "@/hooks/useUser";
 import { useUserStore } from "@/store/store";
+import { useOffline } from "@/hooks/use-offline";
 function EmailVerify() {
   const [searchParams] = useSearchParams({ token: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isOffline=useOffline();
   const [verified, setVerified] = useState(false);
   const userStore = useUserStore();
   const user = useUser();
@@ -112,7 +114,7 @@ function EmailVerify() {
           </div>
           <div className="relative hidden bg-muted md:flex w-1/3 h-[90%] rounded-2xl justify-center items-center">
             <img
-              src="https://letshost.imgix.net/assets/logo.png?fm=webp"
+              src={`${!isOffline?"https://letshost.imgix.net/assets/logo.png?fm=webp":"logo.png"}`}
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
             />

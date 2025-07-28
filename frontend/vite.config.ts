@@ -13,7 +13,7 @@ export default defineConfig({
       disabled: false,
       config: true,
     },
-
+    includeAssets:["favicon.svg","wooden-background-wood-texture-brown-600nw-2477335391.webp","logo.png","astronaut.png"],
     manifest: {
       name: 'Letshost',
       short_name: 'Letshost',
@@ -22,7 +22,7 @@ export default defineConfig({
     },
 
     workbox: {
-      globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+      globPatterns: ['**/*.{js,css,html,svg,png,ico,webp}'],
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       maximumFileSizeToCacheInBytes:5 * 1024 * 1024

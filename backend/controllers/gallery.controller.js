@@ -357,7 +357,140 @@ const getImagesOfUser = asyncHandler(async (req, res) => {
     )
   );
 });
+const getImagesHistoryOfUser = asyncHandler(async (req, res) => {
+  const { limit = 10, page = 1 } = req.query;
+  const limitNum = parseInt(limit, 10);
+  const pageNum = parseInt(page, 10);
 
+  let id = req.user._id;
+
+
+  const user = await User.findById(id);
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+
+  const totalImages = await Image.countDocuments({ uploader: id });
+
+  const images = await Image.aggregate([
+    {
+      $match: { uploader: new mongoose.Types.ObjectId(id) },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "uploader",
+        foreignField: "_id",
+        as: "uploader",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "likes", // Make sure collection name matches your model
+        localField: "_id",
+        foreignField: "image",
+        as: "likes",
+      },
+    },
+    {
+      $lookup: {
+        from: "saves", // Make sure collection name matches your model
+        localField: "_id",
+        foreignField: "image",
+        as: "saves",
+      },
+    },
+    {
+      $lookup: {
+        from: "downloads",
+        localField: "_id",
+        foreignField: "image",
+        as: "downloads",
+      },
+    },
+    {
+      $addFields: {
+        uploader: { $first: "$uploader" },
+        likesCount: { $size: "$likes" },
+        savesCount: { $size: "$saves" },
+        downloadsCount: { $size: "$downloads" },
+        // Fixed: Check if current user's ID exists in the likes array
+        isLikedByUser:
+          req.user && req.user._id
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(req.user._id),
+                  "$likes.likedBy",
+                ],
+              }
+            : false,
+        // Fixed: Check if current user's ID exists in the saves array
+        isSavedByUser:
+          req.user && req.user._id
+            ? {
+                $in: [
+                  new mongoose.Types.ObjectId(req.user._id),
+                  "$saves.savedBy",
+                ],
+              }
+            : false,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $skip: limitNum * (pageNum - 1),
+    },
+    {
+      $limit: limitNum,
+    },
+  ]);
+
+  const totalPages = Math.ceil(totalImages / limitNum);
+  const hasNextPage = pageNum < totalPages;
+  const hasPreviousPage = pageNum > 1;
+
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      {
+        images,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalImages,
+          hasNextPage,
+          hasPreviousPage,
+          limit: limitNum,
+        },
+      },
+      "User gallery fetched successfully"
+    )
+  );
+});
+
+const getSavedImageOfUser=asyncHandler(async(req,res)=>{
+ 
+  const saves=await Save.find({savedBy:req.user._id}).sort({createdAt:-1});
+  const savedImages=[];
+  saves.map(save=>{
+    savedImages.push(save.image);
+  });
+    
+  return res.status(200).json(new apiResponse(200,savedImages,"Saved images fetched successfully"));
+  
+})
 const getGallery = asyncHandler(async (req, res) => {
   const { limit = 10, page = 1 } = req.query;
   const limitNum = parseInt(limit, 10)||10;
@@ -482,7 +615,15 @@ const getTotalImagesCount = asyncHandler(async (req, res) => {
       new apiResponse(200, count, "Total images count fetched successfully")
     );
 });
-
+const getUserImageCount = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+  const count = await Image.countDocuments({ uploader: userId });
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, count, "Total images count fetched successfully")
+    );
+});
 const searchImages = asyncHandler(async (req, res) => {
   const { query, limit = 10, threshold = 0.76, page = 1 } = req.query;
   const userId = req.user?._id;
@@ -660,4 +801,7 @@ export {
   advancedSearch,
   discoverImages,
   downloadImage,
+  getUserImageCount,
+  getImagesHistoryOfUser,
+  getSavedImageOfUser,
 };

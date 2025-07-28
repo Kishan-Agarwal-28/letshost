@@ -270,6 +270,34 @@ React.useEffect(() => {
     <Card key={card._id} item={card} index={index} />
   ));
   const isMobile = useIsMobile();
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+  setTouchEnd(null);
+  setTouchStart(e.targetTouches[0].clientX);
+};
+
+const handleTouchMove = (e: React.TouchEvent) => {
+  setTouchEnd(e.targetTouches[0].clientX);
+};
+
+const handleTouchEnd = () => {
+  if (!touchStart || !touchEnd) return;
+  
+  const distance = touchStart - touchEnd;
+  const isLeftSwipe = distance > 50;
+  const isRightSwipe = distance < -50;
+
+  if (isLeftSwipe && touchEnd) {
+    // Swipe left = next image
+    onNavigate?.("next");
+  }
+  if (isRightSwipe && touchEnd) {
+    // Swipe right = previous image
+    onNavigate?.("prev");
+  }
+};
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
@@ -280,6 +308,9 @@ React.useEffect(() => {
           {/* Image Section */}
           <div
             className={`relative flex-1 bg-black flex items-center justify-center min-h-[50vh] md:min-h-full ${isMobile ? "w-dvw" : ""}`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <button
               onClick={prevImage}

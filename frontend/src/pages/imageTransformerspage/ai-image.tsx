@@ -31,7 +31,7 @@ import {
 import { RainbowButton } from "@/components/magicui/rainbow-button";
 import useUser from "@/hooks/useUser";
 import { useUserStore } from "@/store/store";
-import { useApiPost } from "@/hooks/apiHooks";
+import { useApiPost , useApiGet, useApiInfiniteQuery} from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMsg } from "@/lib/getErrorMsg";
@@ -49,6 +49,7 @@ import {
   imageDB,
   getUserImageKeys,
   getUserImageRecord,
+  getUserImageCount,
 } from "@/db/indexDB";
 import { getRandomPrompts } from "./examplePrompts";
 import {
@@ -71,6 +72,7 @@ export interface HistoryItem {
   public_id: string;
   contributed: boolean;
 }
+
 export default function AIImageGenerator() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -86,86 +88,255 @@ export default function AIImageGenerator() {
   const [selectedResolution, setSelectedResolution] = useState("1024x1024");
   const [selectedAspectRatio, setSelectedAspectRatio] = useState("");
   const [imageHistory, setImageHistory] = useState<HistoryItem[]>([]);
-  const [selectedHistoryImage, setSelectedHistoryImage] =
-    useState<HistoryItem | null>(null);
-  const [currentTab, setCurrentTab] = useState<"generate" | "history">(
-    "generate"
-  );
+  const [selectedHistoryImage, setSelectedHistoryImage] = useState<HistoryItem | null>(null);
+  const [currentTab, setCurrentTab] = useState<"generate" | "history">("generate");
   const [customResolution, setCustomResolution] = useState("");
   const [currentResolution, setCurrentResolution] = useState("");
-  const [savedImages, setSavedImages] = useState<Set<number>>(new Set());
+  const [savedImages, setSavedImages] = useState<Set<unknown>>(new Set());
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [imageToShare, setImageToShare] = useState<string | null>(null);
   const [publicID, setPublicID] = useState<string>("");
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isHydrating, setIsHydrating] = useState(false);
+  
   const user = useUser();
   const userStore = useUserStore();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user?._id) {
-      const saved = localStorage.getItem(`savedImages_${user?._id}`);
-      if (saved) {
-        setSavedImages(new Set(JSON.parse(saved)));
+  const getImagesHistoryOfUser = useApiInfiniteQuery({
+    key: ["getImagesHistoryOfUser"],
+    path: ApiRoutes.getImagesHistoryOfUser,
+    enabled: false, // We'll trigger this manually
+    getNextPageParam: (lastPage) => {
+      const responseData = lastPage?.data?.data;
+      if (!responseData) {
+        return undefined;
       }
-    }
-  }, [user?._id]);
 
-  useEffect(() => {
-    if (user?._id) {
-      localStorage.setItem(
-        `savedImages_${user?._id}`,
-        JSON.stringify([...savedImages])
-      );
-    }
-  }, [savedImages, user?._id]);
-  useEffect(() => {
-    if (user) {
-      setTokens(user.genCredits);
-      // console.log("checking user api key", user.apiKey);
-      if (user.apiKey && user.apiKey !== "") {
-        setGeminiApiKey(user.apiKey);
-        setUseGeminiApi(true);
+      if (responseData.pagination?.hasNextPage) {
+        const nextPage = responseData.pagination.currentPage + 1;
+        return nextPage;
       }
-    }
-  }, [user]);
 
-  useEffect(() => {
-    if (imageHistory.length > 0 && user?._id) {
-      localStorage.setItem(
-        `imageHistory_${user?._id}`,
-        JSON.stringify(imageHistory)
-      );
-    }
-  }, [imageHistory, user?._id]);
+      return undefined;
+    },
+    initialPageParam: 1,
+    limit: 10,
+    tags: undefined,
+    query: undefined,
+    getPreviousPageParam: (firstPage) => {
+      const responseData = firstPage?.data?.data;
+      return responseData?.pagination?.hasPreviousPage
+        ? responseData.pagination.currentPage - 1
+        : undefined;
+    },
+  });
 
-  useEffect(() => {
-    if (user?._id) {
-      const historyData = localStorage.getItem(`imageHistory_${user?._id}`);
-      if (historyData) {
-        setImageHistory(JSON.parse(historyData));
+  const saveImageDB = useApiPost({
+    type: "post",
+    key: ["saveImage"],
+    path: ApiRoutes.saveImage,
+    sendingFile: false,
+  });
+
+  const getUserImageCountDB = useApiGet({
+    key: ["getUserImageCount"],
+    path: ApiRoutes.getUserImageCount,
+    enabled: false,
+  });
+
+  const getSavedImagesFromBackend = useApiGet({
+    key: ["getSavedImages"],
+    path: ApiRoutes.getSavedImage, 
+    enabled: false,
+  });
+
+  // Helper function to convert blob to base64
+  function blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Check if IndexedDB is hydrated
+  const checkIfHydrated = async (userId: string): Promise<boolean> => {
+    try {
+      const localCount = await getUserImageCount(userId);
+      const backendCountResponse = await getUserImageCountDB.refetch();
+      
+      if (backendCountResponse.isError) {
+        console.warn("Failed to get backend count, assuming not hydrated");
+        return false;
       }
+      
+      const backendCount = backendCountResponse.data?.data?.data || 0;
+      return localCount === backendCount && localCount > 0;
+    } catch (error) {
+      console.warn("Error checking hydration status:", error);
+      return false;
     }
-  }, [user?._id]);
+  };
 
+  // Hydrate IndexedDB from backend
+  const hydrateFromBackend = async (userId: string) => {
+    if (isHydrating) return;
+    
+    setIsHydrating(true);
+    
+    try {
+      // Get all images from backend
+      const imageData = await getImagesHistoryOfUser.refetch();
+      
+      if (imageData.isError) {
+        throw new Error("Failed to fetch images from backend");
+      }
+
+      const imagesList = imageData.data?.pages.flatMap((page) => {
+        if (page.data?.data?.images) {
+          const responseData = page?.data?.data;
+          return Array.isArray(responseData.images) ? responseData.images : [];
+        }
+        return [];
+      }) || [];
+
+      // Process and store images in IndexedDB
+      const historyItems: HistoryItem[] = [];
+      
+      for (const image of imagesList) {
+        try {
+          const response = await fetch(image.imageUrl);
+          const blobObj = await response.blob();
+          const imageUrl = URL.createObjectURL(blobObj);
+          const base64Image = await blobToBase64(blobObj);
+          const imageDimensions = await getImageDimensions(imageUrl);
+          
+          const historyItem: HistoryItem = {
+            id: image._id,
+            url: imageUrl,
+            prompt: image.prompt || "",
+            style: image.style || "",
+            resolution: imageDimensions,
+            aspectRatio: image.aspectRatio || "",
+            timestamp: image.createdAt || new Date().toISOString(),
+            generationTime: image.generationTime || 0,
+            public_id: image.public_id || "",
+            contributed: image.contributed || false,
+          };
+          
+          await saveImageWithMeta(historyItem, base64Image, userId);
+          historyItems.push(historyItem);
+        } catch (error) {
+          console.warn("Failed to process image:", image.imageUrl, error);
+        }
+      }
+      
+      setImageHistory(historyItems.reverse()); // Most recent first
+      setIsHydrated(true);
+      
+      // Store hydration flag
+      localStorage.setItem(`db_hydrated_${userId}`, 'true');
+      
+      toast({
+        title: "Sync Complete",
+        description: `Synced ${historyItems.length} images from cloud`,
+        variant: "success",
+        duration: 3000,
+      });
+      
+    } catch (error) {
+      console.error("Hydration failed:", error);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync images from cloud",
+        variant: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsHydrating(false);
+    }
+  };
+
+  // Load saved images from backend and sync with local storage
+  const syncSavedImages = async (userId: string) => {
+    try {
+      const savedImagesResponse = await getSavedImagesFromBackend.refetch();
+      
+      if (savedImagesResponse.isError) {
+        console.warn("Failed to get saved images from backend");
+        return;
+      }
+      
+      const backendSavedImages = savedImagesResponse.data?.data.data || [];
+      console.log("backendSavedImages",backendSavedImages);
+      const backendSavedSet = new Set(backendSavedImages);
+      
+      // Get local saved images
+      const localSaved = localStorage.getItem(`savedImages_${userId}`);
+      const localSavedSet = localSaved ? new Set(JSON.parse(localSaved)) : new Set();
+      
+      // Merge both sets (union)
+      const mergedSavedImages = new Set([...localSavedSet, ...backendSavedSet]);
+      
+      setSavedImages(mergedSavedImages);
+      
+      // Update localStorage with merged data
+      localStorage.setItem(`savedImages_${userId}`, JSON.stringify([...mergedSavedImages]));
+      
+    } catch (error) {
+      console.error("Failed to sync saved images:", error);
+    }
+  };
+
+  // Initialize and hydrate on user load
   useEffect(() => {
-    const restoreImageHistory = async () => {
+    const initializeData = async () => {
       if (!user?._id) return;
+      
+      const userId = user._id;
+      
+      // Check hydration status
+      const hydrationFlag = localStorage.getItem(`db_hydrated_${userId}`);
+      const isLocallyMarkedHydrated = hydrationFlag === 'true';
+      
+      // Always check actual hydration status against backend
+      const actuallyHydrated = await checkIfHydrated(userId);
+      
+      if (!actuallyHydrated || !isLocallyMarkedHydrated) {
+        // Need to hydrate
+        await hydrateFromBackend(userId);
+      } else {
+        // Already hydrated, just restore from IndexedDB
+        setIsHydrated(true);
+        await restoreImageHistory(userId);
+      }
+      
+      // Always sync saved images
+      await syncSavedImages(userId);
+    };
+    
+    initializeData();
+  }, [user?._id]);
 
-      const keys = await getUserImageKeys(user?._id);
-
+  // Restore image history from IndexedDB
+  const restoreImageHistory = async (userId: string) => {
+    try {
+      const keys = await getUserImageKeys(userId);
+      
       const restored = await Promise.all(
         keys.map(async (key) => {
-          const record = await getUserImageRecord(
-            key as IDBValidKey,
-            user?._id
-          );
+          const record = await getUserImageRecord(key as IDBValidKey, userId);
           if (!record || !record.base64) return null;
-
+          
           const blobUrl = base64ToBlobUrl(record.base64);
-
+          
           return {
-            id: record.id.replace(`${user?._id}_`, ""), // Remove prefix for display
-            url: blobUrl, // restored
+            id: parseInt(record.id.toString().replace(`${userId}_`, "")),
+            url: blobUrl,
             prompt: record.prompt,
             style: record.style,
             resolution: record.resolution,
@@ -177,19 +348,94 @@ export default function AIImageGenerator() {
           };
         })
       );
-
+      
       const valid = restored.filter(Boolean) as HistoryItem[];
-      setImageHistory(valid.reverse()); // most recent first
-    };
+      setImageHistory(valid.reverse()); // Most recent first
+      
+    } catch (error) {
+      console.error("Failed to restore image history:", error);
+    }
+  };
 
-    restoreImageHistory();
-  }, [user?._id]);
+  // Enhanced save image function with backend sync
+  const saveImage = async (imageId: number) => {
+    const newSavedImages = new Set(savedImages);
+    const isCurrentlySaved = savedImages.has(imageId);
+    
+    if (isCurrentlySaved) {
+      newSavedImages.delete(imageId);
+      toast({
+        title: "Removed",
+        description: "Image removed from saved collection",
+        duration: 3000,
+        variant: "attention",
+      });
+    } else {
+      newSavedImages.add(imageId);
+      toast({
+        title: "Saved",
+        description: "Image saved to your collection",
+        duration: 3000,
+        variant: "attention",
+      });
+    }
+    
+    setSavedImages(newSavedImages);
+    
+    // Update localStorage immediately for responsiveness
+    if (user?._id) {
+      localStorage.setItem(`savedImages_${user._id}`, JSON.stringify([...newSavedImages]));
+    }
+    
+    // Sync with backend
+    try {
+      await saveImageDB.mutateAsync({
+        imageId: imageId,
+        action: isCurrentlySaved ? 'unsave' : 'save'
+      });
+    } catch (error) {
+      console.error("Failed to sync saved image with backend:", error);
+      // Revert local state on failure
+      setSavedImages(savedImages);
+      if (user?._id) {
+        localStorage.setItem(`savedImages_${user._id}`, JSON.stringify([...savedImages]));
+      }
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync with cloud. Changes reverted.",
+        variant: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+  // Load initial saved images from localStorage
+  useEffect(() => {
+    if (user?._id && !isHydrating) {
+      const saved = localStorage.getItem(`savedImages_${user._id}`);
+      if (saved) {
+        setSavedImages(new Set(JSON.parse(saved)));
+      }
+    }
+  }, [user?._id, isHydrating]);
+
+  // Rest of your existing useEffects and functions remain the same...
+  useEffect(() => {
+    if (user) {
+      setTokens(user.genCredits);
+      if (user.apiKey && user.apiKey !== "") {
+        setGeminiApiKey(user.apiKey);
+        setUseGeminiApi(true);
+      }
+    }
+  }, [user]);
 
   const getGeneratedImage = useApiPost({
     type: "post",
     key: ["generateImage"],
     path: ApiRoutes.generateImage,
   });
+
   const styleOptions = [
     { value: "NO Style", label: "Natural (No Style)" },
     { value: "photorealistic", label: "Photorealistic" },
@@ -228,100 +474,78 @@ export default function AIImageGenerator() {
   ];
 
   const handleGenerate = async () => {
-    if (
-      prompt.trim() &&
-      (tokens > 0 || (useGeminiApi && geminiApiKey.trim()))
-    ) {
+    if (prompt.trim() && (tokens > 0 || (useGeminiApi && geminiApiKey.trim()))) {
       setIsGenerating(true);
       const startTime = Date.now();
-      const image = await getGeneratedImage.mutateAsync({
-        prompt: prompt,
-        options: {
-          style: selectedStyle,
-          resolution:
-            selectedResolution === "Custom"
-              ? customResolution
-              : selectedResolution,
-          aspectRatio: selectedAspectRatio,
-        },
-        apiKey: user?.apiKey || null,
-      });
-      if (getGeneratedImage.isSuccess || image.status === 200) {
-        setIsGenerating(false);
-        if (!useGeminiApi) {
-          setTokens(image.data.data.credits);
-          // console.log("credits", image.data.data.credits);
-          setPublicID(image.data.data.public_id);
-          userStore.updateUser({ genCredits: image.data.data.credits });
-        }
-        // console.log("image", image.data.data.image);
-        // console.log(image.data.data);
-        if (
-          image?.data?.data?.image &&
-          Array.isArray(image.data.data?.image) &&
-          image.data.data?.image.length > 0
-        ) {
-          const base64Image = image.data.data?.image[1]?.inlineData.data;
-          // console.log("Base64 image data:", base64Image);
-          if (base64Image) {
-            const imageUrl = base64ToBlobUrl(base64Image);
-            setGeneratedImage(imageUrl);
-            setGenerationTime(Date.now() - startTime);
-            const imageDimensions = await getImageDimensions(imageUrl);
-            setCurrentResolution(imageDimensions);
-            const historyItem = {
-              id: Date.now(),
-              url: imageUrl,
-              prompt: prompt,
-              style: selectedStyle === "custom" ? customStyle : selectedStyle,
-              resolution: imageDimensions,
-              aspectRatio: selectedAspectRatio,
-              timestamp: new Date().toISOString(),
-              generationTime: Date.now() - startTime,
-              public_id: image.data.data.public_id || "",
-              contributed: false,
-            };
-            await saveImageWithMeta(historyItem, base64Image, user?._id ?? "");
-            setImageHistory((prev) => [historyItem, ...prev]);
-          } else {
-            console.warn("Base64 image data is missing");
-            toast({
-              title: "Error",
-              description: "Failed to generate image",
-              duration: 5000,
-              variant: "error",
-            });
-            setGeneratedImage(null);
-            setGenerationTime(0);
+      
+      try {
+        const image = await getGeneratedImage.mutateAsync({
+          prompt: prompt,
+          options: {
+            style: selectedStyle,
+            resolution: selectedResolution === "Custom" ? customResolution : selectedResolution,
+            aspectRatio: selectedAspectRatio,
+          },
+          apiKey: user?.apiKey || null,
+        });
+        
+        if (getGeneratedImage.isSuccess || image.status === 200) {
+          if (!useGeminiApi) {
+            setTokens(image.data.data.credits);
+            setPublicID(image.data.data.public_id);
+            userStore.updateUser({ genCredits: image.data.data.credits });
           }
-        } else {
-          console.warn("No image data returned from API");
-          toast({
-            title: "Error",
-            description: "Failed to generate image",
-            duration: 5000,
-            variant: "error",
-          });
-          setGeneratedImage(null);
-          setGenerationTime(0);
+          
+          if (image?.data?.data?.image && Array.isArray(image.data.data?.image) && image.data.data?.image.length > 0) {
+            const base64Image = image.data.data?.image[1]?.inlineData.data;
+            
+            if (base64Image) {
+              const imageUrl = base64ToBlobUrl(base64Image);
+              setGeneratedImage(imageUrl);
+              setGenerationTime(Date.now() - startTime);
+              const imageDimensions = await getImageDimensions(imageUrl);
+              setCurrentResolution(imageDimensions);
+              
+              const historyItem: HistoryItem = {
+                id: Date.now(),
+                url: imageUrl,
+                prompt: prompt,
+                style: selectedStyle === "custom" ? customStyle : selectedStyle,
+                resolution: imageDimensions,
+                aspectRatio: selectedAspectRatio,
+                timestamp: new Date().toISOString(),
+                generationTime: Date.now() - startTime,
+                public_id: image.data.data.public_id || "",
+                contributed: false,
+              };
+              
+              await saveImageWithMeta(historyItem, base64Image, user?._id ?? "");
+              setImageHistory((prev) => [historyItem, ...prev]);
+            } else {
+              throw new Error("Base64 image data is missing");
+            }
+          } else {
+            throw new Error("No image data returned from API");
+          }
         }
-      }
-      if (getGeneratedImage.isError) {
-        setIsGenerating(false);
-        setGeneratedImage(null);
-        setGenerationTime(0);
+      } catch (error) {
+        console.log("error",error);
         toast({
           title: "Error",
-          description: getErrorMsg(getGeneratedImage),
+          description: getErrorMsg(getGeneratedImage) || "Failed to generate image",
           duration: 5000,
           variant: "error",
         });
+        setGeneratedImage(null);
+        setGenerationTime(0);
+      } finally {
+        setIsGenerating(false);
       }
     }
   };
 
   function base64ToBlobUrl(base64: string, mimeType = "image/png"): string {
-    const byteString = atob(base64); // Decode base64 string
+    const byteString = atob(base64);
     const byteArray = new Uint8Array(byteString.length);
 
     for (let i = 0; i < byteString.length; i++) {
@@ -347,33 +571,26 @@ export default function AIImageGenerator() {
     setUseGeminiApi(false);
     setShowApiKeyInput(false);
   };
+
   const handleClearHistory = async () => {
     if (!user?._id) return;
 
-    // Only remove non-saved images
-    const filteredHistory = imageHistory.filter((item) =>
-      savedImages.has(item.id)
-    );
+    const filteredHistory = imageHistory.filter((item) => savedImages.has(item.id));
     setImageHistory(filteredHistory);
     setSelectedHistoryImage(null);
 
-    // Remove non-saved images from IndexedDB
-    const keys = await getUserImageKeys(user?._id);
+    const keys = await getUserImageKeys(user._id);
     for (const key of keys) {
-      const record = await getUserImageRecord(key, user?._id);
-      if (record && !savedImages.has(record.id.replace(`${user?._id}_`, ""))) {
+      const record = await getUserImageRecord(key, user._id);
+      if (record && !savedImages.has(parseInt(record.id.toString().replace(`${user._id}_`, "")))) {
         await imageDB.delete("images", key);
       }
     }
 
-    // Update localStorage with only saved images
     if (filteredHistory.length > 0) {
-      localStorage.setItem(
-        `imageHistory_${user?._id}`,
-        JSON.stringify(filteredHistory)
-      );
+      localStorage.setItem(`imageHistory_${user._id}`, JSON.stringify(filteredHistory));
     } else {
-      localStorage.removeItem(`imageHistory_${user?._id}`);
+      localStorage.removeItem(`imageHistory_${user._id}`);
     }
 
     toast({
@@ -388,6 +605,7 @@ export default function AIImageGenerator() {
     setSelectedHistoryImage(historyItem);
     setGeneratedImage(historyItem.url);
   };
+
   const handleRegenerate = (historyItem: HistoryItem) => {
     setPrompt(historyItem.prompt);
     setSelectedStyle(historyItem.style);
@@ -395,11 +613,13 @@ export default function AIImageGenerator() {
     setSelectedAspectRatio(historyItem.aspectRatio);
     setCurrentTab("generate");
   };
+
   const tokenPercentage = (tokens / maxTokens) * 100;
 
   const examplePrompts = useMemo(() => {
     return getRandomPrompts(6);
   }, []);
+
   const getImageDimensions = (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -411,19 +631,15 @@ export default function AIImageGenerator() {
     });
   };
 
-  const handleCustomResolutionChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+  const handleCustomResolutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
 
-    // Format as XXXX-XXXX (add dash after 4 digits)
     if (value.length > 4) {
       value = value.slice(0, 4) + "x" + value.slice(4, 8);
     }
 
     setCustomResolution(value);
 
-    // Update selectedResolution when we have a complete format
     if (value.includes("x") && value.split("x")[1].length > 0) {
       const [width, height] = value.split("x");
       if (width && height && width.length >= 3 && height.length >= 3) {
@@ -489,28 +705,6 @@ export default function AIImageGenerator() {
     }
   };
 
-  const saveImage = (imageId: number) => {
-    const newSavedImages = new Set(savedImages);
-    if (savedImages.has(imageId)) {
-      newSavedImages.delete(imageId);
-      toast({
-        title: "Removed",
-        description: "Image removed from saved collection",
-        duration: 3000,
-        variant: "attention",
-      });
-    } else {
-      newSavedImages.add(imageId);
-      toast({
-        title: "Saved",
-        description: "Image saved to your collection",
-        duration: 3000,
-        variant: "attention",
-      });
-    }
-    setSavedImages(newSavedImages);
-  };
-
   const shareImage = (imageUrl: string) => {
     setImageToShare(imageUrl);
     setShareDialogOpen(true);
@@ -531,7 +725,6 @@ export default function AIImageGenerator() {
           files: [file],
         });
       } catch (error) {
-        // Fallback to copying image URL if native share fails
         copyImageToClipboard(imageUrl);
         console.error("Native share failed:", error);
       }
@@ -539,24 +732,23 @@ export default function AIImageGenerator() {
       copyImageToClipboard(imageUrl);
     }
   };
+
   const contributeImage = useApiPost({
     type: "post",
     key: ["contributeImage"],
     path: ApiRoutes.addToGallery,
     sendingFile: false,
   });
+
   const registerCreator = useApiPost({
     type: "post",
     key: ["registerCreator"],
     path: ApiRoutes.registerCreator,
     sendingFile: false,
   });
-  const handleContributeImage = async () => {
-    // Get the current image's public_id and check if already contributed
-    const currentImage = imageHistory.find(
-      (item) => item.url === generatedImage
-    );
 
+  const handleContributeImage = async () => {
+    const currentImage = imageHistory.find((item) => item.url === generatedImage);
     const currentImagePublicId = currentImage?.public_id || publicID;
 
     if (!currentImagePublicId) {
@@ -569,7 +761,6 @@ export default function AIImageGenerator() {
       return;
     }
 
-    // Check if already contributed
     if (currentImage?.contributed) {
       toast({
         title: "Already Contributed",
@@ -619,7 +810,7 @@ export default function AIImageGenerator() {
           });
         }
       }
-      // Update the imageHistory state
+
       const updatedHistory = imageHistory.map((item) => {
         if (item.public_id === currentImagePublicId) {
           return { ...item, contributed: true };
@@ -629,22 +820,17 @@ export default function AIImageGenerator() {
 
       setImageHistory(updatedHistory);
 
-      // Update IndexedDB
       if (user?._id) {
-        const keys = await getUserImageKeys(user?._id);
+        const keys = await getUserImageKeys(user._id);
         for (const key of keys) {
-          const record = await getUserImageRecord(key, user?._id);
+          const record = await getUserImageRecord(key, user._id);
           if (record && record.public_id === currentImagePublicId) {
             await imageDB.put("images", { ...record, contributed: true });
             break;
           }
         }
 
-        // Update localStorage
-        localStorage.setItem(
-          `imageHistory_${user?._id}`,
-          JSON.stringify(updatedHistory)
-        );
+        localStorage.setItem(`imageHistory_${user._id}`, JSON.stringify(updatedHistory));
       }
     } catch (error) {
       toast({
@@ -656,7 +842,15 @@ export default function AIImageGenerator() {
       console.error("Error:", error);
     }
   };
-
+  if(!isHydrated){
+    return(
+      <>
+<div className="flex items-center justify-center min-h-screen bg-zinc-950/1">
+  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+</div>
+      </>
+    )
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}

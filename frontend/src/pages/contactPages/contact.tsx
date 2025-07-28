@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useApiPost } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { getErrorMsg } from "@/lib/getErrorMsg";
+import { useOffline } from "@/hooks/use-offline";
 export default function Contact() {
   const formRefs = useRef<{
     firstName: HTMLInputElement | null;
@@ -22,6 +23,7 @@ export default function Contact() {
     message: null,
   });
   const { toast } = useToast();
+  const isOffline=useOffline();
   const handleContact = useApiPost({
     type: "post",
     key: ["contact"],
@@ -155,7 +157,7 @@ export default function Contact() {
         <Card className="bg-[#1a1a2e] text-white w-full ">
           <CardContent className="p-0 flex flex-col justify-between h-full">
             <img
-              src="https://letshost.imgix.net/assets/astronaut.png?fm=webp"
+              src={`${!isOffline?"https://letshost.imgix.net/assets/astronaut.png?fm=webp":"astronaut.png"}`}
               alt="Astronaut"
               className="w-full object-cover rounded-t-xl max-h-80 sm:max-h-full"
             />

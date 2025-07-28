@@ -15,6 +15,9 @@ import {
   advancedSearch,
   discoverImages,
   downloadImage,
+  getUserImageCount,
+  getImagesHistoryOfUser,
+  getSavedImageOfUser
 } from "../controllers/gallery.controller.js";
 import { verifyJWTOPT } from "../middlewares/auth.opt.middleware.js";
 import { verifiedMiddleware } from "../middlewares/verified.middleware.js";
@@ -32,6 +35,9 @@ router.route("/search").get(logger, verifyJWTOPT, searchImages);
 router.route("/advanced-search").get(logger, verifyJWTOPT, advancedSearch);
 router.route("/discover").get(logger, verifyJWTOPT, discoverImages);
 router.route("/downloadImage").post(logger, verifyJWT,verifiedMiddleware, downloadImage);
+router.route("/getUserImageCount").get(logger, verifyJWT,verifiedMiddleware, getUserImageCount);
+router.route("/getImagesHistoryOfUser").get(logger, verifyJWT,verifiedMiddleware, getImagesHistoryOfUser);
+router.route("/getSavedImage").get(logger, verifyJWT,verifiedMiddleware, getSavedImageOfUser);
 // GET /search?query=landscape&limit=10 - Text-based search
 // GET /similar/:imageId?limit=10 - Find similar images
 // GET /advanced-search?query=nature&tags=outdoor,landscape - Advanced filtering

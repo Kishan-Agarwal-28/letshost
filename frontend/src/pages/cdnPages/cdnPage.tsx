@@ -651,7 +651,7 @@ const FileCard = ({
             </Dialog>
           </CardContent>
 
-          <CardFooter className="flex gap-2 pt-4 justify-around">
+          <CardFooter className="flex gap-2 pt-4 justify-around flex-wrap">
             <Button
               variant="outline"
               size="sm"
