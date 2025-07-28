@@ -1,6 +1,5 @@
 import Lottie from "lottie-react";
-import verifyAnimation from "../../../lottie/verify.json";
-import errorAnimation from "../../../lottie/error.json";
+
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -60,6 +59,19 @@ function EmailVerify() {
       navigate(`/dashboard?uid=${user?._id}`);
     }
   };
+    const [verifyAnimationData, setVerifyAnimationData] = useState<any>(null);
+    const [errorAnimationData, setErrorAnimationData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/lottie/verify.json")
+      .then((res) => res.json())
+      .then((data) => setVerifyAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+      fetch("/lottie/error.json")
+      .then((res) => res.json())
+      .then((data) => setErrorAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   return (
     <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
       {verified ? (
@@ -67,7 +79,7 @@ function EmailVerify() {
           <div className="w-64 h-64">
             <Lottie
               animationData={
-                !sendToken.isError ? verifyAnimation : errorAnimation
+                !sendToken.isError ? verifyAnimationData : errorAnimationData
               }
               loop={true}
               style={{ width: "100%", height: "100%" }}

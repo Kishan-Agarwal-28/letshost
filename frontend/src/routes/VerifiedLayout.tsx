@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import useUser from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import animation from "../../lottie/accessDenied.json";
+
 
 interface VerifiedRouteProps {
   children: ReactNode;
@@ -14,6 +14,14 @@ function VerifiedRoute({ children }: VerifiedRouteProps) {
   const navigate = useNavigate();
   const redirectTime = 5;
   const [countdown, setCountdown] = useState(redirectTime);
+    const [animationData, setAnimationData] = useState<any>(null);
+   useEffect(() => {
+    fetch("/lottie/accessDenied.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -57,7 +65,7 @@ function VerifiedRoute({ children }: VerifiedRouteProps) {
     <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
       <div className="w-[80%] h-[60%]">
         <Lottie
-          animationData={animation}
+          animationData={animationData}
           loop={true}
           style={{ width: "100%", height: "100%" }}
         />

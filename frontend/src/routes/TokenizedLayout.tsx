@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Lottie from "lottie-react";
-import animation from "../../lottie/accessDenied.json";
+
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +13,14 @@ function TokenizedRoute({ children }: ProtectedRouteProps) {
   const [countdown, setCountdown] = useState(redirectTime);
   const [searchParams] = useSearchParams({ token: "" });
   const token = searchParams.get("token");
+    const [animationData, setAnimationData] = useState<any>(null);
+    useEffect(() => {
+    fetch("/lottie/accessDenied.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   useEffect(() => {
     if (token === "") {
       const interval = setInterval(() => {
@@ -37,7 +45,7 @@ function TokenizedRoute({ children }: ProtectedRouteProps) {
     <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
       <div className="w-[80%] h-[60%]">
         <Lottie
-          animationData={animation}
+          animationData={animationData}
           loop={true}
           style={{ width: "100%", height: "100%" }}
         />

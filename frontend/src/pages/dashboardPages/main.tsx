@@ -25,7 +25,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useState } from "react";
-import SuspenseWrapper from "../../../suspense.tsx";
+import SuspenseWrapper from "../../suspense.tsx";
 const CdnPage = lazy(() => import("../cdnPages/cdnPage"));
 const ImageEditor = lazy(
   () => import("../imageTransformerspage/transformation")

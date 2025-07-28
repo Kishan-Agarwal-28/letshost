@@ -1,9 +1,17 @@
 import Lottie from "lottie-react";
-import animation from "@/../lottie/error_404_error.json";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 function Error() {
   const navigate = useNavigate();
+  const [animation, setAnimation] = useState<any>(null);
+    useEffect(() => {
+    fetch("/lottie/error.json")
+      .then((res) => res.json())
+      .then((data) => setAnimation(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   return (
     <>
       <div className="w-full h-dvh flex justify-center items-center bg-zinc-950 flex-col overflow-hidden">

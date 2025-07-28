@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import Lottie from "lottie-react";
-import loaderAnimation from "./lottie/loader.json";
+import { useEffect, useState } from "react";
 
-const LottieLoader = () => (
+const LottieLoader = ({ loaderAnimation }: { loaderAnimation: any }) => (
   <Lottie
     animationData={loaderAnimation}
     loop
@@ -12,11 +12,19 @@ const LottieLoader = () => (
 );
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
+  const [animationData, setAnimationData] = useState<any>(null);
+    useEffect(() => {
+    fetch("/lottie/loader.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   return (
     <Suspense
       fallback={
         <div className="flex justify-center items-center h-screen">
-          <LottieLoader />
+          <LottieLoader loaderAnimation={animationData} />
         </div>
       }
     >

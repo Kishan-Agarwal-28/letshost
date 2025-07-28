@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +51,6 @@ import {
   getUserImageRecord,
   getUserImageCount,
 } from "@/db/indexDB";
-import { getRandomPrompts } from "./examplePrompts";
 import {
   Dialog,
   DialogContent,
@@ -98,6 +97,7 @@ export default function AIImageGenerator() {
   const [publicID, setPublicID] = useState<string>("");
   const [isHydrated, setIsHydrated] = useState(false);
   const [isHydrating, setIsHydrating] = useState(false);
+  const[requestNewPrompts,setRequestNewPrompts] = useState<boolean>(true);
   
   const user = useUser();
   const userStore = useUserStore();
@@ -540,6 +540,7 @@ export default function AIImageGenerator() {
         setGenerationTime(0);
       } finally {
         setIsGenerating(false);
+        setRequestNewPrompts((prev) => !prev);
       }
     }
   };
@@ -616,9 +617,16 @@ export default function AIImageGenerator() {
 
   const tokenPercentage = (tokens / maxTokens) * 100;
 
-  const examplePrompts = useMemo(() => {
-    return getRandomPrompts(6);
-  }, []);
+  const [examplePrompts, setExamplePrompts] = useState<string[]>([]);
+  useEffect(() => {
+   (async()=>{
+     const data=await fetch("https://spring-math-2d3b.testifywebdev.workers.dev?n=6")
+    const json=await data.json()
+    setExamplePrompts(json.examplePrompts);
+    console.log("examplePrompts",json);
+    return json.data;
+   })()
+  }, [requestNewPrompts]);
 
   const getImageDimensions = (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {

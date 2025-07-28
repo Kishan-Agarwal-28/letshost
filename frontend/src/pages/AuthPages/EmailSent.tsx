@@ -1,5 +1,5 @@
 import Lottie from "lottie-react";
-import animation from "../../../lottie/emailSent.json";
+
 import { Button } from "@/components/ui/button";
 import { useApiGet } from "@/hooks/apiHooks";
 import { useState, useEffect } from "react";
@@ -14,6 +14,14 @@ function EmailSent() {
     path: ApiRoutes.resendVerificationToken,
     enabled: fetched,
   });
+    const [animationData, setAnimationData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/lottie/emailSent.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Failed to load animation", err));
+  }, []);
+
   const handleResendEmail = () => {
     setFetched(true);
   };
@@ -38,7 +46,7 @@ function EmailSent() {
     <div className="w-full h-dvh flex justify-center items-center bg-background flex-col overflow-hidden">
       <div className="w-64 h-64">
         <Lottie
-          animationData={animation}
+          animationData={animationData}
           loop={true}
           style={{ width: "100%", height: "100%" }}
         />

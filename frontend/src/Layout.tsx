@@ -3,13 +3,13 @@ import { ThemeProvider } from "./components/ui/theme-provider";
 import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "./pages/landingPage/header";
-import Footer from "./pages/landingPage/footer";
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import { useUserStore } from "./store/store";
+const Footer=lazy(()=>import("@/pages/landingPage/footer"));
 import { useApiGet } from "./hooks/apiHooks";
 import ApiRoutes from "./connectors/api-routes";
-import CookieConsent from "./pages/cookie/consent";
-import OfflinePage from "./pages/offlinePage/offline";
+const CookieConsent=lazy(()=>import("@/pages/cookie/consent"));
+const OfflinePage=lazy(()=>import("@/pages/offlinePage/offline"));
 import { useOffline } from "./hooks/use-offline";
 
 function Layout() {

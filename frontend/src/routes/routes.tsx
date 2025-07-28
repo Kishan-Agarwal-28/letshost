@@ -33,7 +33,7 @@ const TwoFA = lazy(() => import("@/pages/AuthPages/2fa.tsx"));
 const ConfirmPayment = lazy(() => import("@/pages/pricingPages/confirmPayment.tsx"));
 const SEOTool = lazy(() => import("@/pages/seoPage/seo.tsx"));
 import SemiProtectedRoute from "./semiProtectedRoutes";
-import SuspenseWrapper from "../../suspense.tsx";
+import SuspenseWrapper from "../suspense.tsx";
 import PageSeo from "@/pages/PageSeo/content.tsx";
 import Game from "@/pages/funPage/game.tsx";
 export const router = createBrowserRouter(

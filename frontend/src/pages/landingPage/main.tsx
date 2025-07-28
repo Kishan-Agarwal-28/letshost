@@ -1,6 +1,8 @@
-import Hero from "./hero";
-import Features from "./features";
-import Pricing from "./pricing";
+import { lazy } from "react";
+const Hero=lazy(()=>import("@/pages/landingPage/hero"));
+const Features=lazy(()=>import("@/pages/landingPage/features"));
+const Pricing=lazy(()=>import("@/pages/landingPage/pricing"));
+
 import { useMousePosition } from "@/hooks/use-mouse-position";
 import { motion } from "motion/react";
 import React, { useRef } from "react";
