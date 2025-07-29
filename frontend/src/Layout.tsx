@@ -9,7 +9,7 @@ const Footer = lazy(() => import("@/pages/landingPage/footer"));
 import { useApiGet } from "./hooks/apiHooks";
 import ApiRoutes from "./connectors/api-routes";
 const CookieConsent = lazy(() => import("@/pages/cookie/consent"));
-const OfflinePage = lazy(() => import("@/pages/offlinePage/offline"));
+import OfflinePage from "@/pages/offlinePage/offline";
 import { useOffline } from "./hooks/use-offline";
 
 function Layout() {
