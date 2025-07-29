@@ -53,11 +53,9 @@ const Pay = () => {
 
   return (
     <>
-  
-
-    <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
-      <EmbeddedCheckout />
-    </EmbeddedCheckoutProvider>
+      <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
+        <EmbeddedCheckout />
+      </EmbeddedCheckoutProvider>
     </>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {  Cookie} from "lucide-react";
+import { Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,7 +35,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
       learnMoreHref = "https://policies.google.com/technologies/cookies?hl=en-US",
       ...props
     },
-    ref,
+    ref
   ) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const [hide, setHide] = React.useState(false);
@@ -77,7 +77,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
     const containerClasses = cn(
       "fixed z-50 transition-all duration-700",
       !isOpen ? "translate-y-full opacity-0" : "translate-y-0 opacity-100",
-      className,
+      className
     );
 
     const commonWrapperProps = {
@@ -86,7 +86,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
         containerClasses,
         variant === "mini"
           ? "left-0 right-0 sm:left-4 bottom-4 w-full sm:max-w-3xl"
-          : "bottom-0 left-0 right-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md",
+          : "bottom-0 left-0 right-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md"
       ),
       ...props,
     };
@@ -168,7 +168,6 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
                 {description}
               </CardDescription>
               <div className="flex items-center gap-2 justify-end sm:gap-3">
-                
                 <Button
                   onClick={handleAccept}
                   size="sm"
@@ -185,7 +184,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
     }
 
     return null;
-  },
+  }
 );
 
 CookieConsent.displayName = "CookieConsent";

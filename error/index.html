@@ -181,7 +181,7 @@
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
-        font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
         text-align: left;
       }
 
@@ -234,7 +234,7 @@
         <div class="error-info" id="errorInfo">
           <h1 id="error-title">Error</h1>
           <p id="error-message">Something went wrong</p>
-          <div id="debug-info" style="display: none;">
+          <div id="debug-info" style="display: none">
             <div>Error Info Source: <span id="error-source"></span></div>
             <div>Status: <span id="debug-status"></span></div>
             <div>Reason: <span id="debug-reason"></span></div>
@@ -247,7 +247,7 @@
         </div>
       </div>
     </main>
-    
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Function to get error information from injected window object
@@ -255,15 +255,15 @@
           if (window.errorInfo) {
             return {
               status: window.errorInfo.status,
-              reason: window.errorInfo.reason
+              reason: window.errorInfo.reason,
             };
           }
-          
+
           // Fallback to URL parameters for backward compatibility
           const urlParams = new URLSearchParams(window.location.search);
           return {
             status: urlParams.get("status") || "000",
-            reason: urlParams.get("reason") || "Unknown error occurred."
+            reason: urlParams.get("reason") || "Unknown error occurred.",
           };
         }
 
@@ -273,10 +273,12 @@
 
         // Debug information (remove in production)
         const debugInfo = document.getElementById("debug-info");
-        document.getElementById("error-source").textContent = window.errorInfo ? "Injected Headers" : "URL Parameters";
+        document.getElementById("error-source").textContent = window.errorInfo
+          ? "Injected Headers"
+          : "URL Parameters";
         document.getElementById("debug-status").textContent = errorCode;
         document.getElementById("debug-reason").textContent = errorMessage;
-        
+
         // Show debug info if there's an issue (for development)
         if (errorCode === "000") {
           debugInfo.style.display = "block";
@@ -294,7 +296,10 @@
 
         // Insert animation before error info
         const errorInfoElement = document.getElementById("errorInfo");
-        errorInfoElement.parentNode.insertBefore(animationPlayer, errorInfoElement);
+        errorInfoElement.parentNode.insertBefore(
+          animationPlayer,
+          errorInfoElement
+        );
 
         const errorTitle = document.getElementById("error-title");
         const errorMessageElem = document.getElementById("error-message");
@@ -303,19 +308,23 @@
         errorMessageElem.textContent = errorMessage;
 
         // Map error codes to Lottie files with better fallback handling
-        let animationSrc = "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/underProgress.json"; // Default
-        
+        let animationSrc =
+          "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/underProgress.json"; // Default
+
         if (errorCode === "404") {
-          animationSrc = "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/error404.json";
+          animationSrc =
+            "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/error404.json";
         } else if (errorCode === "403" || errorCode === "401") {
-          animationSrc = "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/accessDenied.json";
+          animationSrc =
+            "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/accessDenied.json";
         } else if (errorCode && errorCode.toString().startsWith("5")) {
-          animationSrc = "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/error.json";
+          animationSrc =
+            "https://fhymsbxuaexnnakojxzk.supabase.co/storage/v1/object/public/subdomains/__error/lottie/error.json";
         }
 
         // Set animation source
         animationPlayer.setAttribute("src", animationSrc);
-        
+
         // Update debug info
         document.getElementById("animation-src").textContent = animationSrc;
 

@@ -20,7 +20,7 @@ type GithubRepo = {
   language: string;
   html_url: string;
   license?: { key: string };
-  homepage?:string;
+  homepage?: string;
   owner: {
     login: string;
     avatar_url: string;
@@ -32,10 +32,10 @@ type GithubRepo = {
 type ToolCardProps = {
   github: GithubRepo;
   npm?: boolean;
-  website?:boolean;
+  website?: boolean;
 };
 
-const ToolCard = ({ github, npm,website }: ToolCardProps) => {
+const ToolCard = ({ github, npm, website }: ToolCardProps) => {
   return (
     <Card className="w-[30rem] min-h-150 mx-h-180 flex items-center justify-around flex-col m-2">
       <CardHeader className="w-full border-b">
@@ -103,7 +103,7 @@ const ToolCard = ({ github, npm,website }: ToolCardProps) => {
             <RainbowButton>Npm Registry</RainbowButton>
           </a>
         )}
-          {website && (
+        {website && (
           <a
             href={`${github.homepage}`}
             target="_blank"
@@ -150,34 +150,46 @@ function Tools() {
   }
   return (
     <>
-    <motion.h1
-    initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-    className="text-6xl font-extrabold text-center text-muted-foreground mt-10">Tools</motion.h1>
-    <motion.p 
-     initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          viewport={{ once: true }}
-    className="text-center text-shadow-muted-foreground text-muted-foreground mt-4 text-lg">
-      Explore our tools and integrations to enhance your website's performance and functionality.
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        viewport={{ once: true }}
+        className="text-6xl font-extrabold text-center text-muted-foreground mt-10"
+      >
+        Tools
+      </motion.h1>
+      <motion.p
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        viewport={{ once: true }}
+        className="text-center text-shadow-muted-foreground text-muted-foreground mt-4 text-lg"
+      >
+        Explore our tools and integrations to enhance your website's performance
+        and functionality.
       </motion.p>
-    <div className="flex flex-wrap justify-around gap-4 w-full mt-8">
-      {githubData.map(
-        (data) =>
-          searchTopics.some((topic) => data.topics.includes(topic)) && (
-            <ToolCard
-              key={data.id}
-              github={data}
-              npm={searchTopics.some((topic) => data.topics.includes(topic))&&data.homepage?.trim().includes("npmjs.com")|| data.homepage?.trim()===""}
-              website={!data.homepage?.trim().includes("npmjs.com")&&data.homepage?.trim()!==""}
+      <div className="flex flex-wrap justify-around gap-4 w-full mt-8">
+        {githubData.map(
+          (data) =>
+            searchTopics.some((topic) => data.topics.includes(topic)) && (
+              <ToolCard
+                key={data.id}
+                github={data}
+                npm={
+                  (searchTopics.some((topic) => data.topics.includes(topic)) &&
+                    data.homepage?.trim().includes("npmjs.com")) ||
+                  data.homepage?.trim() === ""
+                }
+                website={
+                  !data.homepage?.trim().includes("npmjs.com") &&
+                  data.homepage?.trim() !== ""
+                }
               />
             )
-      )}
-    </div>
-            </>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -135,15 +135,15 @@ const Analytics: React.FC = () => {
       setUsageData(getAnalytics.data.data.data.usageData);
       setCalculations(getAnalytics.data.data.data.calculations);
       setFileTypeData(getAnalytics.data.data.data.fileTypeData);
-      const tempMonthlyUsage:MonthlyUsage[] = getAnalytics.data.data.data.monthlyUsage;
-      tempMonthlyUsage.forEach((usage:MonthlyUsage, index:number) => {
+      const tempMonthlyUsage: MonthlyUsage[] =
+        getAnalytics.data.data.data.monthlyUsage;
+      tempMonthlyUsage.forEach((usage: MonthlyUsage, index: number) => {
         tempMonthlyUsage[index].storage = formatBytes(Number(usage.storage));
         tempMonthlyUsage[index].subdomains = usage.subdomains;
         tempMonthlyUsage[index].files = usage.files;
       });
 
       setMonthlyUsage(tempMonthlyUsage);
-      
     }
     if (getAnalytics.isError) {
       toast({
@@ -198,8 +198,6 @@ const Analytics: React.FC = () => {
       .filter((f) => f.fileType === fileType)
       .reduce((total, file) => total + file.size, 0);
   };
-
-
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -353,27 +351,25 @@ const Analytics: React.FC = () => {
                 {userData?.genCredits}
               </div>
               <p className="text-xs text-slate-600 mt-2">Available credits</p>
-              <div className={`mt-2 text-xs ${userData.genCredits>3? "text-green-600":userData.genCredits===0? "text-red-600":"text-yellow-600"} flex items-center gap-1`}>
-              {
-                userData.genCredits>3?(
+              <div
+                className={`mt-2 text-xs ${userData.genCredits > 3 ? "text-green-600" : userData.genCredits === 0 ? "text-red-600" : "text-yellow-600"} flex items-center gap-1`}
+              >
+                {userData.genCredits > 3 ? (
                   <>
                     <TrendingUp className="w-3 h-3" />
-                Active
+                    Active
                   </>
-                ):(
-                  userData.genCredits===0?(
-                    <>
-                    <TrendingDown className="w-3 h-3" />
-                  Active
-                      </>
-                  ):(
+                ) : userData.genCredits === 0 ? (
                   <>
-                  <CircleAlert className="w-3 h-3" />
-                  Inactive
+                    <TrendingDown className="w-3 h-3" />
+                    Active
                   </>
-                  )
-                )
-              }
+                ) : (
+                  <>
+                    <CircleAlert className="w-3 h-3" />
+                    Inactive
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -800,9 +796,26 @@ const Analytics: React.FC = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={monthlyUsage}>
-                    <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis dataKey="month" label={{value:"Month",position:"center",style:{textAnchor:"middle"}}}/>
-                    <YAxis dataKey={"files"} label={{value:"Files",position:"insideBottomLeft",style:{textAnchor:"middle",transform:"translate(20px,-10px)"}}}/>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="month"
+                      label={{
+                        value: "Month",
+                        position: "center",
+                        style: { textAnchor: "middle" },
+                      }}
+                    />
+                    <YAxis
+                      dataKey={"files"}
+                      label={{
+                        value: "Files",
+                        position: "insideBottomLeft",
+                        style: {
+                          textAnchor: "middle",
+                          transform: "translate(20px,-10px)",
+                        },
+                      }}
+                    />
                     <Tooltip />
                     <Area
                       type="monotone"

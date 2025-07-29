@@ -3,7 +3,11 @@ import { devtools, persist, createJSONStorage } from "zustand/middleware";
 
 import { encryptJSON, decryptJSON } from "@/lib/encrypt";
 import { immer } from "zustand/middleware/immer";
-import  type { Base64URLString, CredentialDeviceType,AuthenticatorTransportFuture} from "@simplewebauthn/browser"
+import type {
+  Base64URLString,
+  CredentialDeviceType,
+  AuthenticatorTransportFuture,
+} from "@simplewebauthn/browser";
 export interface ICDn {
   cdnProjectID: string;
   filename: string;
@@ -23,10 +27,10 @@ type Passkey = {
   id: Base64URLString;
   publicKey: Uint8Array;
 
-  user: IUser
+  user: IUser;
 
   webauthnUserID: Base64URLString;
- 
+
   counter: number;
   deviceType: CredentialDeviceType;
   backedUp: boolean;

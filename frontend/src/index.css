@@ -169,7 +169,7 @@
   }
 }
 @media (max-width: 640px) {
-  *{
+  * {
     user-select: auto;
   }
 }

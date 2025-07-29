@@ -3,7 +3,6 @@ import useUser from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 
-
 interface VerifiedRouteProps {
   children: ReactNode;
 }
@@ -14,8 +13,8 @@ function VerifiedRoute({ children }: VerifiedRouteProps) {
   const navigate = useNavigate();
   const redirectTime = 5;
   const [countdown, setCountdown] = useState(redirectTime);
-    const [animationData, setAnimationData] = useState<any>(null);
-   useEffect(() => {
+  const [animationData, setAnimationData] = useState<any>(null);
+  useEffect(() => {
     fetch("/lottie/accessDenied.json")
       .then((res) => res.json())
       .then((data) => setAnimationData(data))

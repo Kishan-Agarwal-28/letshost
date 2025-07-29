@@ -1,7 +1,7 @@
 import { lazy } from "react";
-const Hero=lazy(()=>import("@/pages/landingPage/hero"));
-const Features=lazy(()=>import("@/pages/landingPage/features"));
-const Pricing=lazy(()=>import("@/pages/landingPage/pricing"));
+const Hero = lazy(() => import("@/pages/landingPage/hero"));
+const Features = lazy(() => import("@/pages/landingPage/features"));
+const Pricing = lazy(() => import("@/pages/landingPage/pricing"));
 
 import { useMousePosition } from "@/hooks/use-mouse-position";
 import { motion } from "motion/react";
@@ -15,7 +15,6 @@ function LandingPage() {
 
   return (
     <>
-    
       <div className="">
         <div ref={containerRef} className="">
           <motion.div

@@ -15,13 +15,20 @@ import { useUserStore } from "@/store/store";
 import ApiRoutes from "@/connectors/api-routes";
 import ForgotPassword from "./ForgotPassword";
 import { PasswordInput } from "@/components/ui/password-input";
-import {FormControl,  FormDescription, FormItem, FormLabel, FormMessage ,FormField} from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormField,
+} from "@/components/ui/form";
 import { useOffline } from "@/hooks/use-offline";
 
 function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const isOffline=useOffline();
+  const isOffline = useOffline();
   const [searchParams, setSearchParams] = useSearchParams({
     mode: "signup",
     status: "",
@@ -29,7 +36,6 @@ function Auth() {
 
   const userStore = useUserStore();
   const [is2FARequired, setIs2FARequired] = useState(false);
-
 
   //@handling form and their types
   const signUpSchema = z
@@ -184,13 +190,17 @@ function Auth() {
       // Login success
       if (login.isSuccess) {
         const responseData = login.data?.data?.data;
-        
+
         // Check if 2FA is required
-        if (login.data?.data?.message === "User logged in successfully but pending 2FA") {
+        if (
+          login.data?.data?.message ===
+          "User logged in successfully but pending 2FA"
+        ) {
           setIs2FARequired(true);
           toast({
             title: "2FA Required",
-            description: "Please authenticate with your security key to complete login.",
+            description:
+              "Please authenticate with your security key to complete login.",
             variant: "default",
             duration: 5000,
           });
@@ -217,12 +227,7 @@ function Auth() {
         });
       }
     })();
-  }, [
-    register.isSuccess, 
-    register.isError, 
-    login.isSuccess, 
-    login.isError,
-  ]);
+  }, [register.isSuccess, register.isError, login.isSuccess, login.isError]);
 
   //@handling oauth
   const getStatus = searchParams.get("status");
@@ -277,9 +282,13 @@ function Auth() {
 
   // Render 2FA authentication screen
   if (is2FARequired) {
-    navigate("/user/auth/additional-safety/2fa?mode=login&action=enable",{state:{fromApp:true, loginRequired:true,
-      challenge:login.data?.data.data.challenge
-    }});
+    navigate("/user/auth/additional-safety/2fa?mode=login&action=enable", {
+      state: {
+        fromApp: true,
+        loginRequired: true,
+        challenge: login.data?.data.data.challenge,
+      },
+    });
   }
 
   return (
@@ -332,35 +341,39 @@ function Auth() {
                       placeholderValue="example@gmail.com"
                       type="email"
                     />
-                   
-                     <FormField
-          control={signUpForm.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <PasswordInput placeholder="********" {...field} />
-              </FormControl>
-              <FormDescription>Enter your password.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-                           <FormField
-                                    control={signUpForm.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
-                                        <FormControl>
-                                          <PasswordInput placeholder="********" {...field} />
-                                        </FormControl>
-                                        <FormDescription>Confirm your Password</FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+
+                    <FormField
+                      control={signUpForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <PasswordInput placeholder="********" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Enter your password.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signUpForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <PasswordInput placeholder="********" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Confirm your Password
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <Button
                       type="submit"
                       disabled={register.isPending}
@@ -436,23 +449,28 @@ function Auth() {
                       placeholderValue="example@gmail.com"
                       type="email"
                     />
-                     <div className="relative w-full flex justify-end flex-col text-sm">
+                    <div className="relative w-full flex justify-end flex-col text-sm">
                       <FormField
-          control={loginForm.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <PasswordInput placeholder="********" {...field} />
-              </FormControl>
-              <FormDescription>Enter your password.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <ForgotPassword/>
-                     </div>
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <PasswordInput
+                                placeholder="********"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Enter your password.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <ForgotPassword />
+                    </div>
                     <Button
                       type="submit"
                       disabled={login.isPending}
@@ -479,7 +497,7 @@ function Auth() {
         {/* Side Image */}
         <div className="hidden md:flex relative bg-muted w-full md:w-1/2 h-[97%] rounded-2xl justify-center items-center">
           <img
-            src={`${!isOffline?"https://letshost.imgix.net/assets/logo.png?fm=webp":"logo.png"}`}
+            src={`${!isOffline ? "https://letshost.imgix.net/assets/logo.png?fm=webp" : "logo.png"}`}
             alt="Image"
             className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
           />

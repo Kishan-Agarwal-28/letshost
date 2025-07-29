@@ -13,7 +13,7 @@ const LottieLoader = ({ loaderAnimation }: { loaderAnimation: any }) => (
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   const [animationData, setAnimationData] = useState<any>(null);
-    useEffect(() => {
+  useEffect(() => {
     fetch("/lottie/loader.json")
       .then((res) => res.json())
       .then((data) => setAnimationData(data))

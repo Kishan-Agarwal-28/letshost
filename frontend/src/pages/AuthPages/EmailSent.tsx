@@ -14,7 +14,7 @@ function EmailSent() {
     path: ApiRoutes.resendVerificationToken,
     enabled: fetched,
   });
-    const [animationData, setAnimationData] = useState<any>(null);
+  const [animationData, setAnimationData] = useState<any>(null);
   useEffect(() => {
     fetch("/lottie/emailSent.json")
       .then((res) => res.json())

@@ -56,7 +56,7 @@ const ApiRoutes = {
   getImagesOfUser: "/gallery/getImagesOfUser",
   getUserImageCount: "/gallery/getUserImageCount",
   getImagesHistoryOfUser: "/gallery/getImagesHistoryOfUser",
-  getSavedImage:"/gallery/getSavedImage",
+  getSavedImage: "/gallery/getSavedImage",
   getTotalImagesCount: "/gallery/getTotalImagesCount",
   searchImages: "/gallery/search",
   getSimilarImages: "/gallery/similar",

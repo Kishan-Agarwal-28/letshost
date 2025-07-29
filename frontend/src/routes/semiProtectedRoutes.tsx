@@ -1,8 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import useUser from "@/hooks/useUser";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Lottie from "lottie-react";
-
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -21,8 +20,8 @@ function SemiProtectedRoute({ children }: ProtectedRouteProps) {
 
     return () => clearTimeout(timer);
   }, []);
-    const [animationData, setAnimationData] = useState<any>(null);
-   useEffect(() => {
+  const [animationData, setAnimationData] = useState<any>(null);
+  useEffect(() => {
     fetch("/lottie/accessDenied.json")
       .then((res) => res.json())
       .then((data) => setAnimationData(data))
@@ -46,7 +45,7 @@ function SemiProtectedRoute({ children }: ProtectedRouteProps) {
       return () => clearInterval(interval);
     }
   }, [navigate, user, isLoading]);
-const location = useLocation();
+  const location = useLocation();
   const fromApp = location.state?.fromApp;
   const isLoginRequired = location.state?.loginRequired;
 

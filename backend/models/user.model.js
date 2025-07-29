@@ -127,25 +127,25 @@ const userSchema = new Schema(
       type: Date,
       default: null,
     },
-     TwoFAchallenge:{
-        type:String,
-        default:null
+    TwoFAchallenge: {
+      type: String,
+      default: null,
     },
-    TwoFAEnabled:{
-         type:Boolean,
-         default:false
-     },
-     TwoFAverified:{
-        type:Boolean,
-        default:false
-     },
-     PassKey:{
-        type: Schema.Types.Mixed,
-        default:null,
-        required:function(){
-            return (this.TwoFAEnabled && this.TwoFAverified)
-        }
-     },
+    TwoFAEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    TwoFAverified: {
+      type: Boolean,
+      default: false,
+    },
+    PassKey: {
+      type: Schema.Types.Mixed,
+      default: null,
+      required: function () {
+        return this.TwoFAEnabled && this.TwoFAverified;
+      },
+    },
   },
   {
     timestamps: true,

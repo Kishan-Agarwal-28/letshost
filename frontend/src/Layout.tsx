@@ -5,11 +5,11 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "./pages/landingPage/header";
 import { lazy, useEffect } from "react";
 import { useUserStore } from "./store/store";
-const Footer=lazy(()=>import("@/pages/landingPage/footer"));
+const Footer = lazy(() => import("@/pages/landingPage/footer"));
 import { useApiGet } from "./hooks/apiHooks";
 import ApiRoutes from "./connectors/api-routes";
-const CookieConsent=lazy(()=>import("@/pages/cookie/consent"));
-const OfflinePage=lazy(()=>import("@/pages/offlinePage/offline"));
+const CookieConsent = lazy(() => import("@/pages/cookie/consent"));
+const OfflinePage = lazy(() => import("@/pages/offlinePage/offline"));
 import { useOffline } from "./hooks/use-offline";
 
 function Layout() {
@@ -34,15 +34,15 @@ function Layout() {
     return () => {};
   }, [user.isSuccess]);
 
-  const location=useLocation();
- const isOffline=useOffline();
-if(isOffline&&location.pathname!=="/offline/game"){
-  return <OfflinePage/>
-}
+  const location = useLocation();
+  const isOffline = useOffline();
+  if (isOffline && location.pathname !== "/offline/game") {
+    return <OfflinePage />;
+  }
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {/* <ModeToggle /> */}
-      <CookieConsent/>
+      <CookieConsent />
       <Header />
       <Outlet />
       <Toaster />

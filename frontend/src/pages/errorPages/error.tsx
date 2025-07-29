@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function Error() {
   const navigate = useNavigate();
   const [animation, setAnimation] = useState<any>(null);
-    useEffect(() => {
+  useEffect(() => {
     fetch("/lottie/error.json")
       .then((res) => res.json())
       .then((data) => setAnimation(data))

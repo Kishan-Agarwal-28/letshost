@@ -15,7 +15,7 @@ function EmailVerify() {
   const [searchParams] = useSearchParams({ token: "" });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isOffline=useOffline();
+  const isOffline = useOffline();
   const [verified, setVerified] = useState(false);
   const userStore = useUserStore();
   const user = useUser();
@@ -59,14 +59,14 @@ function EmailVerify() {
       navigate(`/dashboard?uid=${user?._id}`);
     }
   };
-    const [verifyAnimationData, setVerifyAnimationData] = useState<any>(null);
-    const [errorAnimationData, setErrorAnimationData] = useState<any>(null);
+  const [verifyAnimationData, setVerifyAnimationData] = useState<any>(null);
+  const [errorAnimationData, setErrorAnimationData] = useState<any>(null);
   useEffect(() => {
     fetch("/lottie/verify.json")
       .then((res) => res.json())
       .then((data) => setVerifyAnimationData(data))
       .catch((err) => console.error("Failed to load animation", err));
-      fetch("/lottie/error.json")
+    fetch("/lottie/error.json")
       .then((res) => res.json())
       .then((data) => setErrorAnimationData(data))
       .catch((err) => console.error("Failed to load animation", err));
@@ -126,7 +126,7 @@ function EmailVerify() {
           </div>
           <div className="relative hidden bg-muted md:flex w-1/3 h-[90%] rounded-2xl justify-center items-center">
             <img
-              src={`${!isOffline?"https://letshost.imgix.net/assets/logo.png?fm=webp":"logo.png"}`}
+              src={`${!isOffline ? "https://letshost.imgix.net/assets/logo.png?fm=webp" : "logo.png"}`}
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.9] cursor-pointer"
             />

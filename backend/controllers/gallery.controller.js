@@ -364,7 +364,6 @@ const getImagesHistoryOfUser = asyncHandler(async (req, res) => {
 
   let id = req.user._id;
 
-
   const user = await User.findById(id);
   if (!user) {
     throw new apiError(404, "User not found");
@@ -480,21 +479,25 @@ const getImagesHistoryOfUser = asyncHandler(async (req, res) => {
   );
 });
 
-const getSavedImageOfUser=asyncHandler(async(req,res)=>{
- 
-  const saves=await Save.find({savedBy:req.user._id}).sort({createdAt:-1});
-  const savedImages=[];
-  saves.map(save=>{
+const getSavedImageOfUser = asyncHandler(async (req, res) => {
+  const saves = await Save.find({ savedBy: req.user._id }).sort({
+    createdAt: -1,
+  });
+  const savedImages = [];
+  saves.map((save) => {
     savedImages.push(save.image);
   });
-    
-  return res.status(200).json(new apiResponse(200,savedImages,"Saved images fetched successfully"));
-  
-})
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, savedImages, "Saved images fetched successfully")
+    );
+});
 const getGallery = asyncHandler(async (req, res) => {
   const { limit = 10, page = 1 } = req.query;
-  const limitNum = parseInt(limit, 10)||10;
-  const pageNum = parseInt(page, 10)||1;
+  const limitNum = parseInt(limit, 10) || 10;
+  const pageNum = parseInt(page, 10) || 1;
 
   console.log("Fetching page:", pageNum, "with limit:", limitNum);
 

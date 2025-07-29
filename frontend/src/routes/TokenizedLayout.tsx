@@ -2,7 +2,6 @@ import { type ReactNode, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Lottie from "lottie-react";
 
-
 interface ProtectedRouteProps {
   children: ReactNode;
 }
@@ -13,8 +12,8 @@ function TokenizedRoute({ children }: ProtectedRouteProps) {
   const [countdown, setCountdown] = useState(redirectTime);
   const [searchParams] = useSearchParams({ token: "" });
   const token = searchParams.get("token");
-    const [animationData, setAnimationData] = useState<any>(null);
-    useEffect(() => {
+  const [animationData, setAnimationData] = useState<any>(null);
+  useEffect(() => {
     fetch("/lottie/accessDenied.json")
       .then((res) => res.json())
       .then((data) => setAnimationData(data))

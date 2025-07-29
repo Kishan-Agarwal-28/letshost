@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 function ConfirmPayment() {
-    const navigate = useNavigate();
-    const [animation, setAnimation] = useState<any>(null);
+  const navigate = useNavigate();
+  const [animation, setAnimation] = useState<any>(null);
   useEffect(() => {
     fetch("/lottie/verify.json")
       .then((res) => res.json())
@@ -13,7 +13,7 @@ function ConfirmPayment() {
   }, []);
 
   return (
-     <>
+    <>
       <div className="w-full h-dvh flex justify-center items-center bg-zinc-950 flex-col overflow-hidden">
         <Lottie
           animationData={animation}
@@ -28,6 +28,6 @@ function ConfirmPayment() {
         </Button>
       </div>
     </>
-  )
+  );
 }
-export default ConfirmPayment
+export default ConfirmPayment;

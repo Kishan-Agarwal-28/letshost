@@ -5,11 +5,18 @@ import { generatePlainTextEmailTemplates } from "./generateEmailTextTemplates.js
 import { checkEmail } from "../services/checkMail.service.js";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const sendEmail = async ({to, reason, data, html, userID,toBeVerified=true}) => {
-  if(toBeVerified){
-    if(!await checkEmail(data?.email)){
-    throw new Error("Email is not deliverable or is disposable");
-  }
+export const sendEmail = async ({
+  to,
+  reason,
+  data,
+  html,
+  userID,
+  toBeVerified = true,
+}) => {
+  if (toBeVerified) {
+    if (!(await checkEmail(data?.email))) {
+      throw new Error("Email is not deliverable or is disposable");
+    }
   }
   const htmlTemplate = generateEmailTemplates(
     data.username,
@@ -37,7 +44,7 @@ export const sendEmail = async ({to, reason, data, html, userID,toBeVerified=tru
             ? `Your sign-in email was changed for ${APPNAME}`
             : reason,
     html: htmlTemplate == null ? html : htmlTemplate,
-    text:textTemplate== null ? textTemplate : textTemplate
+    text: textTemplate == null ? textTemplate : textTemplate,
   };
   try {
     const email = await resend.emails.send(options);

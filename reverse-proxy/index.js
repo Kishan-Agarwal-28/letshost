@@ -11,13 +11,18 @@ import { getSubDomain } from "./util/queryDb.js";
 import jwt from "jsonwebtoken";
 const app = express();
 
-function makeRequest(url, res, content = "application/octet-stream", params = null) {
+function makeRequest(
+  url,
+  res,
+  content = "application/octet-stream",
+  params = null
+) {
   const parsedUrl = new URL(url);
-  
+
   console.log("Making request to:", url);
   console.log("Parsed URL - pathname:", parsedUrl.pathname);
   console.log("Parsed URL - search:", parsedUrl.search);
-  
+
   const requestOptions = {
     hostname: parsedUrl.hostname,
     port: parsedUrl.port || (parsedUrl.protocol === "https:" ? 443 : 80),
@@ -39,23 +44,23 @@ function makeRequest(url, res, content = "application/octet-stream", params = nu
 
     // If it's HTML and we have parameters to inject, collect the response and modify it
     if (content === "text/html" && params) {
-      let htmlContent = '';
-      
-      proxyRes.on('data', (chunk) => {
+      let htmlContent = "";
+
+      proxyRes.on("data", (chunk) => {
         htmlContent += chunk.toString();
       });
-      
-      proxyRes.on('end', () => {
+
+      proxyRes.on("end", () => {
         // Fix the parameter injection - make it more robust
         let injectedHtml = htmlContent;
-        
+
         // Replace window.location.search with the actual parameters
         const searchParams = `"?${params.toString()}"`;
         injectedHtml = injectedHtml.replace(
           /window\.location\.search/g,
           searchParams
         );
-        
+
         // Also inject the parameters as a script tag for better reliability
         const scriptInjection = `
           <script>
@@ -70,17 +75,20 @@ function makeRequest(url, res, content = "application/octet-stream", params = nu
             };
           </script>
         `;
-        
+
         // Inject before closing head tag
-        injectedHtml = injectedHtml.replace('</head>', `${scriptInjection}</head>`);
-        
+        injectedHtml = injectedHtml.replace(
+          "</head>",
+          `${scriptInjection}</head>`
+        );
+
         // Fix Lottie animation paths - make them absolute
-        const baseUri = process.env.BASE_URI || '';
+        const baseUri = process.env.BASE_URI || "";
         injectedHtml = injectedHtml.replace(
           /src="lottie\//g,
           `src="${baseUri}/subdomains/__error/lottie/`
         );
-        
+
         res.send(injectedHtml);
       });
     } else {
@@ -88,7 +96,7 @@ function makeRequest(url, res, content = "application/octet-stream", params = nu
       proxyRes.pipe(res);
     }
   });
-  
+
   proxyReq.on("error", (err) => {
     console.error("Request error:", err);
     res.status(500).send("Internal Server Error");
@@ -109,9 +117,124 @@ app.use("/", async (req, res) => {
         return res.status(400).send("Subdomain not provided");
       }
       const restrictedSubdomains = [
-        "www", "api", "admin", "blog", "dashboard", "support", "help", "contact", "about", "terms", "privacy", "legal", "status", "docs", "forum", "login", "register", "signin", "signup", "logout", "home", "index", "store", "shop", "cart", "assets", "static", "public", "images", "files", "media", "uploads", "temp", "resources", "http", "https", "localhost", "example", "demo", "test", "staging", "dev", "testbed", "preview", "internal", "secure", "cms", "panel", "adminpanel", "control", "auth", "oauth", "identity", "loginpage", "logoutpage", "error", "maintenance", "billing", "checkout", "payments", "order", "user", "profile", "account", "newsletter", "cartpage", "assets", "cdn", "download", "uploads", "resources", "server", "monitoring", "data", "platform", "api-v1", "api-v2", "api-v3", "api-beta", "adminapi", "authapi", "secureapi", "hooks", "ping", "verify", "robots", "sitemap", "notifications", "messaging", "uploads", "imageserver", "content", "mediafiles", "resources", "downloadfiles", "testing", "console", "cli", "toolbox", "tool", "scripts", "cloud", "supportcenter", "feedback", "tickets", "audit", "logs", "alert", "monitoring", "statuspage", "incident", "release", "updates", "live", "statuspage", "supportchat"
+        "www",
+        "api",
+        "admin",
+        "blog",
+        "dashboard",
+        "support",
+        "help",
+        "contact",
+        "about",
+        "terms",
+        "privacy",
+        "legal",
+        "status",
+        "docs",
+        "forum",
+        "login",
+        "register",
+        "signin",
+        "signup",
+        "logout",
+        "home",
+        "index",
+        "store",
+        "shop",
+        "cart",
+        "assets",
+        "static",
+        "public",
+        "images",
+        "files",
+        "media",
+        "uploads",
+        "temp",
+        "resources",
+        "http",
+        "https",
+        "localhost",
+        "example",
+        "demo",
+        "test",
+        "staging",
+        "dev",
+        "testbed",
+        "preview",
+        "internal",
+        "secure",
+        "cms",
+        "panel",
+        "adminpanel",
+        "control",
+        "auth",
+        "oauth",
+        "identity",
+        "loginpage",
+        "logoutpage",
+        "error",
+        "maintenance",
+        "billing",
+        "checkout",
+        "payments",
+        "order",
+        "user",
+        "profile",
+        "account",
+        "newsletter",
+        "cartpage",
+        "assets",
+        "cdn",
+        "download",
+        "uploads",
+        "resources",
+        "server",
+        "monitoring",
+        "data",
+        "platform",
+        "api-v1",
+        "api-v2",
+        "api-v3",
+        "api-beta",
+        "adminapi",
+        "authapi",
+        "secureapi",
+        "hooks",
+        "ping",
+        "verify",
+        "robots",
+        "sitemap",
+        "notifications",
+        "messaging",
+        "uploads",
+        "imageserver",
+        "content",
+        "mediafiles",
+        "resources",
+        "downloadfiles",
+        "testing",
+        "console",
+        "cli",
+        "toolbox",
+        "tool",
+        "scripts",
+        "cloud",
+        "supportcenter",
+        "feedback",
+        "tickets",
+        "audit",
+        "logs",
+        "alert",
+        "monitoring",
+        "statuspage",
+        "incident",
+        "release",
+        "updates",
+        "live",
+        "statuspage",
+        "supportchat",
       ];
-      
+
       if (restrictedSubdomains.includes(subdomain)) {
         console.log("Restricted subdomain access attempt:", subdomain);
         const params = new URLSearchParams({
@@ -122,7 +245,7 @@ app.use("/", async (req, res) => {
         makeRequest(errorUrl, res, "text/html", params);
         return;
       }
-      
+
       const subAvailable = await getSubDomain(subdomain);
 
       if (!subAvailable) {
@@ -145,17 +268,22 @@ app.use("/", async (req, res) => {
         if (!token) {
           const params = new URLSearchParams({
             status: "401",
-            reason: "Unauthorized Access You need a valid url token to access this site as it is private",
+            reason:
+              "Unauthorized Access You need a valid url token to access this site as it is private",
           });
           const errorUrl = `${process.env.BASE_URI}/subdomains/__error/index.html`;
           makeRequest(errorUrl, res, "text/html", params);
         } else {
           try {
-            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            const decodedToken = jwt.verify(
+              token,
+              process.env.ACCESS_TOKEN_SECRET
+            );
             if (!decodedToken || decodedToken.sub !== subdomain) {
               const params = new URLSearchParams({
                 status: "401",
-                reason: "Unauthorized Access You need a valid url token to access this site as it is private",
+                reason:
+                  "Unauthorized Access You need a valid url token to access this site as it is private",
               });
               const errorUrl = `${process.env.BASE_URI}/subdomains/__error/index.html`;
               makeRequest(errorUrl, res, "text/html", params);

@@ -1,10 +1,17 @@
 // ----------- Type Definitions -----------
-type Locale = 'en_US' | string;
-type Availability = 'InStock' | 'OutOfStock' | string;
-type Condition = 'NewCondition' | 'UsedCondition' | string;
-type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR' | string;
-type OrganizationType = 'Organization' | 'NGO' | 'Corporation' | string;
-type ChangeFreq = 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+type Locale = "en_US" | string;
+type Availability = "InStock" | "OutOfStock" | string;
+type Condition = "NewCondition" | "UsedCondition" | string;
+type EmploymentType = "FULL_TIME" | "PART_TIME" | "CONTRACTOR" | string;
+type OrganizationType = "Organization" | "NGO" | "Corporation" | string;
+type ChangeFreq =
+  | "always"
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "never";
 
 interface QA {
   question: string;
@@ -30,7 +37,7 @@ interface SitemapPage {
 interface AdsEntry {
   domain: string;
   publisherId: string;
-  relationship: 'DIRECT' | 'RESELLER';
+  relationship: "DIRECT" | "RESELLER";
   certificationId: string;
 }
 
@@ -116,10 +123,10 @@ interface SEOFormData {
 }
 
 type ArrayKeys<T> = {
-  [K in keyof T]: T[K] extends unknown[] ? K : never
+  [K in keyof T]: T[K] extends unknown[] ? K : never;
 }[keyof T];
 
-  type SecurityHeaderName =
+type SecurityHeaderName =
   | "Cache-Control"
   | "Strict-Transport-Security"
   | "X-Frame-Options"
@@ -132,7 +139,7 @@ type ArrayKeys<T> = {
   | "Cross-Origin-Opener-Policy"
   | "Cross-Origin-Resource-Policy";
 
-export type{
+export type {
   Locale,
   Availability,
   Condition,
@@ -147,5 +154,5 @@ export type{
   HttpHeader,
   SEOFormData,
   ArrayKeys,
-  SecurityHeaderName
-}
+  SecurityHeaderName,
+};

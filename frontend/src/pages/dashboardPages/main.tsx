@@ -1,6 +1,13 @@
 import Dashboard from "@/pages/dashboardPages/dashboard.tsx";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Sparkles, ChartPie, Upload, Settings,  ImageUp, ImagePlus } from "lucide-react";
+import {
+  Sparkles,
+  ChartPie,
+  Upload,
+  Settings,
+  ImageUp,
+  ImagePlus,
+} from "lucide-react";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { RiDashboardHorizontalLine } from "react-icons/ri";
@@ -91,23 +98,22 @@ function DashboardLayout() {
 
   const [page, setPage] = useState<PageKey>("dashboard");
   const [searchParams, setSearchParams] = useSearchParams();
-useEffect(() => {
-  if (searchParams.get("page")) {
-    const pageParam = searchParams.get("page") as PageKey;
-    setPage(pageParam);
+  useEffect(() => {
+    if (searchParams.get("page")) {
+      const pageParam = searchParams.get("page") as PageKey;
+      setPage(pageParam);
 
-    const params = Object.fromEntries(searchParams.entries());
+      const params = Object.fromEntries(searchParams.entries());
 
-    if (pageParam === "gallery-likes") {
-      setSearchParams({ ...params, showLikes: "true" });
-    } else if (pageParam === "gallery-saves") {
-      setSearchParams({ ...params, showSaves: "true" });
+      if (pageParam === "gallery-likes") {
+        setSearchParams({ ...params, showLikes: "true" });
+      } else if (pageParam === "gallery-saves") {
+        setSearchParams({ ...params, showSaves: "true" });
+      }
+    } else {
+      setSearchParams({ page });
     }
-  } else {
-    setSearchParams({ page });
-  }
-}, []);
-
+  }, []);
 
   const menuSections: MenuSection[] = [
     {
@@ -186,7 +192,7 @@ useEffect(() => {
           label: "View Saved Images",
           icon: ImageUp,
           page: "gallery-saves",
-        }
+        },
       ],
     },
     {
@@ -204,15 +210,13 @@ useEffect(() => {
 
   const handlePageUpdate = (page: PageKey) => {
     setPage(page);
-   if(page==="gallery-likes"){
-    setSearchParams({ page, showLikes: "true" });
-  }
-  else if(page==="gallery-saves"){
-    setSearchParams({ page, showSaves: "true" });
-  }
- else{
-    setSearchParams({ page });
- }
+    if (page === "gallery-likes") {
+      setSearchParams({ page, showLikes: "true" });
+    } else if (page === "gallery-saves") {
+      setSearchParams({ page, showSaves: "true" });
+    } else {
+      setSearchParams({ page });
+    }
   };
   return (
     <>

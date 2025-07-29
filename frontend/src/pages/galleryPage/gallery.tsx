@@ -48,22 +48,22 @@ export const ImageHoverCard = ({
     Math.floor(Math.random() * 1000) + 100
   );
   const { toast } = useToast();
-const navigate = useNavigate();
-const isMobile=useIsMobile();
-const  user  = useUser();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const user = useUser();
   const downloadImage = useApiPost({
     type: "post",
     key: ["downloadImage"],
     path: ApiRoutes.downloadImage,
     sendingFile: false,
   });
-  const getMimeType=(url:string)=>{
-    const mimeType=url.split(".").pop();
+  const getMimeType = (url: string) => {
+    const mimeType = url.split(".").pop();
     return mimeType;
-  }
-  const handleDownload = async(e: React.MouseEvent) => {
+  };
+  const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if(!user){
+    if (!user) {
       navigate("/auth?mode=login");
       toast({
         title: "Error",
@@ -73,9 +73,9 @@ const  user  = useUser();
       });
       return;
     }
-   const result= await downloadImage.mutateAsync({ imageId:item._id })
-   
-    if(result.data.status!==200) {
+    const result = await downloadImage.mutateAsync({ imageId: item._id });
+
+    if (result.data.status !== 200) {
       toast({
         title: "Error",
         description: "Failed to download image",
@@ -83,24 +83,30 @@ const  user  = useUser();
         variant: "error",
       });
     }
-    const imageUrl=await result.data?.data.imageUrl;
-    
-    const mimeType=getMimeType(imageUrl);
-    if(isMobile){
-      const filename=`${title.toLowerCase().replace(/\s+/g, "-").replace(/[:*?"<>|\\/]/g, "") }-${Date.now()}`
-      const downloadUrl=imageUrl.replace(
-    "/upload/",
-    `/upload/fl_attachment:${encodeURIComponent(filename)}`
-  );
-      window.open(downloadUrl,"_blank",);
+    const imageUrl = await result.data?.data.imageUrl;
+
+    const mimeType = getMimeType(imageUrl);
+    if (isMobile) {
+      const filename = `${title
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[:*?"<>|\\/]/g, "")}-${Date.now()}`;
+      const downloadUrl = imageUrl.replace(
+        "/upload/",
+        `/upload/fl_attachment:${encodeURIComponent(filename)}`
+      );
+      window.open(downloadUrl, "_blank");
       return;
     }
-    const imageBlob=await fetch(imageUrl);
-    const blob=await imageBlob.blob();
-    const link=URL.createObjectURL(blob);
+    const imageBlob = await fetch(imageUrl);
+    const blob = await imageBlob.blob();
+    const link = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = link;
-    a.download = `${title.toLowerCase().replace(/\s+/g, "-").replace(/[:*?"<>|\\/]/g, "")}-${Date.now()}.${mimeType}`;
+    a.download = `${title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[:*?"<>|\\/]/g, "")}-${Date.now()}.${mimeType}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -468,13 +474,13 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   // useEffect(() => {
   //   console.log("search params", searchParams);
   // }, [searchParams]);
-  
+
   const query = searchParams.get("query");
   const limit = searchParams.get("limit") || "20";
   const page = searchParams.get("page") || "1";
   const tags = searchParams.get("tags");
- const location=useLocation(); 
-  const {toast} = useToast();
+  const location = useLocation();
+  const { toast } = useToast();
   const getApiRoute = () => {
     if (query && tags) {
       return ApiRoutes.advancedSearch;
@@ -483,12 +489,11 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     } else if (creatorId) {
       // console.log("creatorId", creatorId);
       return `${ApiRoutes.getImagesOfUser}?creatorId=${creatorId}`;
-    }
-     else {
+    } else {
       return ApiRoutes.getGallery;
     }
   };
-  
+
   const getQueryParams = () => {
     const params: any = {
       limit: parseInt(limit),
@@ -620,7 +625,7 @@ function Gallery({ creatorId }: { creatorId?: string }) {
   // ✨ OPTIMIZED: O(1) item update using index map
   const handleItemUpdate = (updatedItem: Items) => {
     const itemIndex = imageIndexMap.current.get(updatedItem._id);
-    
+
     if (itemIndex !== undefined) {
       // O(1) update - directly update the specific index
       setItems((prevItems) => {
@@ -631,7 +636,9 @@ function Gallery({ creatorId }: { creatorId?: string }) {
     } else {
       // Fallback to original O(n) method if index not found
       // This should rarely happen, but provides safety
-      console.warn(`Item with ID ${updatedItem._id} not found in index map, falling back to O(n) update`);
+      console.warn(
+        `Item with ID ${updatedItem._id} not found in index map, falling back to O(n) update`
+      );
       setItems((prevItems) =>
         prevItems.map((item) =>
           item._id === updatedItem._id ? updatedItem : item
@@ -646,186 +653,191 @@ function Gallery({ creatorId }: { creatorId?: string }) {
       setSelectedItem(updatedItem);
     }
   };
-useEffect(() => {
-  const imageId = searchParams.get("imageId");
-  
-  if (imageId && items.length > 0) {
-    // Find the item with matching imageId
-    const itemIndex = items.findIndex(item => item._id === imageId);
-    
-    if (itemIndex !== -1) {
-      const foundItem = items[itemIndex];
-      setSelectedItem(foundItem);
-      setSelectedIndex(itemIndex);
-      setIsPopupOpen(true);
-    } else {
-      console.warn(`Image with ID ${imageId} not found in current items`);
-      // Optionally, you could show a toast notification here
-      toast({
-        title: "Image not found",
-        description: "The requested image could not be found in the current gallery.",
-        duration: 5000,
-        variant: "error",
-      });
+  useEffect(() => {
+    const imageId = searchParams.get("imageId");
+
+    if (imageId && items.length > 0) {
+      // Find the item with matching imageId
+      const itemIndex = items.findIndex((item) => item._id === imageId);
+
+      if (itemIndex !== -1) {
+        const foundItem = items[itemIndex];
+        setSelectedItem(foundItem);
+        setSelectedIndex(itemIndex);
+        setIsPopupOpen(true);
+      } else {
+        console.warn(`Image with ID ${imageId} not found in current items`);
+        // Optionally, you could show a toast notification here
+        toast({
+          title: "Image not found",
+          description:
+            "The requested image could not be found in the current gallery.",
+          duration: 5000,
+          variant: "error",
+        });
+      }
     }
+  }, [searchParams, items]);
+  if (
+    searchParams.get("showLikes") &&
+    location.pathname.toString().includes("dashboard")
+  ) {
+    return (
+      <>
+        <div className="min-h-screen py-12 px-4">
+          <SearchBar />
+          <ResponsiveMasonry
+            columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
+          >
+            <Masonry gutter="20px">
+              {items.map((item, i) => {
+                if (item.isLikedByUser) {
+                  return (
+                    <ImageHoverCard
+                      key={`${item.public_id}-${i}`}
+                      imageUrl={item.imageUrl}
+                      title={item.title}
+                      description={item.description}
+                      alt={`Gallery image ${i + 1}`}
+                      index={i}
+                      item={item}
+                      onOpenPopup={handleOpenPopup}
+                      onItemUpdate={handleItemUpdate}
+                    />
+                  );
+                }
+              })}
+            </Masonry>
+          </ResponsiveMasonry>
+
+          {infiniteQuery.hasNextPage && (
+            <div ref={inViewRef} className="flex justify-center mt-8 py-4">
+              {infiniteQuery.isFetchingNextPage ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                  <span className="text-gray-600">Loading more images...</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => infiniteQuery.fetchNextPage()}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  disabled={!infiniteQuery.hasNextPage}
+                >
+                  Load More
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* End of results message */}
+          {!infiniteQuery.hasNextPage && items.length > 0 && (
+            <div className="flex justify-center mt-8">
+              <div className="text-gray-500">
+                You've reached the end of the gallery
+              </div>
+            </div>
+          )}
+
+          {/* Image Popup */}
+          {selectedItem && (
+            <ImagePopup
+              isOpen={isPopupOpen}
+              onOpenChange={(open) => {
+                setIsPopupOpen(open);
+                // Clear imageId from URL when closing popup
+                if (!open && searchParams.get("imageId")) {
+                  searchParams.delete("imageId");
+                }
+              }}
+              item={selectedItem}
+              onNavigate={handleNavigate}
+              onItemUpdate={handleItemUpdate}
+            />
+          )}
+        </div>
+      </>
+    );
   }
-}, [searchParams, items]);
-if(searchParams.get("showLikes")&&location.pathname.toString().includes("dashboard")){
+  if (
+    searchParams.get("showSaves") &&
+    location.pathname.toString().includes("dashboard")
+  ) {
+    return (
+      <>
+        <div className="min-h-screen py-12 px-4">
+          <SearchBar />
+          <ResponsiveMasonry
+            columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
+          >
+            <Masonry gutter="20px">
+              {items.map((item, i) => {
+                if (item.isSavedByUser) {
+                  return (
+                    <ImageHoverCard
+                      key={`${item.public_id}-${i}`}
+                      imageUrl={item.imageUrl}
+                      title={item.title}
+                      description={item.description}
+                      alt={`Gallery image ${i + 1}`}
+                      index={i}
+                      item={item}
+                      onOpenPopup={handleOpenPopup}
+                      onItemUpdate={handleItemUpdate}
+                    />
+                  );
+                }
+              })}
+            </Masonry>
+          </ResponsiveMasonry>
 
-  return(
-    <>
-      <div className="min-h-screen py-12 px-4">
-    <SearchBar />
-      <ResponsiveMasonry
-        columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
-      >
-        <Masonry gutter="20px">
-          {items.map((item, i) => {
-            if(item.isLikedByUser){
-            return (
-              <ImageHoverCard
-                key={`${item.public_id}-${i}`}
-                imageUrl={item.imageUrl}
-                title={item.title}
-                description={item.description}
-                alt={`Gallery image ${i + 1}`}
-                index={i}
-                item={item}
-                onOpenPopup={handleOpenPopup}
-                onItemUpdate={handleItemUpdate}
-              />
-            );
-          }
-          })}
-        </Masonry>
-      </ResponsiveMasonry>
-
-      {infiniteQuery.hasNextPage && (
-        <div ref={inViewRef} className="flex justify-center mt-8 py-4">
-          {infiniteQuery.isFetchingNextPage ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-              <span className="text-gray-600">Loading more images...</span>
+          {infiniteQuery.hasNextPage && (
+            <div ref={inViewRef} className="flex justify-center mt-8 py-4">
+              {infiniteQuery.isFetchingNextPage ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                  <span className="text-gray-600">Loading more images...</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => infiniteQuery.fetchNextPage()}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  disabled={!infiniteQuery.hasNextPage}
+                >
+                  Load More
+                </button>
+              )}
             </div>
-          ) : (
-            <button
-              onClick={() => infiniteQuery.fetchNextPage()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              disabled={!infiniteQuery.hasNextPage}
-            >
-              Load More
-            </button>
+          )}
+
+          {/* End of results message */}
+          {!infiniteQuery.hasNextPage && items.length > 0 && (
+            <div className="flex justify-center mt-8">
+              <div className="text-gray-500">
+                You've reached the end of the gallery
+              </div>
+            </div>
+          )}
+
+          {/* Image Popup */}
+          {selectedItem && (
+            <ImagePopup
+              isOpen={isPopupOpen}
+              onOpenChange={(open) => {
+                setIsPopupOpen(open);
+                // Clear imageId from URL when closing popup
+                if (!open && searchParams.get("imageId")) {
+                  searchParams.delete("imageId");
+                }
+              }}
+              item={selectedItem}
+              onNavigate={handleNavigate}
+              onItemUpdate={handleItemUpdate}
+            />
           )}
         </div>
-      )}
-
-      {/* End of results message */}
-      {!infiniteQuery.hasNextPage && items.length > 0 && (
-        <div className="flex justify-center mt-8">
-          <div className="text-gray-500">
-            You've reached the end of the gallery
-          </div>
-        </div>
-      )}
-
-      {/* Image Popup */}
-      {selectedItem && (
-  <ImagePopup
-    isOpen={isPopupOpen}
-    onOpenChange={(open) => {
-      setIsPopupOpen(open);
-      // Clear imageId from URL when closing popup
-      if (!open && searchParams.get("imageId")) {
-        searchParams.delete("imageId");
-      }
-    }}
-    item={selectedItem}
-    onNavigate={handleNavigate}
-    onItemUpdate={handleItemUpdate}
-  />
-)}
-    </div>
-    </>
-  )
-}
-if(searchParams.get("showSaves")&&location.pathname.toString().includes("dashboard")){
-
-  return(
-    <>
-      <div className="min-h-screen py-12 px-4">
-    <SearchBar />
-      <ResponsiveMasonry
-        columnsCountBreakPoints={{ 300: 2, 500: 3, 700: 4, 900: 5 }}
-      >
-        <Masonry gutter="20px">
-          {items.map((item, i) => {
-            if(item.isSavedByUser){
-            return (
-              <ImageHoverCard
-                key={`${item.public_id}-${i}`}
-                imageUrl={item.imageUrl}
-                title={item.title}
-                description={item.description}
-                alt={`Gallery image ${i + 1}`}
-                index={i}
-                item={item}
-                onOpenPopup={handleOpenPopup}
-                onItemUpdate={handleItemUpdate}
-              />
-            );
-          }
-          })}
-        </Masonry>
-      </ResponsiveMasonry>
-
-      {infiniteQuery.hasNextPage && (
-        <div ref={inViewRef} className="flex justify-center mt-8 py-4">
-          {infiniteQuery.isFetchingNextPage ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-              <span className="text-gray-600">Loading more images...</span>
-            </div>
-          ) : (
-            <button
-              onClick={() => infiniteQuery.fetchNextPage()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              disabled={!infiniteQuery.hasNextPage}
-            >
-              Load More
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* End of results message */}
-      {!infiniteQuery.hasNextPage && items.length > 0 && (
-        <div className="flex justify-center mt-8">
-          <div className="text-gray-500">
-            You've reached the end of the gallery
-          </div>
-        </div>
-      )}
-
-      {/* Image Popup */}
-      {selectedItem && (
-  <ImagePopup
-    isOpen={isPopupOpen}
-    onOpenChange={(open) => {
-      setIsPopupOpen(open);
-      // Clear imageId from URL when closing popup
-      if (!open && searchParams.get("imageId")) {
-        searchParams.delete("imageId");
-      }
-    }}
-    item={selectedItem}
-    onNavigate={handleNavigate}
-    onItemUpdate={handleItemUpdate}
-  />
-)}
-    </div>
-    </>
-  )
-}
+      </>
+    );
+  }
   // Loading state
   if (infiniteQuery.isLoading) {
     return (
@@ -931,20 +943,20 @@ if(searchParams.get("showSaves")&&location.pathname.toString().includes("dashboa
 
       {/* Image Popup */}
       {selectedItem && (
-  <ImagePopup
-    isOpen={isPopupOpen}
-    onOpenChange={(open) => {
-      setIsPopupOpen(open);
-      // Clear imageId from URL when closing popup
-      if (!open && searchParams.get("imageId")) {
-        searchParams.delete("imageId");
-      }
-    }}
-    item={selectedItem}
-    onNavigate={handleNavigate}
-    onItemUpdate={handleItemUpdate}
-  />
-)}
+        <ImagePopup
+          isOpen={isPopupOpen}
+          onOpenChange={(open) => {
+            setIsPopupOpen(open);
+            // Clear imageId from URL when closing popup
+            if (!open && searchParams.get("imageId")) {
+              searchParams.delete("imageId");
+            }
+          }}
+          item={selectedItem}
+          onNavigate={handleNavigate}
+          onItemUpdate={handleItemUpdate}
+        />
+      )}
     </div>
   );
 }

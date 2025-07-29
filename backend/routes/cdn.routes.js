@@ -22,7 +22,8 @@ router
   .route("/register")
   .post(
     logger,
-    verifyJWT, verifiedMiddleware,
+    verifyJWT,
+    verifiedMiddleware,
     captureRelativePaths,
     uploadFile.array("files", 1),
     registerCDN
@@ -33,13 +34,18 @@ router
   .route("/updateCdn")
   .post(
     logger,
-    verifyJWT, verifiedMiddleware,
+    verifyJWT,
+    verifiedMiddleware,
     captureRelativePaths,
     uploadFile.array("files", 1),
     updateCDN
   );
-router.route("/deleteCdn").post(logger,verifyJWT, verifiedMiddleware, deleteCDN);
-router.route("/generateImage").post(logger, verifyJWT, verifiedMiddleware, generateImage);
+router
+  .route("/deleteCdn")
+  .post(logger, verifyJWT, verifiedMiddleware, deleteCDN);
+router
+  .route("/generateImage")
+  .post(logger, verifyJWT, verifiedMiddleware, generateImage);
 router
   .route("/activateTransformation")
   .post(logger, verifyJWT, verifiedMiddleware, activateTransformation);

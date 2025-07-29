@@ -11,7 +11,6 @@ import { User } from "../models/user.model.js";
 import { Image } from "../models/gallery.model.js";
 import { uploadImageToGallery } from "../services/cloudinary.service.js";
 import { Queue } from "bullmq";
-
 const vectorQueue = new Queue("vector-queue", {
   connection: {
     host: process.env.REDIS_URI,
@@ -269,6 +268,24 @@ const generateImage = asyncHandler(async (req, res) => {
       description: metadata.description,
       prompt: cleanPrompt,
       tags: metadata.tags,
+      connection: {
+        host: process.env.REDIS_URI,
+        port: process.env.REDIS_PORT,
+        username: process.env.REDIS_UNAME,
+        password: process.env.REDIS_PASSWORD,
+      },
+      attempts: 3, // Retry up to 3 times for the job
+      backoff: {
+        type: "exponential", // Exponential backoff for retries
+        delay: 2000, // Initial delay of 2 seconds
+      },
+      limiter: {
+        max: 10, // Max jobs processed per interval
+        duration: 1000, // Per 1 second
+      },
+      removeOnComplete: true, // Remove job when it completes
+      removeOnFail: true, // Remove job when it fails
+      removeOnSuccess: true, // Remove job when it succeeds
     });
 
     return res.status(200).json(
@@ -300,6 +317,7 @@ const generateImage = asyncHandler(async (req, res) => {
     );
   }
 });
+// Utility function to introduce a delay
 
 const generateEmbedding = async (text) => {
   //   try {

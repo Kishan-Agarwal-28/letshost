@@ -1,8 +1,7 @@
-import { type ReactNode, useEffect, useState, } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import useUser from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -15,7 +14,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   const redirectTime = 5;
   const [countdown, setCountdown] = useState(redirectTime);
   const [animationData, setAnimationData] = useState<any>(null);
-   useEffect(() => {
+  useEffect(() => {
     fetch("/lottie/accessDenied.json")
       .then((res) => res.json())
       .then((data) => setAnimationData(data))

@@ -60,7 +60,9 @@ function SettingsPage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
-    const [TwoFAEnabled,setTwoFAEnabled]=useState<boolean>(user?.TwoFAEnabled ?? false);
+  const [TwoFAEnabled, setTwoFAEnabled] = useState<boolean>(
+    user?.TwoFAEnabled ?? false
+  );
   useEffect(() => {
     if (user) {
       setUsername(user.username);
@@ -387,11 +389,15 @@ function SettingsPage() {
     }
   };
   const navigate = useNavigate();
-  const handle2FAChange = async (checked:boolean) => {
-      navigate(`/user/auth/additional-safety/2fa?action=${checked ? "enable" : "disable"}&mode=${TwoFAEnabled?"login":"register"}`,{
-        state:{fromApp:true}});
+  const handle2FAChange = async (checked: boolean) => {
+    navigate(
+      `/user/auth/additional-safety/2fa?action=${checked ? "enable" : "disable"}&mode=${TwoFAEnabled ? "login" : "register"}`,
+      {
+        state: { fromApp: true },
       }
-    
+    );
+  };
+
   return (
     <div className="min-h-screen  p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -724,23 +730,23 @@ function SettingsPage() {
             </Card>
             <Card className="border-0 shadow-lg bg-card backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-lg">2 Factor Authentication (2FA)</CardTitle>
-                <CardDescription>
-                  Manage your 2FA settings
-                </CardDescription>
+                <CardTitle className="text-lg">
+                  2 Factor Authentication (2FA)
+                </CardTitle>
+                <CardDescription>Manage your 2FA settings</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 flex items-center justify-between">
                 Two Factor Authentication (2FA)
-                <Switch 
-                className="cursor-pointer"
-                checked={TwoFAEnabled}
-                onCheckedChange={(checked) => {
-                handle2FAChange(checked);
-                }}
+                <Switch
+                  className="cursor-pointer"
+                  checked={TwoFAEnabled}
+                  onCheckedChange={(checked) => {
+                    handle2FAChange(checked);
+                  }}
                 />
-                </CardContent>
-                </Card>
-                    
+              </CardContent>
+            </Card>
+
             {/* Danger Zone */}
             <Card className="border-red-200 dark:border-red-800 shadow-lg bg-red-50/50 dark:bg-red-900/20 backdrop-blur-sm">
               <CardHeader>

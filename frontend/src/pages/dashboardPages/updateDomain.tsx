@@ -69,13 +69,13 @@ function UpdateDomain({
   const onSubmit = async (values: UpdateDomainFormData) => {
     const filesProvided = values.files && values.files.length > 0;
     const subdomainChanged = values.subDomain !== subdomain;
-    if(values.files && values.files.length>400){
+    if (values.files && values.files.length > 400) {
       toast({
-        title:"Error",
-        description:"You can only upload 400 files at a time",
-        variant:"error",
-        duration:5000,
-      })
+        title: "Error",
+        description: "You can only upload 400 files at a time",
+        variant: "error",
+        duration: 5000,
+      });
       return;
     }
 

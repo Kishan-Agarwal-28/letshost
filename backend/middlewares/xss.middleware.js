@@ -99,25 +99,35 @@ function detectStringType(value, fieldName = "") {
   const trimmedValue = value.trim();
 
   // Check for email
-  if (validator.isEmail(trimmedValue) || fieldName.toLowerCase().includes("email")) {
+  if (
+    validator.isEmail(trimmedValue) ||
+    fieldName.toLowerCase().includes("email")
+  ) {
     return "email";
   }
 
   // Check for URL
-  if (validator.isURL(trimmedValue, { require_protocol: false }) || 
-      fieldName.toLowerCase().includes("url") || 
-      fieldName.toLowerCase().includes("link")) {
+  if (
+    validator.isURL(trimmedValue, { require_protocol: false }) ||
+    fieldName.toLowerCase().includes("url") ||
+    fieldName.toLowerCase().includes("link")
+  ) {
     return "url";
   }
 
   // Check for HTML content
-  if (/<[^>]*>/g.test(trimmedValue) || fieldName.toLowerCase().includes("html")) {
+  if (
+    /<[^>]*>/g.test(trimmedValue) ||
+    fieldName.toLowerCase().includes("html")
+  ) {
     return "html";
   }
 
   // Check for JSON
-  if ((trimmedValue.startsWith("{") && trimmedValue.endsWith("}")) ||
-      (trimmedValue.startsWith("[") && trimmedValue.endsWith("]"))) {
+  if (
+    (trimmedValue.startsWith("{") && trimmedValue.endsWith("}")) ||
+    (trimmedValue.startsWith("[") && trimmedValue.endsWith("]"))
+  ) {
     try {
       JSON.parse(trimmedValue);
       return "json";
@@ -157,11 +167,11 @@ function sanitizeString(value, fieldName = "", options = {}) {
   try {
     // First, basic cleanup
     sanitized = validator.trim(sanitized);
-    
+
     // Remove null bytes and dangerous characters
     sanitized = sanitized.replace(/\0/g, "");
     sanitized = sanitized.replace(/\x00/g, "");
-    
+
     // Detect string type for appropriate sanitization
     const stringType = detectStringType(sanitized, fieldName);
 
@@ -169,7 +179,11 @@ function sanitizeString(value, fieldName = "", options = {}) {
       case "email":
         // Normalize and escape email
         if (validator.isEmail(sanitized)) {
-          sanitized = validator.normalizeEmail(sanitized, validatorOptions.normalizeEmail) || sanitized;
+          sanitized =
+            validator.normalizeEmail(
+              sanitized,
+              validatorOptions.normalizeEmail
+            ) || sanitized;
         }
         sanitized = validator.escape(sanitized);
         break;
@@ -230,16 +244,23 @@ function sanitizeString(value, fieldName = "", options = {}) {
     // Additional security sanitization
     // Remove MongoDB injection characters
     sanitized = sanitized.replace(/\$/g, "");
-    
+
     // Handle dots more carefully - only remove if they appear to be injection attempts
-    if (fieldName !== "email" && fieldName !== "url" && fieldName !== "domain") {
+    if (
+      fieldName !== "email" &&
+      fieldName !== "url" &&
+      fieldName !== "domain"
+    ) {
       // Only remove dots in suspicious patterns
       sanitized = sanitized.replace(/\.{2,}/g, ""); // Multiple consecutive dots
       sanitized = sanitized.replace(/\$\./g, ""); // $. patterns
     }
 
     // Remove script injection patterns
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    sanitized = sanitized.replace(
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      ""
+    );
     sanitized = sanitized.replace(/javascript:/gi, "");
     sanitized = sanitized.replace(/on\w+\s*=/gi, "");
 
@@ -247,11 +268,12 @@ function sanitizeString(value, fieldName = "", options = {}) {
     const maxLength = options.maxLength || 10000;
     if (sanitized.length > maxLength) {
       sanitized = sanitized.substring(0, maxLength);
-      console.warn(`String truncated to ${maxLength} characters for field: ${fieldName}`);
+      console.warn(
+        `String truncated to ${maxLength} characters for field: ${fieldName}`
+      );
     }
 
     return sanitized;
-
   } catch (error) {
     console.error(`String sanitization error for field "${fieldName}":`, error);
     return validator.escape(String(value));
@@ -296,16 +318,18 @@ function sanitizeValue(
   if (typeof value === "number") {
     // Check for dangerous number values
     if (!Number.isFinite(value)) {
-      console.warn(`Non-finite number detected for field "${fieldName}", converting to 0`);
+      console.warn(
+        `Non-finite number detected for field "${fieldName}", converting to 0`
+      );
       return 0;
     }
-    
+
     // Check for extremely large or small numbers that might cause issues
     if (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER) {
       console.warn(`Unsafe number detected for field "${fieldName}", clamping`);
       return value > 0 ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER;
     }
-    
+
     return value;
   }
 
@@ -328,15 +352,24 @@ function sanitizeValue(
       // Limit array length to prevent DoS
       const maxArrayLength = options.maxArrayLength || 1000;
       const limitedArray = value.slice(0, maxArrayLength);
-      
+
       if (value.length > maxArrayLength) {
-        console.warn(`Array truncated to ${maxArrayLength} items for field "${fieldName}"`);
+        console.warn(
+          `Array truncated to ${maxArrayLength} items for field "${fieldName}"`
+        );
       }
 
       const sanitized = limitedArray.map((item, index) => {
         try {
           const itemFieldName = `${fieldName}[${index}]`;
-          return sanitizeValue(item, itemFieldName, depth + 1, maxDepth, visited, options);
+          return sanitizeValue(
+            item,
+            itemFieldName,
+            depth + 1,
+            maxDepth,
+            visited,
+            options
+          );
         } catch (error) {
           console.error(
             `Array item sanitization error at index ${index} for field "${fieldName}":`,
@@ -350,7 +383,10 @@ function sanitizeValue(
       return sanitized;
     } catch (error) {
       visited.delete(value);
-      console.error(`Array sanitization error for field "${fieldName}":`, error);
+      console.error(
+        `Array sanitization error for field "${fieldName}":`,
+        error
+      );
       return [];
     }
   }
@@ -372,9 +408,11 @@ function sanitizeValue(
       const keys = Object.keys(value);
       const maxObjectKeys = options.maxObjectKeys || 100;
       const limitedKeys = keys.slice(0, maxObjectKeys);
-      
+
       if (keys.length > maxObjectKeys) {
-        console.warn(`Object keys truncated to ${maxObjectKeys} for field "${fieldName}"`);
+        console.warn(
+          `Object keys truncated to ${maxObjectKeys} for field "${fieldName}"`
+        );
       }
 
       for (const key of limitedKeys) {
@@ -385,8 +423,10 @@ function sanitizeValue(
           // Only proceed if key is a valid string
           if (typeof sanitizedKey === "string" && sanitizedKey.length > 0) {
             // Create field name for nested value
-            const nestedFieldName = fieldName ? `${fieldName}.${sanitizedKey}` : sanitizedKey;
-            
+            const nestedFieldName = fieldName
+              ? `${fieldName}.${sanitizedKey}`
+              : sanitizedKey;
+
             // Sanitize the value
             sanitized[sanitizedKey] = sanitizeValue(
               value[key],
@@ -410,20 +450,27 @@ function sanitizeValue(
       return sanitized;
     } catch (error) {
       visited.delete(value);
-      console.error(`Object sanitization error for field "${fieldName}":`, error);
+      console.error(
+        `Object sanitization error for field "${fieldName}":`,
+        error
+      );
       return {};
     }
   }
 
   // Handle functions (remove them)
   if (typeof value === "function") {
-    console.warn(`Function detected and removed during sanitization for field "${fieldName}"`);
+    console.warn(
+      `Function detected and removed during sanitization for field "${fieldName}"`
+    );
     return undefined;
   }
 
   // Handle symbols (remove them)
   if (typeof value === "symbol") {
-    console.warn(`Symbol detected and removed during sanitization for field "${fieldName}"`);
+    console.warn(
+      `Symbol detected and removed during sanitization for field "${fieldName}"`
+    );
     return undefined;
   }
 
@@ -433,7 +480,9 @@ function sanitizeValue(
       // For Date objects, validate and return ISO string
       if (value instanceof Date) {
         if (isNaN(value.getTime())) {
-          console.warn(`Invalid Date detected for field "${fieldName}", returning null`);
+          console.warn(
+            `Invalid Date detected for field "${fieldName}", returning null`
+          );
           return null;
         }
         return value.toISOString();
@@ -454,7 +503,14 @@ function sanitizeValue(
 
       // For other objects, try to convert to string and sanitize
       const stringValue = String(value);
-      return sanitizeValue(stringValue, fieldName, depth + 1, maxDepth, visited, options);
+      return sanitizeValue(
+        stringValue,
+        fieldName,
+        depth + 1,
+        maxDepth,
+        visited,
+        options
+      );
     } catch (error) {
       console.error(`Object conversion error for field "${fieldName}":`, error);
       return null;
@@ -462,7 +518,10 @@ function sanitizeValue(
   }
 
   // Default: return null for unknown types
-  console.warn(`Unknown value type detected for field "${fieldName}", returning null:`, typeof value);
+  console.warn(
+    `Unknown value type detected for field "${fieldName}", returning null:`,
+    typeof value
+  );
   return null;
 }
 
@@ -479,9 +538,19 @@ function sanitizeRequestObject(obj, objectName = "request", options = {}) {
   }
 
   try {
-    return sanitizeValue(obj, objectName, 0, options.maxDepth || 10, new WeakSet(), options);
+    return sanitizeValue(
+      obj,
+      objectName,
+      0,
+      options.maxDepth || 10,
+      new WeakSet(),
+      options
+    );
   } catch (error) {
-    console.error(`Request object sanitization error for ${objectName}:`, error);
+    console.error(
+      `Request object sanitization error for ${objectName}:`,
+      error
+    );
     return {};
   }
 }
@@ -597,7 +666,11 @@ export function combinedSanitizer(options = {}) {
       // Handle req.query (often read-only)
       if (req.query && typeof req.query === "object") {
         try {
-          const sanitizedQuery = sanitizeRequestObject(req.query, "query", config);
+          const sanitizedQuery = sanitizeRequestObject(
+            req.query,
+            "query",
+            config
+          );
           safeAssign(req.query, sanitizedQuery);
         } catch (error) {
           if (config.logErrors) {
@@ -617,7 +690,11 @@ export function combinedSanitizer(options = {}) {
       // Handle req.params (often read-only)
       if (req.params && typeof req.params === "object") {
         try {
-          const sanitizedParams = sanitizeRequestObject(req.params, "params", config);
+          const sanitizedParams = sanitizeRequestObject(
+            req.params,
+            "params",
+            config
+          );
           safeAssign(req.params, sanitizedParams);
         } catch (error) {
           if (config.logErrors) {

@@ -15,7 +15,7 @@ import { useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { cn } from "@/lib/utils";
 import { Card, Carousel } from "@/components/ui/apple-cards-carousel";
-import { Link ,useNavigate, useSearchParams} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useApiPost } from "@/hooks/apiHooks";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMsg } from "@/lib/getErrorMsg";
@@ -87,14 +87,13 @@ const ImagePopup: React.FC<ImagePopupProps> = ({
   const [similarImages, setSimilarImages] = React.useState<Items[]>([]);
   const navigate = useNavigate();
   const user = useUser();
-  const [searchParams,setSearchParams] = useSearchParams();
-  
-React.useEffect(() => {
-  if(searchParams.get("imageId")!== item._id) {
-    setSearchParams({ imageId: item._id });
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  }
-});
+  React.useEffect(() => {
+    if (searchParams.get("imageId") !== item._id) {
+      setSearchParams({ imageId: item._id });
+    }
+  });
 
   const getSimilarImages = useApiGet({
     key: ["getSimilarImages"],
@@ -142,7 +141,7 @@ React.useEffect(() => {
   const prevImage = () => {
     onNavigate?.("prev");
   };
- const addLikes = useApiPost({
+  const addLikes = useApiPost({
     type: "post",
     key: ["addLikes"],
     path: ApiRoutes.likeImage,
@@ -270,36 +269,35 @@ React.useEffect(() => {
     <Card key={card._id} item={card} index={index} />
   ));
   const isMobile = useIsMobile();
-const touchStart = React.useRef<number | null>(null);
-const touchEnd = React.useRef<number | null>(null);
+  const touchStart = React.useRef<number | null>(null);
+  const touchEnd = React.useRef<number | null>(null);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchEnd.current = null;
+    touchStart.current = e.targetTouches[0].clientX;
+  };
 
-const handleTouchStart = (e: React.TouchEvent) => {
-  touchEnd.current = null;
-  touchStart.current = e.targetTouches[0].clientX;
-};
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEnd.current = e.targetTouches[0].clientX;
+  };
 
-const handleTouchMove = (e: React.TouchEvent) => {
-  touchEnd.current = e.targetTouches[0].clientX;
-};
+  const handleTouchEnd = () => {
+    if (touchStart.current === null || touchEnd.current === null) return;
 
-const handleTouchEnd = () => {
-  if (touchStart.current === null || touchEnd.current === null) return;
+    const distance = touchStart.current - touchEnd.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
 
-  const distance = touchStart.current - touchEnd.current;
-  const isLeftSwipe = distance > 50;
-  const isRightSwipe = distance < -50;
+    if (isLeftSwipe) {
+      onNavigate?.("next");
+    } else if (isRightSwipe) {
+      onNavigate?.("prev");
+    }
 
-  if (isLeftSwipe) {
-    onNavigate?.("next");
-  } else if (isRightSwipe) {
-    onNavigate?.("prev");
-  }
-
-  // Optionally reset
-  touchStart.current = null;
-  touchEnd.current = null;
-};
+    // Optionally reset
+    touchStart.current = null;
+    touchEnd.current = null;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -381,7 +379,7 @@ const handleTouchEnd = () => {
                 <div className="flex items-center justify-between py-3 md:py-4 border-y border-border">
                   <div className="flex items-center space-x-4 md:space-x-6">
                     <button
-                      onClick={(e) => handleLike?.(e,currentDisplayItem._id)}
+                      onClick={(e) => handleLike?.(e, currentDisplayItem._id)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Heart
@@ -396,7 +394,7 @@ const handleTouchEnd = () => {
                     </button>
 
                     <button
-                      onClick={(e) => handleSave?.(e,currentDisplayItem._id)}
+                      onClick={(e) => handleSave?.(e, currentDisplayItem._id)}
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Bookmark

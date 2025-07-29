@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  reverse-proxy:
+    build: ./reverse-proxy
+    ports:
+      - "8000:8000"
+    depends_on:
+      - vectorbackend
+      - backend
+
+  vectorbackend:
+    build: ./vectorbackend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - qdrant
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/yourdatabase # MongoDB connection string
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - vectorbackend
+      - qdrant
+      - redis
+
+  embedder:
+    build: ./embedder
+    ports:
+      - "7860:7860"
+    environment:
+      - QDRANT_URI=http://qdrant:6333
+      - QDRANT_API_KEY=qdrant
+      - REDIS_URI=redis://redis:6379
+      - REDIS_PORT=6379
+      - REDIS_UNAME=default
+      - REDIS_PASSWORD=password
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+
+  qdrant:
+    image: qdrant/qdrant:v1.1.1
+    ports:
+      - "6333:6333"
+    environment:
+      - QDRANT_PORT=6333
+      - QDRANT_GRPC_PORT=6334
+      - QDRANT_JWT_SECRET=secret
+      - QDRANT_UPDATE_JWT_SECRET=secret
+    command:
+      - --cluster
+    depends_on:
+      - mongo
+
+  redis:
+    image: redis:7.0.10
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
