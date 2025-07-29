@@ -106,6 +106,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webp}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        additionalManifestEntries: [
+      { url: '/wooden-background-wood-texture-brown-600nw-2477335391.webp', revision: null }
+    ],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       },
       devOptions: {

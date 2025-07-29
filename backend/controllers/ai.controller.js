@@ -317,7 +317,7 @@ const generateEmbedding = async (text) => {
   //     throw error;
   //   }
   try {
-    const response = await fetch("http://localhost:8000/passage", {
+    const response = await fetch("https://letshost-embedder.hf.space/passage", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
