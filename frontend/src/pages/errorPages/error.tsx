@@ -6,7 +6,7 @@ function Error() {
   const navigate = useNavigate();
   const [animation, setAnimation] = useState<any>(null);
   useEffect(() => {
-    fetch("/lottie/error.json")
+    fetch("/lottie/error_404_error.json")
       .then((res) => res.json())
       .then((data) => setAnimation(data))
       .catch((err) => console.error("Failed to load animation", err));
