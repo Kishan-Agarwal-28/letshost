@@ -324,7 +324,7 @@ function Auth() {
         
         try {
           const user = await userStore.getUser();
-          const encrypted = sessionStorage.getItem("User");
+          const encrypted = localStorage.getItem("User");
           
           if (encrypted) {
             const encryptedUser = JSON.parse(encrypted).state.user;
