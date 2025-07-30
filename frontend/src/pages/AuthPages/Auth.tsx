@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -37,11 +37,7 @@ function Auth() {
   const userStore = useUserStore();
   const [is2FARequired, setIs2FARequired] = useState(false);
   
-  // Add refs to track if effects have run to prevent infinite loops
-  const registerProcessedRef = useRef(false);
-  const loginProcessedRef = useRef(false);
-  const oauthProcessedRef = useRef(false);
-  const userCheckProcessedRef = useRef(false);
+
 
   // Schemas
   const signUpSchema = z
@@ -150,16 +146,12 @@ function Auth() {
     setSearchParams({ mode: "login" });
     signUpForm.reset();
     setIs2FARequired(false);
-    registerProcessedRef.current = false;
-    loginProcessedRef.current = false;
   }, [setSearchParams, signUpForm]);
 
   const switchToSignup = useCallback(() => {
     setSearchParams({ mode: "signup" });
     loginForm.reset();
     setIs2FARequired(false);
-    registerProcessedRef.current = false;
-    loginProcessedRef.current = false;
   }, [setSearchParams, loginForm]);
 
   // API hooks
@@ -184,10 +176,10 @@ function Auth() {
 
   // Submit handlers
   const onSignuUpSubmit = async(data:z.infer<typeof signUpSchema>) => {
-    registerProcessedRef.current = false;
+  
     const res = await register.mutateAsync(data);
-    if(res.status===200 && !registerProcessedRef.current) {
-          registerProcessedRef.current = true;
+    if(res.status===200 ) {
+      console.log(res.data?.data)
           await userStore.setUser(res.data?.data);
           navigate("/auth/email-sent", { state: { fromApp: true } });
           toast({
@@ -199,8 +191,7 @@ function Auth() {
           return;
     }
     else{
-      if(!registerProcessedRef.current){
-        registerProcessedRef.current = true;
+   
       toast({
         title: "Error",
         description: getErrorMsg(register),
@@ -209,16 +200,15 @@ function Auth() {
       })
       return;
     }
-    }
   }
 
   const onLoginSubmit = async(data:z.infer<typeof loginSchema>) => {
-    loginProcessedRef.current = false;
-    const res = await login.mutateAsync(data);
-    if(res.status===200 && !loginProcessedRef.current) {
-          loginProcessedRef.current = true;
-          const responseData = res.data.data
 
+    const res = await login.mutateAsync(data);
+    if(res.status===200) {
+         
+          const responseData = res.data.data
+          console.log(responseData)
           // Check if 2FA is required
           if (login.data?.data?.message === "User logged in successfully but pending 2FA") {
             setIs2FARequired(true);
@@ -242,8 +232,7 @@ function Auth() {
           }
           
     } else{
-      if(!loginProcessedRef.current){
-        loginProcessedRef.current = true;
+     
         toast({
           title: "Error",
           description: getErrorMsg(login),
@@ -251,7 +240,6 @@ function Auth() {
           duration: 5000,
         })
         return;
-      }
     }
   }
 
@@ -261,15 +249,14 @@ function Auth() {
   useEffect(() => {
     const handleOAuth = async () => {
       if (
-        (getStatus === "User logged in successfully" || getStatus === "User registered successfully") &&
-        !oauthProcessedRef.current
-      ) {
-        oauthProcessedRef.current = true;
+        (getStatus === "User logged in successfully" || getStatus === "User registered successfully")) {
+        
         
         try {
           const result = await getOauthUser.refetch();
           
           if (result.isSuccess) {
+            console.log(result.data?.data)
             await userStore.setUser(result.data?.data?.data);
           } else if (result.isError) {
             toast({
@@ -297,8 +284,8 @@ function Auth() {
   // Handle user verification after OAuth
   useEffect(() => {
     const handleUserVerification = async () => {
-      if (getOauthUser.isSuccess && !userCheckProcessedRef.current) {
-        userCheckProcessedRef.current = true;
+      if (getOauthUser.isSuccess) {
+   
         
         try {
           const user = await userStore.getUser();
