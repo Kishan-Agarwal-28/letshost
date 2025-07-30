@@ -1494,6 +1494,49 @@ const disable2FA = asyncHandler(async (req, res) => {
       .json(new apiResponse(200, user, "2FA is already disabled"));
   }
 });
+const userHasPassword = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-refreshToken -verificationToken -verificationTokenExpiryDate"
+  );
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+  if (user.password) {
+    return res
+      .status(200)
+      .json(new apiResponse(200, true, "User has password"));
+  } else {
+    return res
+      .status(200)
+      .json(new apiResponse(200, false, "User does not have password"));
+  }
+});
+const setPasswordForOauthUser= asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-refreshToken -verificationToken -verificationTokenExpiryDate"
+  );
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+  if (user.password) {
+    throw new apiError(400, "User already has password");
+  }
+  const { password } = req.body;
+  if (!password) {
+    throw new apiError(400, "Password is required");
+  }
+  if(user.oauth.providers.length === 0) {
+    throw new apiError(400, "User does not have any oauth providers");
+  }
+  if(user.isVerified) {
+    throw new apiError(400, "User is already verified");
+  }
+  user.password = password;
+  await user.save();
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "Password set successfully"));
+});
 export {
   registerUser,
   registerOauthUser,
@@ -1524,4 +1567,6 @@ export {
   verify2FALogin,
   checkPassword,
   disable2FA,
+  userHasPassword,
+  setPasswordForOauthUser,
 };

@@ -52,6 +52,7 @@ import CompactFileUploader from "../cdnPages/compactFileUploader";
 import { Switch } from "@/components/ui/switch";
 
 import { useNavigate } from "react-router-dom";
+import SetPassword from "./setPassword";
 
 function SettingsPage() {
   const user = useUser();
@@ -389,7 +390,17 @@ function SettingsPage() {
     }
   };
   const navigate = useNavigate();
+  const checkHasPassword = useApiGet({
+    key: ["checkHasPassword"],
+    path: ApiRoutes.hasPassword,
+    enabled: false,
+  });
+  const [showPasswordSetForm, setShowPasswordSetForm] = useState(false);
   const handle2FAChange = async (checked: boolean) => {
+    const data = await checkHasPassword.refetch();
+    if(!data.isSuccess){
+      setShowPasswordSetForm(true)
+    }
     navigate(
       `/user/auth/additional-safety/2fa?action=${checked ? "enable" : "disable"}&mode=${TwoFAEnabled ? "login" : "register"}`,
       {
@@ -765,7 +776,7 @@ function SettingsPage() {
                     action cannot be undone.
                   </div>
                 </div>
-
+                <SetPassword open={showPasswordSetForm} checked={TwoFAEnabled} TwoFAEnabled={TwoFAEnabled}/>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button

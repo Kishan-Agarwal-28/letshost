@@ -29,6 +29,8 @@ import {
   verify2FALogin,
   checkPassword,
   disable2FA,
+  userHasPassword,
+  setPasswordForOauthUser,
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { uploadFile } from "../middlewares/multer.middleware.js";
@@ -123,4 +125,8 @@ router
 router
   .route("/payment")
   .post(logger, verifyJWT, verifiedMiddleware, MakePayment);
+  router.route("/hasPassword").get(logger, verifyJWT, userHasPassword);
+  router
+  .route("/setPasswordForOauthUser")
+  .post(logger, verifyJWT, verifiedMiddleware, setPasswordForOauthUser);
 export default router;

@@ -15,6 +15,8 @@ const ApiRoutes = {
   verify: "/users/verify",
   changePassword: "/users/changePassword",
   resendVerificationToken: "/users/resendVerificationToken",
+  hasPassword: "/users/hasPassword",
+  setPasswordForOauthUser: "/users/setPasswordForOauthUser",
   changeEmail: "/users/changeEmail",
   updateEmail: "/users/updateEmail",
   forgotUserName: "/users/forgotUserName",

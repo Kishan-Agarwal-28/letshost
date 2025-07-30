@@ -1,16 +1,3 @@
-import { useEffect} from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useApiPost } from "@/hooks/apiHooks";
-import { useToast } from "@/hooks/use-toast";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import ApiRoutes from "@/connectors/api-routes";
-import { getErrorMsg } from "@/lib/getErrorMsg";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
   FormControl,
@@ -19,9 +6,21 @@ import {
   FormLabel,
   FormMessage,
   FormField,
+  Form
 } from "@/components/ui/form";
-function ChangePassword() {
-  const changePasswordSchema = z
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useApiPost } from "@/hooks/apiHooks";
+import { useToast } from "@/hooks/use-toast";
+import ApiRoutes from "@/connectors/api-routes";
+import { getErrorMsg } from "@/lib/getErrorMsg";
+import  useUser  from "@/hooks/useUser";
+import { useNavigate } from "react-router-dom";
+function SetPassword({open,checked,TwoFAEnabled}:{open:boolean,checked:boolean,TwoFAEnabled:boolean}) {
+     const changePasswordSchema = z
     .object({
       password: z
         .string()
@@ -54,45 +53,43 @@ function ChangePassword() {
       confirmPassword: "",
     },
   });
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams({ token: "" });
-  const token = searchParams.get("token");
   const changePassword = useApiPost({
     key: ["changePassword"],
-    path: ApiRoutes.changePassword,
+    path: ApiRoutes.setPasswordForOauthUser,
     type: "post",
+    sendingFile: false,
   });
-  const onSubmit = (data: z.infer<typeof changePasswordSchema>) => {
-    changePassword.mutate({
-      verificationToken: token,
-      newPassword: data.password,
+  const { toast } = useToast();
+  const user = useUser();
+  const navigate = useNavigate();
+  const onSubmit = async(data: z.infer<typeof changePasswordSchema>) => {
+    if(!user){
+      return
+    }
+    const res = await changePassword.mutateAsync({
+        password: data.password,
     });
-  };
-  useEffect(() => {
-    if (changePassword.isSuccess) {
-      toast({
-        title: "Password changed successfully",
-        description: "Please login with your new password",
-        variant: "success",
-        duration: 5000,
-      });
-      navigate("/auth?mode=login");
-    }
-    if (changePassword.isError) {
-      toast({
-        title: "Error",
-        description: getErrorMsg(changePassword),
-        variant: "error",
-        duration: 5000,
-      });
-    }
-  }, [changePassword.isSuccess, changePassword.isError, toast]);
+    if(res.data?.data?.message === "Password set successfully" || res.status===200) { 
+    toast({
+      title: "Password set successfully",
+      description: "Please login with your new password",
+      variant: "success",
+      duration: 5000,
+    })
+    navigate( `/user/auth/additional-safety/2fa?action=${checked ? "enable" : "disable"}&mode=${TwoFAEnabled ? "login" : "register"}`,)
+ } else toast({
+      title: "Error",
+      description: getErrorMsg(changePassword),
+      variant: "error",
+      duration: 5000,
+    });
+  }
   return (
-    <div className="w-full h-dvh flex items-center-safe justify-center-safe">
-      <div className="bg-black rounded-2xl w-1/2 min-h-[90%] flex flex-col justify-center items-center shadow-2xl p-8">
-        <h1 className="text-2xl font-bold mx-auto p-1">Change Password</h1>
-
+              <Dialog open={open}>
+                <DialogHeader>
+                    <h1>Set Password</h1>
+                </DialogHeader>
+                <DialogContent>
         <div className="w-[80%]">
           <Form {...changePasswordForm}>
             <form
@@ -119,7 +116,7 @@ function ChangePassword() {
                       control={changePasswordForm.control}
                       name="confirmPassword"
                       render={({ field }) => (
-                        <FormItem>
+                          <FormItem>
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
                             <PasswordInput placeholder="********" {...field} />
@@ -136,16 +133,15 @@ function ChangePassword() {
                   type="submit"
                   className="cursor-pointer"
                   disabled={changePassword.isPending}
-                >
+                  >
                   Submit
                 </Button>
               </div>
             </form>
           </Form>
         </div>
-      </div>
-    </div>
-  );
+                      </DialogContent>
+                      </Dialog>
+                    )
 }
-
-export default ChangePassword;
+export default SetPassword

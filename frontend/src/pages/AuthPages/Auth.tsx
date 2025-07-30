@@ -41,10 +41,8 @@ function Auth() {
       username: z
         .string()
         .min(3, "Username must be at least 3 characters long")
-        .regex(
-          /^[a-zA-Z0-9]+$/,
-          "Username can only contain letters and numbers"
-        )
+        .regex(/^[a-zA-Z0-9\- ]+$/, "Username can only contain letters, numbers, spaces, and dashes")
+
         .refine(
           (value) => !value.includes(" "),
           "Username cannot contain spaces"
@@ -92,10 +90,8 @@ function Auth() {
       username: z
         .string()
         .min(3, "Username must be at least 3 characters long")
-        .regex(
-          /^[a-zA-Z0-9]+$/,
-          "Username can only contain letters and numbers"
-        )
+       .regex(/^[a-zA-Z0-9\- ]+$/, "Username can only contain letters, numbers, spaces, and dashes")
+
         .refine((val) => !val.includes(" "), "Username cannot contain spaces")
         .or(z.literal("")), // allow empty string
       email: z
@@ -242,7 +238,10 @@ function Auth() {
       getOauthUser.refetch();
       if (getOauthUser.isFetched) {
         if (getOauthUser.isSuccess) {
-          userStore.setUser(getOauthUser.data?.data?.data);
+         ;(async()=>{
+           await userStore.setUser(getOauthUser.data?.data?.data);
+         })()
+          navigate(`/dashboard?uid=${getOauthUser.data?.data?.data?._id}`);
         } else if (getOauthUser.isError) {
           toast({
             title: "Error",
