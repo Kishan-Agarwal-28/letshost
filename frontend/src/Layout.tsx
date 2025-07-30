@@ -3,7 +3,7 @@ import { ThemeProvider } from "./components/ui/theme-provider";
 import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "./pages/landingPage/header";
-import { lazy, useEffect } from "react";
+import { lazy, useEffect, useState, Suspense } from "react";
 import { useUserStore } from "./store/store";
 const Footer = lazy(() => import("@/pages/landingPage/footer"));
 import { useApiGet } from "./hooks/apiHooks";
@@ -33,6 +33,19 @@ function Layout() {
 
     return () => {};
   }, [user.isSuccess]);
+  const ReactQueryDevtoolsProduction =lazy(() =>
+  import('@tanstack/react-query-devtools/build/modern/production.js').then(
+    (d) => ({
+      default: d.ReactQueryDevtools,
+    }),
+  ),
+)
+ const [showDevtools, setShowDevtools] = useState(false)
+
+useEffect(() => {
+    // @ts-expect-error
+    window.toggleDevtools = () => setShowDevtools((old) => !old)
+  }, [])
 
   const location = useLocation();
   const isOffline = useOffline();
@@ -47,6 +60,11 @@ function Layout() {
       <Outlet />
       <Toaster />
       <Footer />
+      {showDevtools && (
+        <Suspense fallback={null}>
+          <ReactQueryDevtoolsProduction />
+        </Suspense>
+      )}
     </ThemeProvider>
   );
 }
