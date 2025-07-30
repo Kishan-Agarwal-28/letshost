@@ -110,9 +110,6 @@ router
     updateAvatar
   );
 router
-  .route("/getUserDetails")
-  .get(logger, verifyJWT, verifiedMiddleware, getUserDetails);
-router
   .route("/initialize2FA")
   .post(logger, verifyJWT, verifiedMiddleware, initialize2FA);
 router
