@@ -183,44 +183,41 @@ function Auth() {
   });
 
   // Submit handlers
-  const onSignuUpSubmit = useCallback((data:z.infer<typeof signUpSchema>) => {
+  const onSignuUpSubmit = async(data:z.infer<typeof signUpSchema>) => {
     registerProcessedRef.current = false;
-    register.mutate(data);
-  }, [register]);
-
-  const onLoginSubmit = useCallback((data:z.infer<typeof loginSchema>) => {
-    loginProcessedRef.current = false;
-    login.mutate(data);
-  }, [login]);
-
-  // Handle register/login responses
-  useEffect(() => {
-    const handleAuthResponse = async () => {
-      try {
-        // Handle register success
-        if (register.isSuccess && !registerProcessedRef.current) {
+    const res = await register.mutateAsync(data);
+    if(res.status===200 && !registerProcessedRef.current) {
           registerProcessedRef.current = true;
-          await userStore.setUser(register.data?.data?.data);
+          await userStore.setUser(res.data?.data);
           navigate("/auth/email-sent", { state: { fromApp: true } });
-          return;
-        }
-
-        // Handle register error
-        if (register.isError && !registerProcessedRef.current) {
-          registerProcessedRef.current = true;
           toast({
-            title: "Error",
-            description: getErrorMsg(register),
-            variant: "error",
+            title: "Success",
+            description: "You are registered successfully",
+            variant: "success",
             duration: 5000,
           });
           return;
-        }
+    }
+    else{
+      if(!registerProcessedRef.current){
+        registerProcessedRef.current = true;
+      toast({
+        title: "Error",
+        description: getErrorMsg(register),
+        variant: "error",
+        duration: 5000,
+      })
+      return;
+    }
+    }
+  }
 
-        // Handle login success
-        if (login.isSuccess && !loginProcessedRef.current) {
+  const onLoginSubmit = async(data:z.infer<typeof loginSchema>) => {
+    loginProcessedRef.current = false;
+    const res = await login.mutateAsync(data);
+    if(res.status===200 && !loginProcessedRef.current) {
           loginProcessedRef.current = true;
-          const responseData = login.data?.data?.data;
+          const responseData = res.data.data
 
           // Check if 2FA is required
           if (login.data?.data?.message === "User logged in successfully but pending 2FA") {
@@ -243,41 +240,22 @@ function Auth() {
               navigate("/auth/email-sent", { state: { fromApp: true } });
             }
           }
-          return;
-        }
-
-        // Handle login error
-        if (login.isError && !loginProcessedRef.current) {
-          loginProcessedRef.current = true;
-          toast({
-            title: "Error",
-            description: getErrorMsg(login),
-            variant: "error",
-            duration: 5000,
-          });
-          return;
-        }
-      } catch (error) {
-        console.error("Error handling auth response:", error);
+          
+    } else{
+      if(!loginProcessedRef.current){
+        loginProcessedRef.current = true;
         toast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: getErrorMsg(login),
           variant: "error",
           duration: 5000,
-        });
+        })
+        return;
       }
-    };
+    }
+  }
 
-    handleAuthResponse();
-  }, [
-    register.isSuccess,
-    register.isError,
-    login.isSuccess,
-    login.isError,
-    userStore,
-    navigate,
-    toast
-  ]);
+
 
   // Handle OAuth flow
   useEffect(() => {
@@ -305,7 +283,7 @@ function Auth() {
           console.error("OAuth error:", error);
           toast({
             title: "Error",
-            description: "Failed to authenticate with OAuth",
+            description:`Failed to authenticate with OAuth ${getErrorMsg(getOauthUser)}`,
             variant: "error",
             duration: 5000,
           });
