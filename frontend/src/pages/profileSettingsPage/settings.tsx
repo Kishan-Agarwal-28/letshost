@@ -400,6 +400,7 @@ function SettingsPage() {
     const data = await checkHasPassword.refetch();
     if(!data.isSuccess){
       setShowPasswordSetForm(true)
+      return
     }
     navigate(
       `/user/auth/additional-safety/2fa?action=${checked ? "enable" : "disable"}&mode=${TwoFAEnabled ? "login" : "register"}`,
