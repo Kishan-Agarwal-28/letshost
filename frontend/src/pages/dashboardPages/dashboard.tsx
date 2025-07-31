@@ -116,7 +116,7 @@ export default function Dashboard() {
         duration: 5000,
       });
     }
-  }, [getUser.isSuccess, getUser.isError, getUser.dataUpdatedAt]);
+  }, [getUser.dataUpdatedAt]);
   const getPresignedUrl = useApiPost({
     type: "post",
     key: ["getPresignedUrl"],
@@ -206,11 +206,9 @@ export default function Dashboard() {
       });
     }
   }, [
-    deleteSubdomain.isSuccess,
-    deleteSubdomain.isError,
+    deleteSubdomain.submittedAt,
     toast,
-    updateSubdomainVisibility.isSuccess,
-    updateSubdomainVisibility.isError,
+    updateSubdomainVisibility.submittedAt,
   ]);
 
   // Filter and search logic

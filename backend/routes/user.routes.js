@@ -125,8 +125,8 @@ router
 router
   .route("/payment")
   .post(logger, verifyJWT, verifiedMiddleware, MakePayment);
-  router.route("/hasPassword").get(logger, verifyJWT, userHasPassword);
-  router
+router.route("/hasPassword").get(logger, verifyJWT, userHasPassword);
+router
   .route("/setPasswordForOauthUser")
   .post(logger, verifyJWT, verifiedMiddleware, setPasswordForOauthUser);
 export default router;

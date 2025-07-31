@@ -316,7 +316,7 @@ export default function CreatorDashboard() {
         variant: "error",
       });
     }
-  }, [sendFollow.isSuccess, sendFollow.isError, toast]);
+  }, [sendFollow.submittedAt, toast]);
   const renderHeader = () => (
     <div className="relative">
       {/* Cover Image */}

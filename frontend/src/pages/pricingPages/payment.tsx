@@ -43,7 +43,7 @@ const Pay = () => {
     if (payment.isSuccess && payment.data.data?.data?.client_secret) {
       setClientSecret(payment.data.data.data.client_secret);
     }
-  }, [payment.isError, payment.isSuccess]);
+  }, [payment.submittedAt]);
 
   if (!clientSecret) {
     return <div className="w-dvh h-dvh"></div>;

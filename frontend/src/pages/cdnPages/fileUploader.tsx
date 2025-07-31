@@ -453,7 +453,7 @@ const FileUploader = ({ className }: { className?: string }) => {
         variant: "error",
       });
     }
-  }, [cdnRegister.isSuccess, cdnRegister.isError, clearUploadStates]);
+  }, [cdnRegister.submittedAt, clearUploadStates]);
 
   React.useEffect(() => {
     const handleGlobalPaste = (e: ClipboardEvent) => {

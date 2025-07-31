@@ -80,7 +80,7 @@ function Header() {
       });
     }
     return () => {};
-  }, [logout.isSuccess, logout.isError, toast]);
+  }, [logout.dataUpdatedAt, toast]);
   return (
     <div className="bg-white/5 backdrop-blur-sm shadow-md sticky top-0 w-full z-50">
       <div className="flex flex-wrap items-center justify-between p-4 md:px-12 lg:px-20">

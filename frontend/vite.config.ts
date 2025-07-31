@@ -73,21 +73,21 @@ export default defineConfig({
         clientsClaim: true,
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
-    {
-      urlPattern: /.*\.(?:webp|png|jpg|jpeg|svg|ico)/,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "images",
-        expiration: {
-          maxEntries: 20,
-          maxAgeSeconds: 60 * 60 * 24 * 30,
-        },
-        cacheableResponse: {
-          statuses: [0, 200],
-        },
-      },
-    },
-  ],
+          {
+            urlPattern: /.*\.(?:webp|png|jpg|jpeg|svg|ico)/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images",
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
       devOptions: {
         enabled: true,
@@ -153,7 +153,21 @@ export default defineConfig({
         keep_fnames: false,
         properties: false, // Disable property mangling entirely
         reserved: [
-          "CryptoJS", "AES", "encrypt", "decrypt", "enc", "Utf8", "toString", "S", "T", "U", "V", "W", "X", "Y", "Z"
+          "CryptoJS",
+          "AES",
+          "encrypt",
+          "decrypt",
+          "enc",
+          "Utf8",
+          "toString",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
         ],
       },
       format: {

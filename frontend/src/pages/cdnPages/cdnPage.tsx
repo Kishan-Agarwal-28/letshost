@@ -148,7 +148,7 @@ function CdnPage() {
         duration: 5000,
       });
     }
-  }, [getCDN.isSuccess, getCDN.isError, getCDN.dataUpdatedAt, toast]);
+  }, [getCDN.dataUpdatedAt, toast]);
 
   // Filter and sort logic
   const { filteredAndSortedCdns, tabs } = useMemo(() => {
@@ -480,7 +480,7 @@ const FileCard = ({
         variant: "error",
       });
     }
-  }, [activateTransformation.isSuccess, activateTransformation.isError, toast]);
+  }, [activateTransformation.submittedAt, toast]);
   return (
     <Card
       className={`w-[30rem] min-h-190 max-h-[55rem] relative perspective-1000 ${isUpdating ? "flip-card-active" : ""}`}

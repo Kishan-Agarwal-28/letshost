@@ -20,6 +20,7 @@ app.use(
       "https://letshost.dpdns.org",
       "http://letshost.dpdns.org",
       /^https:\/\/.*\.cloudinary\.com$/,
+      "http://localhost:3000",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -61,7 +62,7 @@ app.use(
     },
   })
 );
-app.use(csrfMiddleware);
+// app.use(csrfMiddleware);
 connectDB();
 connectRedis();
 connectvectorDB();

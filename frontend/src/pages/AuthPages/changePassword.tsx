@@ -1,4 +1,4 @@
-import { useEffect} from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -87,7 +87,7 @@ function ChangePassword() {
         duration: 5000,
       });
     }
-  }, [changePassword.isSuccess, changePassword.isError, toast]);
+  }, [changePassword.submittedAt, toast]);
   return (
     <div className="w-full h-dvh flex items-center-safe justify-center-safe">
       <div className="bg-black rounded-2xl w-1/2 min-h-[90%] flex flex-col justify-center items-center shadow-2xl p-8">
@@ -99,38 +99,34 @@ function ChangePassword() {
               onSubmit={changePasswordForm.handleSubmit(onSubmit)}
               className="space-y-8"
             >
-               <FormField
-                      control={changePasswordForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <PasswordInput placeholder="********" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Enter your password.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-               <FormField
-                      control={changePasswordForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <PasswordInput placeholder="********" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Confirm your Password
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <FormField
+                control={changePasswordForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <PasswordInput placeholder="********" {...field} />
+                    </FormControl>
+                    <FormDescription>Enter your password.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={changePasswordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <PasswordInput placeholder="********" {...field} />
+                    </FormControl>
+                    <FormDescription>Confirm your Password</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="w-full text-white rounded-2xl cursor-pointer flex items-center justify-center-safe">
                 <Button
                   type="submit"

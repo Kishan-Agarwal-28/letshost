@@ -99,13 +99,7 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
         duration: 5000,
       });
     }
-  }, [
-    registerDomain.isSuccess,
-    registerDomain.isError,
-    registerDomain.error?.message,
-    form,
-    toast,
-  ]);
+  }, [registerDomain.submittedAt, form, toast]);
 
   return (
     <Dialog>

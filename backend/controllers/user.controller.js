@@ -1511,7 +1511,7 @@ const userHasPassword = asyncHandler(async (req, res) => {
       .json(new apiResponse(200, false, "User does not have password"));
   }
 });
-const setPasswordForOauthUser= asyncHandler(async (req, res) => {
+const setPasswordForOauthUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select(
     "-refreshToken -verificationToken -verificationTokenExpiryDate"
   );
@@ -1525,10 +1525,10 @@ const setPasswordForOauthUser= asyncHandler(async (req, res) => {
   if (!password) {
     throw new apiError(400, "Password is required");
   }
-  if(user.oauth.providers.length === 0) {
+  if (user.oauth.providers.length === 0) {
     throw new apiError(400, "User does not have any oauth providers");
   }
-  if(user.isVerified) {
+  if (user.isVerified) {
     throw new apiError(400, "User is already verified");
   }
   user.password = password;

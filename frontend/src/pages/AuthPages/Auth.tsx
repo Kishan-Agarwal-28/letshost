@@ -41,7 +41,10 @@ function Auth() {
       username: z
         .string()
         .min(3, "Username must be at least 3 characters long")
-        .regex(/^[a-zA-Z0-9\- ]+$/, "Username can only contain letters, numbers, spaces, and dashes")
+        .regex(
+          /^[a-zA-Z0-9\- ]+$/,
+          "Username can only contain letters, numbers, spaces, and dashes"
+        )
 
         .refine(
           (value) => !value.includes(" "),
@@ -90,7 +93,10 @@ function Auth() {
       username: z
         .string()
         .min(3, "Username must be at least 3 characters long")
-       .regex(/^[a-zA-Z0-9\- ]+$/, "Username can only contain letters, numbers, spaces, and dashes")
+        .regex(
+          /^[a-zA-Z0-9\- ]+$/,
+          "Username can only contain letters, numbers, spaces, and dashes"
+        )
 
         .refine((val) => !val.includes(" "), "Username cannot contain spaces")
         .or(z.literal("")), // allow empty string
@@ -221,7 +227,7 @@ function Auth() {
         });
       }
     })();
-  }, [register.isSuccess, register.isError, login.isSuccess, login.isError]);
+  }, [register.submittedAt, login.submittedAt]);
 
   //@handling oauth
   const getStatus = searchParams.get("status");
@@ -238,9 +244,9 @@ function Auth() {
       getOauthUser.refetch();
       if (getOauthUser.isFetched) {
         if (getOauthUser.isSuccess) {
-         ;(async()=>{
-           await userStore.setUser(getOauthUser.data?.data?.data);
-         })()
+          (async () => {
+            await userStore.setUser(getOauthUser.data?.data?.data);
+          })();
           navigate(`/dashboard?uid=${getOauthUser.data?.data?.data?._id}`);
         } else if (getOauthUser.isError) {
           toast({
@@ -252,7 +258,7 @@ function Auth() {
         }
       }
     }
-  }, [getStatus, getOauthUser.isError, getOauthUser.isSuccess, toast]);
+  }, [getStatus, getOauthUser.dataUpdatedAt, toast]);
 
   useEffect(() => {
     (async () => {

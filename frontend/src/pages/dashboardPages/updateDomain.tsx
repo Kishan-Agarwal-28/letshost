@@ -166,12 +166,7 @@ function UpdateDomain({
         duration: 5000,
       });
     }
-  }, [
-    updateSubdomain.isSuccess,
-    updateSubdomain.isError,
-    updateSubdomainFiles.isSuccess,
-    updateSubdomainFiles.isError,
-  ]);
+  }, [updateSubdomain.submittedAt, updateSubdomainFiles.submittedAt]);
   return (
     <Sheet>
       <SheetTrigger asChild>

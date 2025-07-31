@@ -52,7 +52,7 @@ function EmailVerify() {
       }
     })();
     return () => {};
-  }, [sendToken.isSuccess, sendToken.isError, toast]);
+  }, [sendToken.submittedAt, toast]);
 
   const handleContinue = () => {
     if (verified) {
