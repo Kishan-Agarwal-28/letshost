@@ -17,22 +17,17 @@ function Layout() {
   const user = useApiGet({
     key: ["getUser"],
     path: ApiRoutes.getUserDetails,
-    enabled: false,
+    enabled: true,
   });
-  useEffect(() => {
-    user.refetch();
-
-    return () => {};
-  }, []);
   useEffect(() => {
     (async () => {
       if (user.isSuccess) {
-        await userStore.updateUser(user.data?.data?.data);
+        await userStore.updateUser(user.data?.data.data);
       }
     })();
 
     return () => {};
-  }, [user.isSuccess]);
+  }, [user.dataUpdatedAt]);
 
   const location = useLocation();
   const isOffline = useOffline();

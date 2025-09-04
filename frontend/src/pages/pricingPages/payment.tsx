@@ -26,24 +26,22 @@ const Pay = () => {
 
   useEffect(() => {
     if (planType) {
-      payment.mutate({ planType });
-    }
-  }, [planType]);
-
-  useEffect(() => {
-    if (payment.isError) {
-      toast({
+      ;(async()=>{
+        const data= await payment.mutateAsync({ planType });
+      if(data.status !== 200){
+       toast({
         title: "Error",
         description: getErrorMsg(payment),
         variant: "error",
         duration: 5000,
       });
+      }
+      if (data.data?.data?.client_secret) {
+        setClientSecret(data.data.data.client_secret);
+      }
+      })();
     }
-
-    if (payment.isSuccess && payment.data.data?.data?.client_secret) {
-      setClientSecret(payment.data.data.data.client_secret);
-    }
-  }, [payment.submittedAt]);
+  }, [planType]);
 
   if (!clientSecret) {
     return <div className="w-dvh h-dvh"></div>;

@@ -1528,9 +1528,7 @@ const setPasswordForOauthUser = asyncHandler(async (req, res) => {
   if (user.oauth.providers.length === 0) {
     throw new apiError(400, "User does not have any oauth providers");
   }
-  if (user.isVerified) {
-    throw new apiError(400, "User is already verified");
-  }
+
   user.password = password;
   await user.save();
   return res

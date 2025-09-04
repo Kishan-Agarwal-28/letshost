@@ -398,7 +398,8 @@ function SettingsPage() {
   const [showPasswordSetForm, setShowPasswordSetForm] = useState(false);
   const handle2FAChange = async (checked: boolean) => {
     const data = await checkHasPassword.refetch();
-    if (!data.data?.data) {
+    console.log(data.data?.data.data)
+    if (!data.data?.data.data) {
       setShowPasswordSetForm(true);
       return;
     }

@@ -135,7 +135,10 @@ export const useUserStore = create<IStore>()(
         // Updates partial user data by decrypting -> merging -> encrypting -> storing
         updateUser: async (updatedFields: Partial<IUser>) => {
           const encryptedUser = get().user;
-          if (!encryptedUser) return;
+          if (!encryptedUser){
+            get().setUser(updatedFields as IUser);
+            return;
+          }
 
           const user = await decryptUserData(encryptedUser);
           const updatedUser: IUser = {
