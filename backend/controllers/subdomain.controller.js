@@ -563,7 +563,7 @@ const getViewSignedUrl = asyncHandler(async (req, res) => {
     throw new apiError(403, "Unauthorized: You don't own this subdomain");
   }
 
-  let ViewUrl = `${existing.subDomain}.lethost.dpdns.org`;
+  let ViewUrl = `${existing.subDomain}.letshost.dpdns.org`;
   if (existing.public === false) {
     const token = jwt.sign(
       {
@@ -574,7 +574,7 @@ const getViewSignedUrl = asyncHandler(async (req, res) => {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
       }
     );
-    ViewUrl = `${existing.subDomain}.lethost.dpdns.org/?token=${token}`;
+    ViewUrl = `${existing.subDomain}.letshost.dpdns.org/?token=${token}`;
   }
   await cacheSubDomain(
     existing.subDomain,
