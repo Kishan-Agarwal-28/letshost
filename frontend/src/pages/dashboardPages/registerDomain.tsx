@@ -30,6 +30,7 @@ import {
 import { UploadCloudIcon } from "lucide-react";
 import { File as Files, Folder, Tree } from "@/components/magicui/file-tree";
 import { useConfettiCannon } from "@/components/ui/confetti-cannon";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   subDomain: z.string().min(1, "Subdomain is required"),
@@ -114,7 +115,14 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
             <DialogHeader>
               <DialogTitle>Deploy a new Project </DialogTitle>
               <DialogDescription>
-                Enter the subdomain you want your project to be hosted on.
+                Enter the subdomain you want your project to be hosted on.{" "}
+                <Link 
+                  to="/restricted-subdomains" 
+                  className="text-blue-500 hover:text-blue-600 underline"
+                  target="_blank"
+                >
+                  View restricted subdomains
+                </Link>
               </DialogDescription>
             </DialogHeader>
             <div className="flex items-center gap-4">
@@ -122,11 +130,22 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
                 control={form.control}
                 name="subDomain"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex-1">
                     <FormLabel>Subdomain</FormLabel>
                     <FormControl>
                       <Input placeholder="example" type="text" {...field} />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Choose a unique name (some names are{" "}
+                      <Link 
+                        to="/restricted-subdomains" 
+                        className="text-blue-500 hover:text-blue-600 underline"
+                        target="_blank"
+                      >
+                        restricted
+                      </Link>
+                      )
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

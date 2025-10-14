@@ -29,6 +29,7 @@ const CreatorDashboard = lazy(
 );
 const Gallery = lazy(() => import("@/pages/galleryPage/gallery.tsx"));
 const Docs = lazy(() => import("@/pages/docs/docs.tsx"));
+const RestrictedSubdomainsPage = lazy(() => import("@/pages/dashboardPages/restrictedSubdomainsPage.tsx"));
 const TwoFA = lazy(() => import("@/pages/AuthPages/2fa.tsx"));
 const ConfirmPayment = lazy(
   () => import("@/pages/pricingPages/confirmPayment.tsx")
@@ -263,6 +264,25 @@ export const router = createBrowserRouter(
               />
 
               <Docs />
+            </SuspenseWrapper>
+          }
+        />
+        <Route
+          path="/restricted-subdomains"
+          element={
+            <SuspenseWrapper>
+              <PageSeo
+                pageTitle="Restricted Subdomains – Letshost"
+                description="View the complete list of reserved and restricted subdomain names on Letshost. Choose a unique subdomain for your project."
+                canonical="https://letshost.dpdns.org/restricted-subdomains"
+                ogTitle="Restricted Subdomains – Letshost"
+                ogDescription="See which subdomains are reserved for system use and cannot be registered on Letshost."
+                ogUrl="https://letshost.dpdns.org/restricted-subdomains"
+                twitterTitle="Restricted Subdomains"
+                twitterDescription="View reserved subdomain names on Letshost platform."
+              />
+
+              <RestrictedSubdomainsPage />
             </SuspenseWrapper>
           }
         />

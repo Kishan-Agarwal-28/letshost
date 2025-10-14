@@ -32,11 +32,14 @@ const addToGallery = asyncHandler(async (req, res) => {
     await commitImageToGallery(public_id);
     if (!image.uploaded) {
       image.uploaded = true;
-      user.genCredits += 0.5;
+      await User.findByIdAndUpdate(
+        req.user._id,
+        { $inc: { genCredits: 0.5 } },
+        { new: true }
+      );
     } else {
       throw new apiError(400, "Image already contributed");
     }
-    await user.save();
     await image.save();
     return res
       .status(200)
@@ -75,8 +78,12 @@ const likeImage = asyncHandler(async (req, res) => {
       // Credit management for uploader (not for own images)
       if (!isOwnImage) {
         const uploader = await User.findById(image.uploader);
-        uploader.genCredits = Math.max(0, uploader.genCredits - 0.1);
-        await uploader.save();
+        const newCredits = Math.max(0, uploader.genCredits - 0.1);
+        await User.findByIdAndUpdate(
+          image.uploader,
+          { genCredits: newCredits },
+          { new: true }
+        );
       }
     } else {
       // Like: Add new like
@@ -89,15 +96,16 @@ const likeImage = asyncHandler(async (req, res) => {
 
       // Credit management for uploader (not for own images)
       if (!isOwnImage) {
-        const uploader = await User.findById(image.uploader);
-
         // Count total likes for this image
         const totalLikes = await Like.countDocuments({ image: imageId });
 
         // Add 1 credit for every 10 likes
         if (totalLikes % 10 === 0) {
-          uploader.genCredits += 1;
-          await uploader.save();
+          await User.findByIdAndUpdate(
+            image.uploader,
+            { $inc: { genCredits: 1 } },
+            { new: true }
+          );
         }
       }
     }
@@ -212,8 +220,12 @@ const deleteImage = asyncHandler(async (req, res) => {
 
     // Deduct 2 credits from user for deleting
     const user = await User.findById(req.user._id);
-    user.genCredits = Math.max(0, user.genCredits - 2);
-    await user.save();
+    const newCredits = Math.max(0, user.genCredits - 2);
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { genCredits: newCredits },
+      { new: true }
+    );
 
     // Delete the image
     await Image.findByIdAndDelete(imageId);

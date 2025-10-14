@@ -244,8 +244,11 @@ const generateImage = asyncHandler(async (req, res) => {
 
     // Deduct credits after successful generation
     if (!req.body.apiKey) {
-      user.genCredits -= 1;
-      await user.save();
+      await User.findByIdAndUpdate(
+        req.user._id,
+        { $inc: { genCredits: -1 } },
+        { new: true }
+      );
     }
 
     // Save to database
@@ -303,9 +306,11 @@ const generateImage = asyncHandler(async (req, res) => {
     // If credits were deducted but operation failed, restore them
     if (!req.body.apiKey && error.statusCode !== 400) {
       try {
-        const currentUser = await User.findById(req.user._id);
-        currentUser.genCredits += 1;
-        await currentUser.save();
+        await User.findByIdAndUpdate(
+          req.user._id,
+          { $inc: { genCredits: 1 } },
+          { new: true }
+        );
       } catch (creditError) {
         // Silent error handling for credit restoration
       }
