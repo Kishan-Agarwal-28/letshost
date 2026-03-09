@@ -14,8 +14,8 @@ export const checkEmail = async (email) => {
   } else {
     const verifalia = new VerifaliaRestClient({
       authenticator: new BearerAuthenticator(
-        "admin@letshost.dpdns.org",
-        "QijDEh1TazBsnaB"
+        "email",
+        "token"
       ),
     });
     const result = await verifalia.emailValidations.submit(email);
