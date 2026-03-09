@@ -1,0 +1,95 @@
+name: Deploy
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed services
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BASE_SHA="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+          else
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          fi
+
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            BASE_SHA="$(git rev-list --max-parents=0 "$HEAD_SHA")"
+          fi
+
+          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -qE '^backend/'; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^reverse-proxy/'; then
+            echo "reverse_proxy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "reverse_proxy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^embedder/'; then
+            echo "embedder=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "embedder=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^vectorbackend/'; then
+            echo "vectorbackend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "vectorbackend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^frontend/'; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "frontend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy backend
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.backend == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+      - name: Deploy reverse proxy
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.reverse_proxy == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_REVERSE_PROXY_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+      - name: Deploy embeddings service
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.embedder == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_EMBEDDINGS_SERVICE_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+      - name: Deploy vector backend
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.vectorbackend == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_VECTOR_BACKEND_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+      - name: Deploy frontend
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.frontend == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
