@@ -184,7 +184,7 @@ export default function Dashboard() {
     if (deleteSubdomain.isError) {
       toast({
         title: "Error",
-        description: deleteSubdomain.error?.message,
+        description: getErrorMsg(deleteSubdomain.error),
         variant: "error",
         duration: 5000,
       });
@@ -200,7 +200,7 @@ export default function Dashboard() {
     if (updateSubdomainVisibility.isError) {
       toast({
         title: "Error",
-        description: updateSubdomainVisibility.error?.message,
+        description: getErrorMsg(updateSubdomainVisibility.error),
         variant: "error",
         duration: 5000,
       });

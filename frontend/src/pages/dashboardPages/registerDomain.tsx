@@ -18,6 +18,7 @@ import { useApiPost, useApiGet } from "@/hooks/apiHooks";
 import ApiRoutes from "@/connectors/api-routes";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { getErrorMsg } from "@/lib/getErrorMsg";
 
 import {
   Form,
@@ -98,7 +99,7 @@ const RegisterDomain = ({ children }: React.PropsWithChildren) => {
     if (registerDomain.isError) {
       toast({
         title: "Error",
-        description: registerDomain.error?.message,
+        description: getErrorMsg(registerDomain.error),
         variant: "error",
         duration: 5000,
       });

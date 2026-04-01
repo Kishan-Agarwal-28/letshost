@@ -1,19 +1,21 @@
 import type { AxiosError } from "axios";
-import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
+import type { UseMutationResult, UseQueryResult, UseInfiniteQueryResult } from "@tanstack/react-query";
 
 // Overloads
 export function getErrorMsg(
-  handler: UseMutationResult<unknown, Error, unknown, unknown>
+  handler: UseMutationResult<any, Error, any, any>
 ): string;
-export function getErrorMsg(handler: UseQueryResult<unknown, Error>): string;
+export function getErrorMsg(handler: UseQueryResult<any, Error>): string;
+export function getErrorMsg(handler: UseInfiniteQueryResult<any, Error>): string;
+export function getErrorMsg(handler: Error | AxiosError): string;
 export function getErrorMsg(handler: AxiosError): string;
 
 // Implementation
-export function getErrorMsg(handler: { error?: unknown } | AxiosError): string {
+export function getErrorMsg(handler: { error?: unknown } | Error | AxiosError): string {
   const error =
-    "isAxiosError" in handler
+    (handler && typeof handler === "object" && "isAxiosError" in handler)
       ? handler // it's an AxiosError directly
-      : handler.error;
+      : ("error" in handler ? handler.error : handler);
 
   if (error && typeof error === "object" && "response" in error) {
     const raw = (error as AxiosError).response?.data;

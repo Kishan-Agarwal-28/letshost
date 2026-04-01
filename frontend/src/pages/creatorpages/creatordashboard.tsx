@@ -1264,7 +1264,7 @@ export default function CreatorDashboard() {
         <div className="text-lg text-red-600">
           Error loading the dashboard please try again
           <br />
-          <small>{getCreatorStats.error?.message}</small>
+          <small>{getErrorMsg(getCreatorStats.error)}</small>
         </div>
       </div>
     );

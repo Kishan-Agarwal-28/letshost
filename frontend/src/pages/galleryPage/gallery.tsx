@@ -857,7 +857,7 @@ function Gallery({ creatorId }: { creatorId?: string }) {
             ? "Error loading gallery. Please try again."
             : "Error searching images. Please try again."}
           <br />
-          <small>{infiniteQuery.error?.message}</small>
+          <small>{getErrorMsg(infiniteQuery.error)}</small>
         </div>
       </div>
     );
