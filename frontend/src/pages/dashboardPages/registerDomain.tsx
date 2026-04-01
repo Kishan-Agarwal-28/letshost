@@ -31,9 +31,12 @@ import { UploadCloudIcon } from "lucide-react";
 import { File as Files, Folder, Tree } from "@/components/magicui/file-tree";
 import { useConfettiCannon } from "@/components/ui/confetti-cannon";
 import { Link } from "react-router-dom";
+import { restrictedSubdomains } from "./restrictedSubdomainsPage";
 
 const formSchema = z.object({
-  subDomain: z.string().min(1, "Subdomain is required"),
+  subDomain: z.string().min(1, "Subdomain is required").refine((val) => !restrictedSubdomains.includes(val.toLowerCase()), {
+    message: "This subdomain is restricted. Please refer to /restricted for a full list of restricted subdomains",
+  }),
   files: z.array(z.instanceof(File)).min(1),
 });
 

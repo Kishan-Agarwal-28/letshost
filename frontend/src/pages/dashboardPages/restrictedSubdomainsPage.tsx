@@ -3,7 +3,7 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // List of restricted subdomains (synced with backend)
-const restrictedSubdomains = [
+export const restrictedSubdomains = [
   "www",
   "api",
   "admin",

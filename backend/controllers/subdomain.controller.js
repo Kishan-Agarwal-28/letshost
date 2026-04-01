@@ -277,7 +277,7 @@ const registerSubDomain = asyncHandler(async (req, res) => {
       subdomain.public
     );
     user.SDLimit = user.SDLimit - 1;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
     return res
       .status(200)
       .json(
@@ -394,7 +394,7 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
     // Store original limit for potential rollback
     originalFileLimit = user.fileLimit;
     user.fileLimit = totalSize;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
   }
 
   const projectID = existing.projectID;
@@ -422,7 +422,7 @@ const changeSubDomainContents = asyncHandler(async (req, res) => {
     // Rollback user fileLimit if it was updated
     if (user && folderSize > 0) {
       user.fileLimit = originalFileLimit;
-      await user.save();
+      await user.save({ validateModifiedOnly: true });
     }
 
     // Clean up temp folder on error
@@ -456,7 +456,7 @@ const deleteSubDomain = asyncHandler(async (req, res) => {
   const user = await User.findById(owner);
   user.SDLimit = user.SDLimit + 1;
   user.fileLimit = Math.max(user.fileLimit - subdomain.fileSize, 0);
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
   const getOldKeyDataRedis = await redis.get(formattedSubdomain);
   if (getOldKeyDataRedis) {
     await redis.del(formattedSubdomain);
