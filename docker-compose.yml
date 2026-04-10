@@ -110,6 +110,7 @@ services:
       - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
     environment:
       - OTEL_INGEST_HTPASSWD=${OTEL_INGEST_HTPASSWD}
+      - LOKI_OTLP_ENDPOINT=http://loki:3100/otlp
     depends_on:
       - loki
 

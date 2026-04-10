@@ -163,12 +163,14 @@ GRAFANA_ADMIN_USER=your_grafana_user
 GRAFANA_ADMIN_PASSWORD=your_grafana_password
 OTEL_INGEST_HTPASSWD=collector_user:$apr1$hash$generated_hash
 BACKEND_OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic <base64(user:pass)>
+LOKI_OTLP_ENDPOINT=http://loki:3100/otlp
 ```
 
 Notes:
 
 - `OTEL_INGEST_HTPASSWD` must be a valid htpasswd line (username + hashed password), not plain text.
 - `BACKEND_OTEL_EXPORTER_OTLP_HEADERS` should match the collector basic auth credentials.
+- `LOKI_OTLP_ENDPOINT` controls where the collector exports logs (`http://loki:3100/otlp` for local compose).
 
 Render deployment note for OTel Collector:
 
@@ -180,6 +182,20 @@ Render deployment note for OTel Collector:
   - Runtime: Docker
 
 If Collector is deployed as `otel/opentelemetry-collector:latest` directly, it runs default config and logs will not be forwarded to Loki.
+
+Render environment variables required for end-to-end ingestion:
+
+- On `otel` service:
+  - `OTEL_INGEST_HTPASSWD=<valid htpasswd line>`
+  - `LOKI_OTLP_ENDPOINT=https://loki-xnpm.onrender.com/otlp`
+- On `letshost-api` service:
+  - `ENV=production`
+  - `OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-9u2o.onrender.com`
+  - `OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic <base64(user:pass)>`
+
+Important:
+
+- Your current Render backend runs as a Node service (`rootDir=backend`), not via `backend/Dockerfile`, so Dockerfile `ENV` defaults are not applied there.
 
 Access Grafana:
 

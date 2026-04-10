@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { appLogger } from "./utils/logger.js";
-import { shutdownTelemetry } from "./utils/telemetry.js";
+import { shutdownTelemetry, telemetryDiagnostics } from "./utils/telemetry.js";
 
 import {
   csrfMiddleware,
@@ -89,6 +89,7 @@ app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
   appLogger.info(
     {
       port: process.env.PORT || 3000,
+      telemetry: telemetryDiagnostics,
     },
     "Server is running"
   );

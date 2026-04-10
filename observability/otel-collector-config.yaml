@@ -15,7 +15,7 @@ processors:
 
 exporters:
   otlphttp/loki:
-    endpoint: http://loki:3100/otlp
+    endpoint: ${LOKI_OTLP_ENDPOINT}
 
 extensions:
   health_check:

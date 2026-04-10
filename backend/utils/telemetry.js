@@ -42,11 +42,19 @@ const parseHeaders = (rawHeaders) => {
 
 let provider = null;
 export let telemetryLogger = null;
+const parsedExporterHeaders = parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS);
+const resolvedLogsEndpoint = telemetryEnabled ? getLogsEndpoint() : null;
+
+export const telemetryDiagnostics = {
+  enabled: telemetryEnabled,
+  logsEndpoint: resolvedLogsEndpoint,
+  headersConfigured: Boolean(parsedExporterHeaders),
+};
 
 if (telemetryEnabled) {
   const exporter = new OTLPLogExporter({
-    url: getLogsEndpoint(),
-    headers: parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
+    url: resolvedLogsEndpoint,
+    headers: parsedExporterHeaders,
   });
 
   provider = new LoggerProvider({
