@@ -170,6 +170,17 @@ Notes:
 - `OTEL_INGEST_HTPASSWD` must be a valid htpasswd line (username + hashed password), not plain text.
 - `BACKEND_OTEL_EXPORTER_OTLP_HEADERS` should match the collector basic auth credentials.
 
+Render deployment note for OTel Collector:
+
+- Do not deploy Collector as a plain Docker Hub image without config.
+- Deploy it from this repo so it loads `observability/otel-collector-config.yaml`.
+- Use:
+  - Root Directory: `observability`
+  - Dockerfile Path: `./otel-collector/Dockerfile`
+  - Runtime: Docker
+
+If Collector is deployed as `otel/opentelemetry-collector:latest` directly, it runs default config and logs will not be forwarded to Loki.
+
 Access Grafana:
 
 - URL: `http://localhost:3001`
