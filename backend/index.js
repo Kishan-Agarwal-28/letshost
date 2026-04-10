@@ -4,6 +4,8 @@ import { connectvectorDB } from "./db/connectVectorDB.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { appLogger } from "./utils/logger.js";
+import { shutdownTelemetry } from "./utils/telemetry.js";
 
 import {
   csrfMiddleware,
@@ -84,7 +86,24 @@ app.use("/api/v1/gallery", galleryRouter);
 app.use("/api/v1/creator", creatorRouter);
 app.use("/api/v1/contact", contact);
 app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
-  console.log(
-    `Server is running on http://localhost:${process.env.PORT || 3000}`
+  appLogger.info(
+    {
+      port: process.env.PORT || 3000,
+    },
+    "Server is running"
   );
+});
+
+const gracefulShutdown = async (signal) => {
+  appLogger.info({ signal }, "Shutting down backend services");
+  await shutdownTelemetry();
+  process.exit(0);
+};
+
+process.on("SIGINT", () => {
+  void gracefulShutdown("SIGINT");
+});
+
+process.on("SIGTERM", () => {
+  void gracefulShutdown("SIGTERM");
 });

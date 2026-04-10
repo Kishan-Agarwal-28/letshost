@@ -63,6 +63,31 @@ jobs:
             echo "frontend=false" >> "$GITHUB_OUTPUT"
           fi
 
+          if echo "$CHANGED_FILES" | grep -qE '^observability/|^\.env\.observability\.example$'; then
+            echo "observability=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "observability=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Redeploy collector on backend changes to keep ingestion path aligned.
+          if echo "$CHANGED_FILES" | grep -qE '^backend/|^observability/|^\.env\.observability\.example$'; then
+            echo "otel_collector=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "otel_collector=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^observability/|^\.env\.observability\.example$'; then
+            echo "loki=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "loki=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qE '^observability/|^\.env\.observability\.example$'; then
+            echo "grafana=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "grafana=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy backend
         if: github.ref == 'refs/heads/main' && steps.changes.outputs.backend == 'true'
         env:
@@ -91,5 +116,26 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.changes.outputs.frontend == 'true'
         env:
           deploy_url: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+
+      - name: Deploy OpenTelemetry collector
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.otel_collector == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_OTEL_COLLECTOR_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+
+      - name: Deploy Loki
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.loki == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_LOKI_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+
+      - name: Deploy Grafana
+        if: github.ref == 'refs/heads/main' && steps.changes.outputs.grafana == 'true'
+        env:
+          deploy_url: ${{ secrets.RENDER_GRAFANA_DEPLOY_HOOK_URL }}
         run: |
           curl "$deploy_url"
